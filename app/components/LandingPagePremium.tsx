@@ -88,17 +88,6 @@ export default function LandingPagePremium() {
         </div>
       </div>
 
-      {/* Social proof - subtle */}
-      <div className="max-w-6xl mx-auto px-6 py-16 border-t border-gray-200">
-        <p className="text-sm text-gray-500 mb-8">Trusted by people at</p>
-        <div className="flex flex-wrap gap-12 items-center opacity-40">
-          <div className="text-2xl font-bold text-gray-900">Google</div>
-          <div className="text-2xl font-bold text-gray-900">Tesla</div>
-          <div className="text-2xl font-bold text-gray-900">Stripe</div>
-          <div className="text-2xl font-bold text-gray-900">Y Combinator</div>
-        </div>
-      </div>
-
       {/* How it works */}
       <div className="max-w-6xl mx-auto px-6 py-24">
         <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-12">
