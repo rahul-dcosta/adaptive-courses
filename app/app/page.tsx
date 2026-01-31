@@ -1,5 +1,5 @@
-import CourseBuilder from '@/components/CourseBuilder';
+import CourseBuilderNew from '@/components/CourseBuilderNew';
 
 export default function Home() {
-  return <CourseBuilder />;
+  return <CourseBuilderNew />;
 }
