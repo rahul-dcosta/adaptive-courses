@@ -30,13 +30,14 @@ export default function CourseBuilder() {
       setCurrentInput('');
       setStep('time');
     } else if (step === 'time') {
-      setTimeAvailable(currentInput);
+      const finalTime = currentInput;
+      setTimeAvailable(finalTime);
       setStep('generating');
-      await generateCourse();
+      await generateCourse(finalTime);
     }
   };
 
-  const generateCourse = async () => {
+  const generateCourse = async (time: string) => {
     setLoading(true);
     try {
       const response = await fetch('/api/generate-course', {
@@ -46,16 +47,21 @@ export default function CourseBuilder() {
           topic,
           skillLevel,
           goal,
-          timeAvailable
+          timeAvailable: time
         })
       });
       
       const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || `API error: ${response.status}`);
+      }
+      
       setGeneratedCourse(data.course);
       setStep('complete');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Generation failed:', error);
-      alert('Failed to generate course. Please try again.');
+      alert(`Failed to generate course: ${error.message || 'Unknown error'}`);
       setStep('topic');
     } finally {
       setLoading(false);
