@@ -59,7 +59,7 @@ Format the response as JSON with this structure:
 Make the content engaging, practical, and tailored to their ${skillLevel} skill level.`;
 
     const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-5-20250929',
       max_tokens: 4096,
       messages: [
         {
