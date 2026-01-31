@@ -1,5 +1,5 @@
-import CourseBuilderV2 from '@/components/CourseBuilderV2';
+import LandingPageEnhanced from '@/components/LandingPageEnhanced';
 
 export default function Home() {
-  return <CourseBuilderV2 />;
+  return <LandingPageEnhanced />;
 }
