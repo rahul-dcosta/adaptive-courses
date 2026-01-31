@@ -62,20 +62,20 @@ export default function LandingPagePremium() {
             Get exactly what you need.
           </p>
 
-          {/* Email capture */}
+          {/* Topic input - direct to course builder */}
           <form onSubmit={handleEmailSubmit} className="max-w-md">
             <div className="flex gap-3">
               <input
-                type="email"
+                type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
+                placeholder="What do you want to learn?"
                 className="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-900 transition-colors"
                 required
               />
               <button
                 type="submit"
-                disabled={!email.includes('@')}
+                disabled={!email.trim()}
                 className="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 active:bg-black transition-colors disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
               >
                 Get started
