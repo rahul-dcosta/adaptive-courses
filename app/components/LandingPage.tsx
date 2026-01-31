@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import CourseBuilderNew from './CourseBuilderNew';
+import CourseBuilderEnhanced from './CourseBuilderEnhanced';
 import { analytics } from '@/lib/analytics';
 
 export default function LandingPage() {
@@ -40,7 +40,7 @@ export default function LandingPage() {
   };
 
   if (showBuilder) {
-    return <CourseBuilderNew />;
+    return <CourseBuilderEnhanced />;
   }
 
   return (
