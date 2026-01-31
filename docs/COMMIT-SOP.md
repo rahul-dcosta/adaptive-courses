@@ -1,40 +1,50 @@
 # Commit Standard Operating Procedure (SOP)
 
-## ⚠️ MANDATORY PRE-COMMIT CHECKLIST
+## ⚠️ MANDATORY PRE-PUSH WORKFLOW
 
-**NEVER push code without completing ALL steps below.**
+**The correct order: Commit → Build → Push**
 
-### 1. Build Locally
+### 1. Make Changes & Commit
 ```bash
-cd /root/projects/adaptive-courses/app
+cd /root/projects/adaptive-courses
+git add -A
+git commit -m "Clear description of changes
+
+- List specific changes
+- Note any breaking changes"
+```
+
+**Don't push yet!**
+
+### 2. Build to Verify
+```bash
+cd app
 npm run build
 ```
 
 **Required:** Build MUST exit with code 0 (success).
 
-### 2. Check for Errors
-- ❌ **Any build errors?** Fix before committing
+### 3. Check Build Result
+- ❌ **Build errors?** → Go to step 4 (Fix)
 - ⚠️ **Warnings OK** (metadata, deprecated features) - non-blocking
-- ✅ **Exit code 0?** Safe to proceed
+- ✅ **Exit code 0?** → Go to step 5 (Push)
 
-### 3. Test Locally (Optional but Recommended)
+### 4. If Build Fails
 ```bash
-npm run dev
+# Fix the errors
+# Then amend the commit
+git add -A
+git commit --amend --no-edit
+
+# Build again
+cd app && npm run build
+
+# If passes → proceed to step 5
+# If fails → repeat step 4
 ```
 
-Open http://localhost:3000 and verify:
-- Landing page loads
-- Course builder works
-- No console errors
-
-### 4. Commit & Push
+### 5. Push (Only After Build Passes)
 ```bash
-git add -A
-git commit -m "Clear description of changes
-
-- BUILD VERIFIED LOCALLY
-- List specific changes
-- Note any breaking changes"
 git push origin main
 ```
 
@@ -45,15 +55,23 @@ git push origin main
 
 ---
 
+## The Golden Rule
+
+**🚨 COMMIT → BUILD → PUSH (ONLY IF BUILD PASSES) 🚨**
+
+Never push without building first.
+
+---
+
 ## Why This Matters
 
-**Without local builds:**
+**Without build checks:**
 - Waste 5-10 minutes per failed deploy
 - Rack up failed deployment history
 - Risk breaking production
 - Lose user trust
 
-**With local builds:**
+**With build checks:**
 - Catch errors in 30 seconds
 - Push with confidence
 - Clean deployment history
