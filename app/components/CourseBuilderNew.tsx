@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { analytics } from '@/lib/analytics';
 
 type Step = 'topic' | 'situation' | 'timeline' | 'goal' | 'generating' | 'complete';
 
@@ -63,7 +64,11 @@ export default function CourseBuilderNew() {
 
   const generateCourse = async (selectedGoal: string) => {
     setLoading(true);
+    const startTime = Date.now();
+    
     try {
+      analytics.courseStarted(topic);
+      
       // Map the vibe selections to API params
       const skillLevel = situation === 'curious' ? 'beginner' : 
                         situation === 'career_switch' ? 'intermediate' : 'advanced';
@@ -88,6 +93,9 @@ export default function CourseBuilderNew() {
       if (!response.ok) {
         throw new Error(data.error || `API error: ${response.status}`);
       }
+      
+      const duration = Date.now() - startTime;
+      analytics.courseGenerated(topic, duration);
       
       setGeneratedCourse(data.course);
       setStep('complete');

@@ -1,12 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CourseBuilderNew from './CourseBuilderNew';
+import { analytics } from '@/lib/analytics';
 
 export default function LandingPage() {
   const [showBuilder, setShowBuilder] = useState(false);
   const [email, setEmail] = useState('');
   const [emailCaptured, setEmailCaptured] = useState(false);
+
+  useEffect(() => {
+    analytics.pageView('landing');
+  }, []);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +33,7 @@ export default function LandingPage() {
         // Continue anyway - don't block the user
       }
       
+      analytics.emailSignup(email);
       setEmailCaptured(true);
       setShowBuilder(true);
     }
