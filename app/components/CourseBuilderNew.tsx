@@ -226,7 +226,16 @@ export default function CourseBuilderNew() {
           </div>
 
           {/* Action Buttons */}
-          <div className="bg-white px-6 md:px-8 py-4 flex gap-3 flex-wrap border-b">
+          <div className="bg-white px-6 md:px-8 py-4 flex gap-3 flex-wrap border-b no-print">
+            <button
+              onClick={() => window.print()}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+              </svg>
+              Print Course
+            </button>
             <button
               onClick={() => alert('PDF export coming soon!')}
               className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
@@ -320,7 +329,7 @@ export default function CourseBuilderNew() {
           </div>
 
           {/* Bottom Actions */}
-          <div className="mt-6 flex gap-4 flex-wrap">
+          <div className="mt-6 flex gap-4 flex-wrap no-print">
             <button
               onClick={() => {
                 setStep('topic');

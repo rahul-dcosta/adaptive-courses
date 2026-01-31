@@ -24,3 +24,61 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Print Styles */
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+  
+  /* Hide navigation, buttons, and UI elements */
+  button,
+  .no-print {
+    display: none !important;
+  }
+  
+  /* Ensure course content is readable */
+  .prose {
+    max-width: 100%;
+  }
+  
+  /* Add page breaks */
+  .page-break {
+    page-break-after: always;
+  }
+  
+  /* Optimize spacing for print */
+  h1 {
+    font-size: 24pt;
+    margin-top: 0;
+  }
+  
+  h2 {
+    font-size: 18pt;
+    page-break-after: avoid;
+  }
+  
+  h3 {
+    font-size: 14pt;
+    page-break-after: avoid;
+  }
+  
+  /* Avoid orphans and widows */
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  
+  /* Print links with URLs */
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+  
+  /* Keep quiz boxes together */
+  .quiz-box {
+    page-break-inside: avoid;
+  }
+}
