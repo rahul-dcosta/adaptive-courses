@@ -164,10 +164,23 @@ export default function LandingPage() {
 
       {/* Footer */}
       <div className="bg-gray-900 text-white py-8">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-gray-400">
-            © 2026 Adaptive Courses. Built with Claude.
-          </p>
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <p className="text-gray-400 mb-4 md:mb-0">
+              © 2026 Adaptive Courses. Built with Claude.
+            </p>
+            <div className="flex gap-6">
+              <a href="/terms" className="text-gray-400 hover:text-white transition">
+                Terms of Service
+              </a>
+              <a href="/privacy" className="text-gray-400 hover:text-white transition">
+                Privacy Policy
+              </a>
+              <a href="mailto:support@adaptive-courses.com" className="text-gray-400 hover:text-white transition">
+                Contact
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
