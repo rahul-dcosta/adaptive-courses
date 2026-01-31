@@ -88,6 +88,32 @@ create policy "Allow course generation logging"
   with check (true);
 ```
 
+## Migration 4: Course Feedback Table
+
+```sql
+create table course_feedback (
+  id uuid default uuid_generate_v4() primary key,
+  course_id uuid references courses(id),
+  rating integer not null check (rating >= 1 and rating <= 5),
+  feedback text,
+  email text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table course_feedback enable row level security;
+
+create policy "Allow feedback submission"
+  on course_feedback for insert
+  with check (true);
+
+create policy "Allow reading feedback"
+  on course_feedback for select
+  using (true);
+
+create index course_feedback_course_id_idx on course_feedback(course_id);
+create index course_feedback_rating_idx on course_feedback(rating);
+```
+
 ---
 
 ## Verification
