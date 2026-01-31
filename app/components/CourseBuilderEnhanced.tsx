@@ -261,13 +261,9 @@ export default function CourseBuilderEnhanced() {
             </form>
 
             <div className="mt-6 flex items-center justify-center gap-2">
-              <div className="flex -space-x-2">
-                {['https://i.pravatar.cc/150?img=1', 'https://i.pravatar.cc/150?img=2', 'https://i.pravatar.cc/150?img=3'].map((src, i) => (
-                  <img key={i} src={src} alt="" className="w-8 h-8 rounded-full border-2 border-white" />
-                ))}
-              </div>
+              <span className="text-2xl">🚀</span>
               <p className="text-sm text-gray-600">
-                Join <strong>1,234+</strong> people learning smarter
+                <strong>Early Access</strong> • First course FREE
               </p>
             </div>
           </div>

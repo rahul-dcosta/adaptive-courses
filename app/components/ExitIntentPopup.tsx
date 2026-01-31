@@ -145,10 +145,10 @@ export default function ExitIntentPopup({ onCapture, delay = 30000 }: ExitIntent
             </div>
           </div>
 
-          {/* Social proof */}
+          {/* Early access */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">
-              Join <strong>1,234+</strong> people learning smarter
+              🚀 <strong>Early Access</strong> • Limited time offer
             </p>
           </div>
         </div>

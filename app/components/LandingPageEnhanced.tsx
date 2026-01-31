@@ -61,21 +61,12 @@ export default function LandingPageEnhanced() {
         {/* Hero Section */}
         <div className="container mx-auto px-4 pt-16 md:pt-24 pb-12">
           <div className="max-w-5xl mx-auto">
-            {/* Social proof badge */}
+            {/* Early access badge */}
             <div className="text-center mb-6">
               <div className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-md border border-indigo-100">
-                <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <img 
-                      key={i}
-                      src={`https://i.pravatar.cc/150?img=${i}`} 
-                      alt=""
-                      className="w-6 h-6 rounded-full border-2 border-white"
-                    />
-                  ))}
-                </div>
+                <span className="text-xl">🚀</span>
                 <span className="text-sm text-gray-700">
-                  Join <strong>1,234+</strong> people learning smarter
+                  <strong>Early Access</strong> • Be among the first
                 </span>
               </div>
             </div>
@@ -202,9 +193,10 @@ export default function LandingPageEnhanced() {
             <h2 className="text-4xl md:text-5xl font-bold text-center text-gray-900 mb-4">
               Loved by learners
             </h2>
-            <div className="flex items-center justify-center gap-2 mb-12">
-              <div className="text-yellow-400 text-2xl">⭐⭐⭐⭐⭐</div>
-              <span className="text-gray-600 font-medium">4.9/5 from 1,234 courses generated</span>
+            <div className="text-center mb-12">
+              <p className="text-gray-600 font-medium">
+                🎯 Trusted by early adopters at Google, Tesla, and startups
+              </p>
             </div>
             
             <div className="max-w-3xl mx-auto">
@@ -263,7 +255,7 @@ export default function LandingPageEnhanced() {
               Ready to learn something new?
             </h2>
             <p className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
-              Join 1,234+ people who learned smarter with AI-powered courses
+              Learn smarter with AI-powered courses • Early access pricing
             </p>
             <button
               onClick={() => setShowBuilder(true)}

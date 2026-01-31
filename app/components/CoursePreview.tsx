@@ -220,14 +220,10 @@ export default function CoursePreview({ course, onUnlock, isFree = true, showRef
 
               {/* Social proof */}
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8 border border-white/20">
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <div className="text-yellow-400 text-xl">⭐⭐⭐⭐⭐</div>
-                  <span className="text-sm">4.9/5 from 1,234 learners</span>
-                </div>
-                <div className="text-sm italic text-indigo-100">
+                <div className="text-sm italic text-indigo-100 mb-3">
                   "{testimonials[0].text}"
                 </div>
-                <div className="text-xs text-indigo-200 mt-2">
+                <div className="text-xs text-indigo-200">
                   - {testimonials[0].author}, {testimonials[0].role}
                 </div>
               </div>

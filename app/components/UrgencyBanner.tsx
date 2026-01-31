@@ -64,33 +64,18 @@ export default function UrgencyBanner({ type = 'early-pricing' }: UrgencyBannerP
   }
 
   if (type === 'limited-slots') {
-    const spotsLeft = 47;
-    const totalSpots = 1000;
-    const percentFilled = ((totalSpots - spotsLeft) / totalSpots) * 100;
-
     return (
-      <div className="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-4 mb-6">
-        <div className="flex items-start gap-3 mb-3">
-          <span className="text-2xl">⚠️</span>
+      <div className="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-4 mb-6">
+        <div className="flex items-start gap-3">
+          <span className="text-2xl">🚀</span>
           <div className="flex-1">
-            <p className="text-sm font-semibold text-yellow-900">
-              Only <strong className="text-lg">{spotsLeft} spots left</strong> at $5 early pricing
+            <p className="text-sm font-semibold text-indigo-900">
+              <strong className="text-lg">Early Access Pricing</strong>
             </p>
-            <p className="text-xs text-yellow-700 mt-1">
-              Price increases to $15 after reaching 1,000 early adopters
+            <p className="text-xs text-indigo-700 mt-1">
+              First course FREE • Future courses $2 each (no subscription)
             </p>
           </div>
-        </div>
-        <div className="relative">
-          <div className="w-full bg-yellow-200 rounded-full h-3 overflow-hidden">
-            <div 
-              className="bg-gradient-to-r from-yellow-500 to-orange-500 h-3 rounded-full transition-all duration-500"
-              style={{ width: `${percentFilled}%` }}
-            />
-          </div>
-          <p className="text-xs text-yellow-700 mt-2 text-right">
-            {totalSpots - spotsLeft} of {totalSpots} spots claimed
-          </p>
         </div>
       </div>
     );
