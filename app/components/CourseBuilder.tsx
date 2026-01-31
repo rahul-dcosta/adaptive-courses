@@ -92,6 +92,16 @@ export default function CourseBuilder() {
     }
   };
 
+  const getStepNumber = () => {
+    switch (step) {
+      case 'topic': return 1;
+      case 'skill_level': return 2;
+      case 'goal': return 3;
+      case 'time': return 4;
+      default: return 0;
+    }
+  };
+
   if (step === 'generating') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
@@ -189,7 +199,7 @@ export default function CourseBuilder() {
               value={currentInput}
               onChange={(e) => setCurrentInput(e.target.value)}
               placeholder={getPlaceholder()}
-              className="w-full px-6 py-4 text-lg border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none mb-4"
+              className="w-full px-6 py-4 text-lg text-gray-900 placeholder-gray-400 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none mb-4"
               autoFocus
               required
             />
@@ -204,7 +214,7 @@ export default function CourseBuilder() {
         </div>
 
         <p className="text-center mt-4 text-gray-600 text-sm">
-          Step {['topic', 'skill_level', 'goal', 'time'].indexOf(step) + 1} of 4
+          Step {getStepNumber()} of 4
         </p>
       </div>
     </div>
