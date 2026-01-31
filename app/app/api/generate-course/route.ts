@@ -56,23 +56,24 @@ ${depthGuidance}
 
 Generate a structured course with:
 1. A specific, actionable course title (not generic)
-2. 3-5 modules, each with 2-4 lessons
+2. 3-4 modules, each with 2-3 lessons
 3. Each lesson:
    - Clear, specific title
-   - 200-300 words of actionable content
-   - Real-world examples
+   - 150-200 words of actionable content (concise!)
+   - Keep content simple and avoid complex quotes/punctuation
    - A quiz question that tests understanding (include answer)
 4. Module descriptions (1 sentence explaining what the module covers)
 5. Estimated time for the entire course
-6. 3-4 concrete "next steps" they can take after finishing
+6. 3 concrete "next steps" they can take after finishing
 
-CRITICAL JSON RULES:
-- Return ONLY valid JSON, nothing else
-- No markdown code blocks
-- No trailing commas
-- Use double quotes for all strings
-- Escape any quotes inside content with \"
-- Keep all content on single lines (no literal newlines in strings)
+CRITICAL JSON FORMATTING RULES:
+1. Return ONLY a single valid JSON object, nothing before or after
+2. NO markdown code blocks or backticks
+3. NO trailing commas after last array/object item
+4. Use double quotes for all string keys and values
+5. Escape quotes inside strings: use \" not "
+6. For multi-line content, use \\n not actual newlines
+7. Test your JSON is valid before responding
 
 Use this exact structure:
 {
@@ -105,8 +106,8 @@ Make it engaging, practical, and worth $5.`;
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 8000, // Increased for longer courses
-      temperature: 0.7,
+      max_tokens: 6000, // Balanced - enough for quality course, not so long it breaks JSON
+      temperature: 0.5, // Lower temp = more predictable, less likely to break JSON
       system: systemPrompt,
       messages: [
         {
@@ -124,24 +125,22 @@ Make it engaging, practical, and worth $5.`;
     // Parse the course data
     let courseData;
     try {
-      // Try multiple extraction strategies
-      let jsonString = responseText;
+      let jsonString = responseText.trim();
       
-      // 1. Try to extract from markdown code blocks
-      const jsonMatch = responseText.match(/```json\n([\s\S]*?)\n```/) || 
-                       responseText.match(/```\n([\s\S]*?)\n```/);
-      if (jsonMatch) {
-        jsonString = jsonMatch[1];
-      }
+      // 1. Remove markdown code blocks
+      jsonString = jsonString
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/, '')
+        .replace(/\s*```$/,'');
       
-      // 2. Try to find JSON object boundaries
+      // 2. Find JSON object boundaries more carefully
       const jsonStart = jsonString.indexOf('{');
       const jsonEnd = jsonString.lastIndexOf('}');
       if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
         jsonString = jsonString.substring(jsonStart, jsonEnd + 1);
       }
       
-      // 3. Clean up trailing commas
+      // 3. Remove trailing commas (common JSON error)
       jsonString = jsonString.replace(/,(\s*[}\]])/g, '$1');
       
       courseData = JSON.parse(jsonString);
