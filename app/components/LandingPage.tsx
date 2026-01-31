@@ -71,12 +71,14 @@ export default function LandingPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                className="flex-1 px-6 py-4 text-lg rounded-lg border-2 border-gray-300 focus:border-indigo-500 focus:outline-none"
+                pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                className="flex-1 px-6 py-4 text-lg rounded-lg border-2 border-gray-300 focus:border-indigo-500 focus:outline-none invalid:border-red-300"
                 required
               />
               <button
                 type="submit"
-                className="bg-indigo-600 text-white font-semibold px-8 py-4 rounded-lg hover:bg-indigo-700 transition whitespace-nowrap"
+                className="bg-indigo-600 text-white font-semibold px-8 py-4 rounded-lg hover:bg-indigo-700 transition whitespace-nowrap disabled:bg-gray-400"
+                disabled={!email.includes('@') || !email.includes('.')}
               >
                 Start Learning →
               </button>

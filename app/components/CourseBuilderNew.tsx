@@ -101,7 +101,19 @@ export default function CourseBuilderNew() {
       setStep('complete');
     } catch (error: any) {
       console.error('Generation failed:', error);
-      alert(`Failed to generate course: ${error.message || 'Unknown error'}`);
+      
+      let errorMessage = 'Failed to generate course';
+      if (error.message.includes('not_found_error')) {
+        errorMessage = 'AI model temporarily unavailable. Please try again in a moment.';
+      } else if (error.message.includes('authentication')) {
+        errorMessage = 'Service configuration error. Please contact support.';
+      } else if (error.message.includes('rate_limit')) {
+        errorMessage = 'Too many requests. Please wait a minute and try again.';
+      } else if (error.message) {
+        errorMessage += `: ${error.message}`;
+      }
+      
+      alert(errorMessage);
       setStep('topic');
     } finally {
       setLoading(false);
