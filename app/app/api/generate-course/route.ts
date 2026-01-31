@@ -17,46 +17,73 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate course using Claude
-    const prompt = `Create a comprehensive learning course for the following:
+    // Build context-aware prompt
+    const contextualGuidance = goal === 'sound_smart' 
+      ? 'Focus on key buzzwords, frameworks, and talking points. Make them sound conversational and confident.'
+      : goal === 'ask_questions'
+      ? 'Focus on smart questions to ask, what to look for, and how to engage meaningfully. Include specific question examples.'
+      : 'Focus on deep understanding with clear explanations, examples, and why things work the way they do.';
 
-Topic: ${topic}
-Skill Level: ${skillLevel}
-Goal: ${goal}
-Time Available: ${timeAvailable}
+    const depthGuidance = timeAvailable.includes('2 hours')
+      ? 'Keep it concise and tactical. 3-4 modules max. Focus on the essentials someone needs RIGHT NOW.'
+      : timeAvailable.includes('1 hour/day for a week')
+      ? '4-5 modules with practical depth. Balance theory with application.'
+      : '4-5 modules with comprehensive coverage. Go deeper on concepts.';
+
+    // Generate course using Claude
+    const prompt = `You are creating a personalized learning course for someone learning about "${topic}".
+
+CONTEXT:
+- Skill Level: ${skillLevel}
+- Goal: ${goal}
+- Time Available: ${timeAvailable}
+
+TONE & APPROACH:
+${contextualGuidance}
+
+STRUCTURE:
+${depthGuidance}
 
 Generate a structured course with:
-1. A catchy course title
+1. A specific, actionable course title (not generic)
 2. 3-5 modules, each with 2-4 lessons
-3. Each lesson should have:
-   - A clear lesson title
-   - Detailed content (aim for 200-300 words per lesson)
-   - A quick quiz question to test understanding
-4. Include practical examples and actionable takeaways
+3. Each lesson:
+   - Clear, specific title
+   - 200-300 words of actionable content
+   - Real-world examples
+   - A quiz question that tests understanding (include answer)
+4. Module descriptions (1 sentence explaining what the module covers)
+5. Estimated time for the entire course
+6. 3-4 concrete "next steps" they can take after finishing
 
 IMPORTANT: Return ONLY valid JSON, no markdown, no extra text. Use this exact structure:
 {
-  "title": "Course Title",
+  "title": "Specific Course Title (not generic)",
+  "estimated_time": "X hours/minutes total",
   "modules": [
     {
       "title": "Module Title",
+      "description": "What this module covers in one sentence",
       "lessons": [
         {
           "title": "Lesson Title",
-          "content": "Detailed lesson content...",
+          "content": "200-300 words of actionable content with real examples",
           "quiz": {
-            "question": "Quiz question?",
-            "answer": "Correct answer"
+            "question": "Test understanding question?",
+            "answer": "Detailed answer explanation"
           }
         }
       ]
     }
   ],
-  "estimated_time": "Total time estimate",
-  "next_steps": ["Step 1", "Step 2"]
+  "next_steps": [
+    "Concrete action step 1",
+    "Concrete action step 2",
+    "Concrete action step 3"
+  ]
 }
 
-Make the content engaging, practical, and tailored to their ${skillLevel} skill level.`;
+Make it engaging, practical, and worth $5.`;
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-5-20250929',
@@ -95,6 +122,24 @@ Make the content engaging, practical, and tailored to their ${skillLevel} skill 
       }
       
       courseData = JSON.parse(jsonString);
+      
+      // Validate course structure
+      if (!courseData.title || !courseData.modules || courseData.modules.length === 0) {
+        throw new Error('Invalid course structure: missing required fields');
+      }
+      
+      // Ensure at least 2 modules
+      if (courseData.modules.length < 2) {
+        throw new Error('Course must have at least 2 modules');
+      }
+      
+      // Validate each module has lessons
+      for (const module of courseData.modules) {
+        if (!module.lessons || module.lessons.length === 0) {
+          throw new Error(`Module "${module.title}" has no lessons`);
+        }
+      }
+      
     } catch (parseError: any) {
       console.error('Failed to parse course JSON:', parseError);
       console.error('Raw response:', responseText.substring(0, 500));
