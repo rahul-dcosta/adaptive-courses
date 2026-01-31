@@ -104,12 +104,35 @@ Make the content engaging, practical, and tailored to their ${skillLevel} skill 
       );
     }
 
-    // TODO: Save to Supabase (after payment)
-    // For now, just return the course
+    // Save to Supabase
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+    );
+
+    const { data: courseRecord, error: dbError } = await supabase
+      .from('courses')
+      .insert({
+        topic,
+        skill_level: skillLevel,
+        goal,
+        time_available: timeAvailable,
+        content: courseData,
+        paid: false // Will be true after payment
+      })
+      .select()
+      .single();
+
+    if (dbError) {
+      console.error('Database error:', dbError);
+      // Still return the course even if DB save fails
+    }
 
     return NextResponse.json({
       success: true,
-      course: courseData
+      course: courseData,
+      courseId: courseRecord?.id
     });
 
   } catch (error: any) {
