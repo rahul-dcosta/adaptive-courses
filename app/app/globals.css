@@ -6,7 +6,7 @@
 @layer base {
   /* Prose styling for course content */
   .prose {
-    color: theme('colors.gray.900');
+    @apply text-gray-900;
     max-width: none;
   }
 
@@ -91,15 +91,15 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-track {
-    background: theme('colors.gray.100');
+    background: rgb(243 244 246);
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: theme('colors.gray.400');
+    background: rgb(156 163 175);
     border-radius: 4px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: theme('colors.gray.500');
+    background: rgb(107 114 128);
   }
 }
