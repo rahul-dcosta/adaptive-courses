@@ -37,8 +37,10 @@ export async function POST(request: NextRequest) {
       ? '4-5 modules with practical depth. Balance theory with application.'
       : '4-5 modules with comprehensive coverage. Go deeper on concepts.';
 
+    const systemPrompt = `You are a course creation AI. You MUST respond with valid JSON only. No markdown, no explanations, just pure JSON.`;
+
     // Generate course using Claude
-    const prompt = `You are creating a personalized learning course for someone learning about "${topic}".
+    const prompt = `Create a personalized learning course for someone learning about "${topic}".
 
 CONTEXT:
 - Skill Level: ${finalSkillLevel}
@@ -64,7 +66,15 @@ Generate a structured course with:
 5. Estimated time for the entire course
 6. 3-4 concrete "next steps" they can take after finishing
 
-IMPORTANT: Return ONLY valid JSON, no markdown, no extra text. Use this exact structure:
+CRITICAL JSON RULES:
+- Return ONLY valid JSON, nothing else
+- No markdown code blocks
+- No trailing commas
+- Use double quotes for all strings
+- Escape any quotes inside content with \"
+- Keep all content on single lines (no literal newlines in strings)
+
+Use this exact structure:
 {
   "title": "Specific Course Title (not generic)",
   "estimated_time": "X hours/minutes total",
@@ -95,7 +105,9 @@ Make it engaging, practical, and worth $5.`;
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 4096,
+      max_tokens: 8000, // Increased for longer courses
+      temperature: 0.7,
+      system: systemPrompt,
       messages: [
         {
           role: 'user',
@@ -129,6 +141,9 @@ Make it engaging, practical, and worth $5.`;
         jsonString = jsonString.substring(jsonStart, jsonEnd + 1);
       }
       
+      // 3. Clean up trailing commas
+      jsonString = jsonString.replace(/,(\s*[}\]])/g, '$1');
+      
       courseData = JSON.parse(jsonString);
       
       // Validate course structure
@@ -149,10 +164,24 @@ Make it engaging, practical, and worth $5.`;
       }
       
     } catch (parseError: any) {
-      console.error('Failed to parse course JSON:', parseError);
-      console.error('Raw response:', responseText.substring(0, 500));
+      console.error('=== JSON PARSE ERROR ===');
+      console.error('Error:', parseError.message);
+      console.error('Response length:', responseText.length);
+      console.error('First 500 chars:', responseText.substring(0, 500));
+      console.error('Last 500 chars:', responseText.substring(responseText.length - 500));
+      
+      // Try to identify the problem area from error message
+      const posMatch = parseError.message.match(/position (\d+)/);
+      if (posMatch) {
+        const pos = parseInt(posMatch[1]);
+        console.error(`Problem area (pos ${pos}):`, responseText.substring(Math.max(0, pos - 100), pos + 100));
+      }
+      
       return NextResponse.json(
-        { error: `Failed to parse course: ${parseError.message}` },
+        { 
+          error: `Failed to parse course: ${parseError.message}`,
+          hint: 'The AI generated malformed JSON. Please try again or try a different topic.'
+        },
         { status: 500 }
       );
     }
