@@ -54,8 +54,13 @@ export default function LandingPage() {
           <p className="text-xl md:text-2xl text-gray-600 mb-8">
             AI-powered courses that understand your situation, not just your skill level.
           </p>
-          <p className="text-lg text-gray-500 mb-12">
+          <p className="text-lg text-gray-500 mb-8">
             Going to a factory tomorrow? Job interview next week? We'll teach you exactly what you need, nothing more.
+          </p>
+          <p className="text-sm text-indigo-600 mb-12">
+            <a href="/sample" className="hover:underline">
+              → See a sample course first
+            </a>
           </p>
 
           {/* Email Capture */}
