@@ -5,6 +5,7 @@ import { analytics } from '@/lib/analytics';
 import ProgressBreadcrumbs from './ProgressBreadcrumbs';
 import LoadingSpinner from './LoadingSpinner';
 import SuccessCelebration from './SuccessCelebration';
+import CoursePreview from './CoursePreview';
 
 type Step = 'topic' | 'situation' | 'timeline' | 'goal' | 'generating' | 'celebration' | 'preview' | 'complete';
 
@@ -201,52 +202,17 @@ export default function CourseBuilderEnhanced() {
     );
   }
 
-  // Course preview (this will be enhanced with lock/unlock later)
+  // Course preview
   if (step === 'preview') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-6">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-              {generatedCourse?.title}
-            </h1>
-            <p className="text-gray-600 text-lg">
-              {generatedCourse?.description}
-            </p>
-          </div>
-
-          {/* Modules */}
-          <div className="space-y-4">
-            {generatedCourse?.modules?.map((module: any, idx: number) => (
-              <div 
-                key={idx}
-                className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow"
-              >
-                <h2 className="text-xl font-bold text-gray-900 mb-3">
-                  Module {idx + 1}: {module.title}
-                </h2>
-                <div className="prose prose-sm max-w-none">
-                  <div dangerouslySetInnerHTML={{ __html: module.content }} />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* CTA */}
-          <div className="mt-8 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-8 text-center text-white">
-            <h3 className="text-2xl font-bold mb-4">
-              🎉 Your first course is FREE!
-            </h3>
-            <p className="text-lg mb-6 text-indigo-100">
-              Future courses are just $2 each. No subscription. No BS.
-            </p>
-            <button className="bg-white text-indigo-600 font-bold px-8 py-3 rounded-xl hover:scale-105 transition-transform">
-              Save to Dashboard →
-            </button>
-          </div>
-        </div>
-      </div>
+      <CoursePreview
+        course={generatedCourse}
+        isFree={true}
+        onUnlock={() => {
+          // TODO: Integrate Stripe checkout
+          alert('Stripe payment coming soon!');
+        }}
+      />
     );
   }
 
