@@ -39,6 +39,23 @@ export default function CourseBuilderNew() {
   const [generatedCourse, setGeneratedCourse] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
+  // Save progress to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined' && topic) {
+      localStorage.setItem('adaptive-courses-topic', topic);
+    }
+  }, [topic]);
+
+  // Load saved topic on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('adaptive-courses-topic');
+      if (saved && !topic) {
+        setTopic(saved);
+      }
+    }
+  }, []);
+
   const handleTopicSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (topic.trim()) {
@@ -367,6 +384,11 @@ export default function CourseBuilderNew() {
               <p className="text-gray-600 mb-6">
                 Type anything — from "supply chain" to "how nuclear reactors work"
               </p>
+              {topic && (
+                <p className="text-sm text-indigo-600 mb-4">
+                  ✓ Restored your last topic
+                </p>
+              )}
               <form onSubmit={handleTopicSubmit}>
                 <input
                   type="text"
