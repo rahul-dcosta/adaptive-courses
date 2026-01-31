@@ -88,9 +88,9 @@ const GOALS = [
   }
 ];
 
-export default function CourseBuilderEnhanced() {
-  const [step, setStep] = useState<Step>('topic');
-  const [topic, setTopic] = useState('');
+export default function CourseBuilderEnhanced({ initialTopic }: { initialTopic?: string }) {
+  const [step, setStep] = useState<Step>(initialTopic ? 'situation' : 'topic');
+  const [topic, setTopic] = useState(initialTopic || '');
   const [situation, setSituation] = useState('');
   const [timeline, setTimeline] = useState('');
   const [goal, setGoal] = useState('');
@@ -334,8 +334,15 @@ export default function CourseBuilderEnhanced() {
           
           {step === 'situation' && (
             <>
+              {initialTopic && (
+                <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                  <p className="text-gray-900 text-lg">
+                    <span className="font-semibold">Cool! You want to learn:</span> {topic}
+                  </p>
+                </div>
+              )}
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                What's the situation?
+                Why are you learning this?
               </h2>
               <p className="text-gray-600 text-lg mb-8">
                 💡 This helps us tailor the course to what you actually need

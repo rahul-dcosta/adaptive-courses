@@ -6,37 +6,22 @@ import { analytics } from '@/lib/analytics';
 
 export default function LandingPagePremium() {
   const [showBuilder, setShowBuilder] = useState(false);
-  const [email, setEmail] = useState('');
+  const [topic, setTopic] = useState('');
 
   useEffect(() => {
     analytics.pageView('landing');
   }, []);
 
-  const handleEmailSubmit = async (e: React.FormEvent) => {
+  const handleTopicSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email.trim()) {
-      try {
-        const { createClient } = await import('@supabase/supabase-js');
-        const supabase = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-        );
-        
-        await supabase.from('email_signups').insert({
-          email,
-          source: 'landing_page'
-        });
-      } catch (error) {
-        console.error('Failed to save email:', error);
-      }
-      
-      analytics.emailSignup(email);
+    if (topic.trim()) {
+      analytics.track('topic_entered_landing', { topic });
       setShowBuilder(true);
     }
   };
 
   if (showBuilder) {
-    return <CourseBuilderEnhanced />;
+    return <CourseBuilderEnhanced initialTopic={topic} />;
   }
 
   return (
@@ -63,19 +48,20 @@ export default function LandingPagePremium() {
           </p>
 
           {/* Topic input - direct to course builder */}
-          <form onSubmit={handleEmailSubmit} className="max-w-md">
+          <form onSubmit={handleTopicSubmit} className="max-w-md">
             <div className="flex gap-3">
               <input
                 type="text"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
                 placeholder="What do you want to learn?"
                 className="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-900 transition-colors"
                 required
+                autoFocus
               />
               <button
                 type="submit"
-                disabled={!email.trim()}
+                disabled={!topic.trim()}
                 className="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 active:bg-black transition-colors disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
               >
                 Get started
@@ -191,19 +177,20 @@ export default function LandingPagePremium() {
             Generate your first course for free.
           </p>
           
-          <form onSubmit={handleEmailSubmit} className="max-w-md">
+          <form onSubmit={handleTopicSubmit} className="max-w-md">
             <div className="flex gap-3">
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
+                type="text"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                placeholder="What do you want to learn?"
                 className="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-900 transition-colors"
                 required
+                autoFocus
               />
               <button
                 type="submit"
-                disabled={!email.includes('@')}
+                disabled={!topic.trim()}
                 className="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 active:bg-black transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Get started
