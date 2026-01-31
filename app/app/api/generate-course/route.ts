@@ -7,10 +7,17 @@ const anthropic = new Anthropic({
 
 export async function POST(request: NextRequest) {
   try {
-    const { topic, skillLevel, goal, timeAvailable } = await request.json();
+    const body = await request.json();
+    const { topic, skillLevel, goal, timeAvailable, context, timeline, depth } = body;
+
+    // Accept either old format (skillLevel, goal, timeAvailable) or new format (context, timeline, depth)
+    const finalSkillLevel = skillLevel || 'intermediate';
+    const finalGoal = goal || depth || 'understand';
+    const finalTimeAvailable = timeAvailable || timeline || 'flexible';
+    const learningContext = context || '';
 
     // Validate inputs
-    if (!topic || !skillLevel || !goal || !timeAvailable) {
+    if (!topic) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -18,15 +25,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Build context-aware prompt
-    const contextualGuidance = goal === 'sound_smart' 
+    const contextualGuidance = finalGoal.includes('smart') 
       ? 'Focus on key buzzwords, frameworks, and talking points. Make them sound conversational and confident.'
-      : goal === 'ask_questions'
+      : finalGoal.includes('questions')
       ? 'Focus on smart questions to ask, what to look for, and how to engage meaningfully. Include specific question examples.'
       : 'Focus on deep understanding with clear explanations, examples, and why things work the way they do.';
 
-    const depthGuidance = timeAvailable.includes('2 hours')
+    const depthGuidance = finalTimeAvailable.includes('2 hours') || finalTimeAvailable.includes('tomorrow')
       ? 'Keep it concise and tactical. 3-4 modules max. Focus on the essentials someone needs RIGHT NOW.'
-      : timeAvailable.includes('1 hour/day for a week')
+      : finalTimeAvailable.includes('week')
       ? '4-5 modules with practical depth. Balance theory with application.'
       : '4-5 modules with comprehensive coverage. Go deeper on concepts.';
 
@@ -34,9 +41,10 @@ export async function POST(request: NextRequest) {
     const prompt = `You are creating a personalized learning course for someone learning about "${topic}".
 
 CONTEXT:
-- Skill Level: ${skillLevel}
-- Goal: ${goal}
-- Time Available: ${timeAvailable}
+- Skill Level: ${finalSkillLevel}
+- Learning Context: ${learningContext || 'general interest'}
+- Timeline: ${finalTimeAvailable}
+- Depth Goal: ${finalGoal}
 
 TONE & APPROACH:
 ${contextualGuidance}
