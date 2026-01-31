@@ -221,23 +221,23 @@ export default function CourseBuilderEnhanced() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center p-4">
         <div className="max-w-2xl w-full">
-          <div className="text-center mb-12">
-            <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-tight">
+          <div className="text-center mb-8 md:mb-12 px-2">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white mb-4 md:mb-6 leading-tight">
               Learn Anything<br/>
               <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                 in 30 Minutes
               </span>
             </h1>
-            <p className="text-xl md:text-2xl text-cyan-200">
+            <p className="text-lg sm:text-xl md:text-2xl text-cyan-200">
               AI-powered courses tailored to YOUR situation
             </p>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+          <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 md:p-12">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 md:mb-3">
               What do you want to learn?
             </h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-sm sm:text-base text-gray-600 mb-4 md:mb-6">
               💡 Type anything — from "supply chain" to "quantum physics"
             </p>
             
@@ -247,14 +247,14 @@ export default function CourseBuilderEnhanced() {
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder="e.g., manufacturing operations"
-                className="w-full px-6 py-5 text-xl text-gray-900 placeholder-gray-400 border-2 border-gray-200 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 focus:outline-none mb-4 transition-all"
+                className="w-full px-4 sm:px-6 py-4 sm:py-5 text-lg sm:text-xl text-gray-900 placeholder-gray-400 border-2 border-gray-200 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 focus:outline-none mb-4 transition-all"
                 autoFocus
                 required
               />
               <button
                 type="submit"
                 disabled={!topic.trim()}
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-lg py-5 px-8 rounded-2xl hover:from-indigo-700 hover:to-purple-700 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg hover:shadow-xl"
+                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-base sm:text-lg py-4 sm:py-5 px-6 sm:px-8 rounded-2xl hover:from-indigo-700 hover:to-purple-700 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg hover:shadow-xl min-h-[56px]"
               >
                 Continue →
               </button>

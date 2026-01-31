@@ -48,15 +48,15 @@ export default function UrgencyBanner({ type = 'early-pricing' }: UrgencyBannerP
 
   if (type === 'early-pricing') {
     return (
-      <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white py-3 px-4 text-center shadow-lg">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-sm sm:text-base">
-          <span className="flex items-center gap-2">
-            🔥 <strong>Early Adopter Price:</strong> $5 
-            <span className="hidden sm:inline text-white/80 line-through">$15</span>
+      <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white py-2 sm:py-3 px-3 sm:px-4 text-center shadow-lg">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-4 text-xs sm:text-base">
+          <span className="flex items-center gap-1 sm:gap-2">
+            🔥 <strong>Early Price:</strong> $5 
+            <span className="hidden sm:inline text-white/80 line-through ml-1">$15</span>
           </span>
           <span className="hidden sm:inline">•</span>
-          <span className="flex items-center gap-2 font-mono font-bold">
-            Ends in {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
+          <span className="flex items-center gap-1 sm:gap-2 font-mono font-bold text-xs sm:text-base">
+            {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m
           </span>
         </div>
       </div>

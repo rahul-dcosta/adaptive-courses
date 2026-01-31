@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     images: ['/og-image.png'],
     creator: '@AdaptiveCourses',
   },
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
   themeColor: '#4F46E5',
   manifest: '/manifest.json',
   icons: {
@@ -40,6 +40,8 @@ export const metadata: Metadata = {
     apple: '/apple-icon.png',
   },
 };
+
+import MobileOptimized from '@/components/MobileOptimized';
 
 export default function RootLayout({
   children,
@@ -87,7 +89,11 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <MobileOptimized>
+          {children}
+        </MobileOptimized>
+      </body>
     </html>
   );
 }

@@ -80,17 +80,17 @@ export default function LandingPageEnhanced() {
               </div>
             </div>
 
-            <div className="text-center mb-12">
-              <h1 className="text-5xl md:text-7xl font-black text-gray-900 mb-6 leading-tight">
+            <div className="text-center mb-8 md:mb-12">
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-gray-900 mb-4 md:mb-6 leading-tight px-2">
                 Learn Anything<br className="hidden sm:block" />
                 in <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
                   30 Minutes
                 </span>
               </h1>
-              <p className="text-xl md:text-2xl text-gray-600 mb-6 max-w-3xl mx-auto">
+              <p className="text-lg sm:text-xl md:text-2xl text-gray-600 mb-4 md:mb-6 max-w-3xl mx-auto px-4">
                 AI-powered courses that understand <strong>your situation</strong>, not just your skill level
               </p>
-              <p className="text-lg text-gray-500 mb-4 max-w-2xl mx-auto">
+              <p className="text-base sm:text-lg text-gray-500 mb-4 max-w-2xl mx-auto px-4">
                 Factory visit tomorrow? Job interview next week?<br className="hidden md:block" />
                 We'll teach you exactly what you need. <strong>Nothing more.</strong>
               </p>
@@ -108,7 +108,7 @@ export default function LandingPageEnhanced() {
             </div>
 
             {/* Email Capture - Enhanced */}
-            <div className="max-w-lg mx-auto mb-8">
+            <div className="max-w-lg mx-auto mb-6 md:mb-8 px-4">
               <form onSubmit={handleEmailSubmit} className="relative">
                 <div className="flex flex-col sm:flex-row gap-3">
                   <input
@@ -116,20 +116,20 @@ export default function LandingPageEnhanced() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email to start"
-                    className="flex-1 px-6 py-5 text-lg rounded-2xl border-2 border-gray-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 focus:outline-none transition-all shadow-sm"
+                    className="flex-1 px-5 sm:px-6 py-4 sm:py-5 text-base sm:text-lg rounded-2xl border-2 border-gray-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 focus:outline-none transition-all shadow-sm"
                     required
                   />
                   <button
                     type="submit"
                     disabled={!email.includes('@')}
-                    className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold px-10 py-5 rounded-2xl hover:from-indigo-700 hover:to-purple-700 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl text-lg whitespace-nowrap"
+                    className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold px-8 sm:px-10 py-4 sm:py-5 rounded-2xl hover:from-indigo-700 hover:to-purple-700 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl text-base sm:text-lg whitespace-nowrap min-h-[56px]"
                   >
                     Start Learning →
                   </button>
                 </div>
               </form>
               
-              <div className="flex items-center justify-center gap-6 mt-4 text-sm text-gray-600">
+              <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-4 text-xs sm:text-sm text-gray-600 px-4">
                 <div className="flex items-center gap-1">
                   <span className="text-green-600">✓</span>
                   <span>First course FREE</span>
