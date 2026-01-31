@@ -5,6 +5,42 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+// Simple in-memory cache for common topics (context step only)
+const questionCache = new Map<string, any>();
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
+interface CacheEntry {
+  data: any;
+  timestamp: number;
+}
+
+function getCacheKey(topic: string, step: string): string {
+  return `${topic.toLowerCase().trim()}-${step}`;
+}
+
+function getCachedQuestion(topic: string, step: string): any | null {
+  const key = getCacheKey(topic, step);
+  const entry = questionCache.get(key) as CacheEntry | undefined;
+  
+  if (!entry) return null;
+  
+  // Check if expired
+  if (Date.now() - entry.timestamp > CACHE_TTL) {
+    questionCache.delete(key);
+    return null;
+  }
+  
+  return entry.data;
+}
+
+function setCachedQuestion(topic: string, step: string, data: any): void {
+  const key = getCacheKey(topic, step);
+  questionCache.set(key, {
+    data,
+    timestamp: Date.now()
+  });
+}
+
 export async function POST(request: Request) {
   try {
     const { topic, step, previousAnswers } = await request.json();
@@ -14,6 +50,18 @@ export async function POST(request: Request) {
         { error: 'Topic is required' },
         { status: 400 }
       );
+    }
+
+    // Check cache first (only for 'context' step - first question)
+    // Later steps depend on previous answers, so don't cache those
+    if (step === 'context') {
+      const cached = getCachedQuestion(topic, step);
+      if (cached) {
+        return NextResponse.json({
+          ...cached,
+          _cached: true // Flag for debugging
+        });
+      }
     }
 
     const systemPrompt = `You are an expert course designer helping create personalized learning experiences. Generate contextually relevant onboarding questions based on what the user wants to learn.
@@ -104,6 +152,11 @@ Generate 4 depth options.`;
     }
 
     const result = JSON.parse(jsonMatch[0]);
+
+    // Cache the result (only for 'context' step)
+    if (step === 'context') {
+      setCachedQuestion(topic, step, result);
+    }
 
     return NextResponse.json(result);
   } catch (error: any) {

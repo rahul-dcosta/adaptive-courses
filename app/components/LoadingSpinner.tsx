@@ -21,24 +21,33 @@ export default function LoadingSpinner({ topic }: LoadingSpinnerProps) {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // Rotate messages every 2.5 seconds
-    const messageInterval = setInterval(() => {
-      setMessageIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
-    }, 2500);
+    // Sync message index with progress (not time-based)
+    const updateMessage = () => {
+      if (progress < 15) setMessageIndex(0);
+      else if (progress < 30) setMessageIndex(1);
+      else if (progress < 50) setMessageIndex(2);
+      else if (progress < 70) setMessageIndex(3);
+      else if (progress < 85) setMessageIndex(4);
+      else if (progress < 92) setMessageIndex(5);
+      else setMessageIndex(6); // "Almost there..." at 92%+
+    };
 
-    // Fake progress bar (0 → 90% over ~25 seconds)
+    // Realistic progress: fast start, slow at end
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= 90) return 90; // Cap at 90% until real completion
-        return prev + 1.5;
+        if (prev < 60) return prev + 3; // Fast initial progress
+        if (prev < 80) return prev + 1.5; // Slow down
+        if (prev < 92) return prev + 0.5; // Very slow near end
+        return 92; // Cap at 92%, stay at "Almost there..." until actual completion
       });
-    }, 400);
+    }, 500);
+
+    updateMessage();
 
     return () => {
-      clearInterval(messageInterval);
       clearInterval(progressInterval);
     };
-  }, []);
+  }, [progress]);
 
   const currentMessage = LOADING_MESSAGES[messageIndex];
 
