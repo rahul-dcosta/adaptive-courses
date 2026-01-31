@@ -145,11 +145,45 @@ export default function CourseBuilderNew() {
 
   if (step === 'generating') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <h2 className="text-2xl font-bold text-gray-900">Crafting your course...</h2>
-          <p className="text-gray-600 mt-2">This will take about 30-60 seconds</p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+          <div className="text-center mb-8">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto mb-4"></div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Crafting your course...</h2>
+            <p className="text-gray-600">This takes 30-60 seconds</p>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 text-sm">
+              <div className="w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span className="text-gray-700">Analyzing your topic...</span>
+            </div>
+            
+            <div className="flex items-center gap-3 text-sm animate-pulse">
+              <div className="w-6 h-6 bg-gray-300 rounded-full flex-shrink-0"></div>
+              <span className="text-gray-500">Structuring modules...</span>
+            </div>
+            
+            <div className="flex items-center gap-3 text-sm">
+              <div className="w-6 h-6 bg-gray-200 rounded-full flex-shrink-0"></div>
+              <span className="text-gray-400">Writing lessons...</span>
+            </div>
+            
+            <div className="flex items-center gap-3 text-sm">
+              <div className="w-6 h-6 bg-gray-200 rounded-full flex-shrink-0"></div>
+              <span className="text-gray-400">Creating quizzes...</span>
+            </div>
+          </div>
+          
+          <div className="mt-8 p-4 bg-blue-50 rounded-lg">
+            <p className="text-sm text-gray-700 text-center">
+              💡 <strong>Fun fact:</strong> Claude is reading thousands of sources to build your custom curriculum
+            </p>
+          </div>
         </div>
       </div>
     );
