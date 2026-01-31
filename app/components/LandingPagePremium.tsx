@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import CourseBuilderEnhanced from './CourseBuilderEnhanced';
+import CourseBuilderSmart from './CourseBuilderSmart';
 import { analytics } from '@/lib/analytics';
 
 export default function LandingPagePremium() {
@@ -21,7 +21,7 @@ export default function LandingPagePremium() {
   };
 
   if (showBuilder) {
-    return <CourseBuilderEnhanced initialTopic={topic} />;
+    return <CourseBuilderSmart initialTopic={topic} />;
   }
 
   return (
