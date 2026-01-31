@@ -5,6 +5,7 @@ import CourseBuilderEnhanced from './CourseBuilderEnhanced';
 import UrgencyBanner from './UrgencyBanner';
 import LiveActivityFeed from './LiveActivityFeed';
 import TestimonialsCarousel from './TestimonialsCarousel';
+import ExitIntentPopup from './ExitIntentPopup';
 import { analytics } from '@/lib/analytics';
 
 export default function LandingPageEnhanced() {
@@ -44,6 +45,12 @@ export default function LandingPageEnhanced() {
 
   return (
     <>
+      {/* Exit intent popup */}
+      <ExitIntentPopup onCapture={(email) => {
+        setEmail(email);
+        setShowBuilder(true);
+      }} />
+      
       {/* Urgency banner at top */}
       <UrgencyBanner type="early-pricing" />
       
