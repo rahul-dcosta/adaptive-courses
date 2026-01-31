@@ -1,0 +1,87 @@
+'use client';
+
+import { useEffect } from 'react';
+
+/**
+ * Performance monitoring component
+ * Tracks Core Web Vitals and sends to analytics
+ */
+export default function PerformanceMonitor() {
+  useEffect(() => {
+    // Only run in browser
+    if (typeof window === 'undefined') return;
+
+    // Track page load time
+    window.addEventListener('load', () => {
+      const perfData = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+      
+      if (perfData) {
+        const metrics = {
+          dns: perfData.domainLookupEnd - perfData.domainLookupStart,
+          tcp: perfData.connectEnd - perfData.connectStart,
+          ttfb: perfData.responseStart - perfData.requestStart,
+          download: perfData.responseEnd - perfData.responseStart,
+          domInteractive: perfData.domInteractive - perfData.fetchStart,
+          domComplete: perfData.domComplete - perfData.fetchStart,
+          loadComplete: perfData.loadEventEnd - perfData.fetchStart
+        };
+
+        // Send to analytics
+        fetch('/api/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event: 'performance_metrics',
+            properties: metrics
+          })
+        }).catch(() => {});
+      }
+    });
+
+    // Track Core Web Vitals using web-vitals library pattern
+    const reportWebVitals = (metric: any) => {
+      fetch('/api/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'web_vital',
+          properties: {
+            name: metric.name,
+            value: metric.value,
+            rating: metric.rating,
+            delta: metric.delta,
+            id: metric.id
+          }
+        })
+      }).catch(() => {});
+    };
+
+    // Simple LCP tracking (Largest Contentful Paint)
+    const observer = new PerformanceObserver((list) => {
+      const entries = list.getEntries();
+      const lastEntry = entries[entries.length - 1] as any;
+      
+      if (lastEntry) {
+        reportWebVitals({
+          name: 'LCP',
+          value: lastEntry.renderTime || lastEntry.loadTime,
+          rating: lastEntry.renderTime < 2500 ? 'good' : lastEntry.renderTime < 4000 ? 'needs-improvement' : 'poor',
+          delta: lastEntry.renderTime || lastEntry.loadTime,
+          id: `lcp-${Date.now()}`
+        });
+      }
+    });
+
+    try {
+      observer.observe({ type: 'largest-contentful-paint', buffered: true });
+    } catch (e) {
+      // LCP not supported
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  return null; // This component doesn't render anything
+}
