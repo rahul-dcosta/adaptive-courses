@@ -1,5 +1,5 @@
-import LandingPageEnhanced from '@/components/LandingPageEnhanced';
+import LandingPagePremium from '@/components/LandingPagePremium';
 
 export default function Home() {
-  return <LandingPageEnhanced />;
+  return <LandingPagePremium />;
 }
