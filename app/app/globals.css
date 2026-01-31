@@ -1,84 +1,105 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-/* Print Styles */
-@media print {
-  body {
-    background: white;
-    color: black;
-  }
-  
-  /* Hide navigation, buttons, and UI elements */
-  button,
-  .no-print {
-    display: none !important;
-  }
-  
-  /* Ensure course content is readable */
+/* Typography for course content */
+@layer base {
+  /* Prose styling for course content */
   .prose {
-    max-width: 100%;
+    color: theme('colors.gray.900');
+    max-width: none;
   }
-  
-  /* Add page breaks */
-  .page-break {
-    page-break-after: always;
+
+  .prose h1 {
+    @apply text-3xl font-bold text-gray-900 mt-8 mb-4;
   }
-  
-  /* Optimize spacing for print */
-  h1 {
-    font-size: 24pt;
-    margin-top: 0;
+
+  .prose h2 {
+    @apply text-2xl font-bold text-gray-900 mt-8 mb-4;
   }
-  
-  h2 {
-    font-size: 18pt;
-    page-break-after: avoid;
+
+  .prose h3 {
+    @apply text-xl font-bold text-gray-900 mt-6 mb-3;
   }
-  
-  h3 {
-    font-size: 14pt;
-    page-break-after: avoid;
+
+  .prose p {
+    @apply text-lg leading-relaxed text-gray-700 mb-4;
   }
-  
-  /* Avoid orphans and widows */
-  p {
-    orphans: 3;
-    widows: 3;
+
+  .prose ul, .prose ol {
+    @apply my-4 ml-6 space-y-2;
   }
-  
-  /* Print links with URLs */
-  a[href]:after {
-    content: " (" attr(href) ")";
-    font-size: 0.8em;
-    color: #666;
+
+  .prose ul {
+    @apply list-disc;
   }
-  
-  /* Keep quiz boxes together */
-  .quiz-box {
-    page-break-inside: avoid;
+
+  .prose ol {
+    @apply list-decimal;
+  }
+
+  .prose li {
+    @apply text-lg text-gray-700;
+  }
+
+  .prose strong {
+    @apply font-semibold text-gray-900;
+  }
+
+  .prose code {
+    @apply px-1.5 py-0.5 bg-gray-100 text-gray-900 rounded text-sm font-mono;
+  }
+
+  .prose pre {
+    @apply my-4 p-4 bg-gray-900 text-gray-100 rounded-lg overflow-x-auto;
+  }
+
+  .prose pre code {
+    @apply bg-transparent p-0 text-gray-100;
+  }
+
+  .prose blockquote {
+    @apply border-l-4 border-gray-900 pl-4 italic text-gray-700 my-4;
+  }
+
+  .prose a {
+    @apply text-gray-900 underline hover:text-gray-700 transition-colors;
+  }
+
+  .prose hr {
+    @apply my-8 border-gray-200;
+  }
+
+  .prose table {
+    @apply w-full my-4 border-collapse;
+  }
+
+  .prose th {
+    @apply bg-gray-100 px-4 py-2 text-left font-semibold text-gray-900 border border-gray-200;
+  }
+
+  .prose td {
+    @apply px-4 py-2 border border-gray-200 text-gray-700;
+  }
+}
+
+/* Custom scrollbar */
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: theme('colors.gray.100');
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: theme('colors.gray.400');
+    border-radius: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: theme('colors.gray.500');
   }
 }

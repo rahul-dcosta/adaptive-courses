@@ -5,7 +5,7 @@ import { analytics } from '@/lib/analytics';
 import ProgressBreadcrumbs from './ProgressBreadcrumbs';
 import LoadingSpinner from './LoadingSpinner';
 import SuccessCelebration from './SuccessCelebration';
-import CoursePreview from './CoursePreview';
+import CourseViewer from './CourseViewer';
 
 type Step = 'topic' | 'situation' | 'timeline' | 'goal' | 'generating' | 'celebration' | 'preview' | 'complete';
 
@@ -202,15 +202,19 @@ export default function CourseBuilderEnhanced() {
     );
   }
 
-  // Course preview
+  // Course viewer
   if (step === 'preview') {
     return (
-      <CoursePreview
+      <CourseViewer
         course={generatedCourse}
-        isFree={true}
-        onUnlock={() => {
-          // TODO: Integrate Stripe checkout
-          alert('Stripe payment coming soon!');
+        onExit={() => {
+          // Go back to start
+          setStep('topic');
+          setTopic('');
+          setSituation('');
+          setTimeline('');
+          setGoal('');
+          setGeneratedCourse(null);
         }}
       />
     );
