@@ -356,6 +356,15 @@ export default function CourseBuilderNew() {
 
           {step === 'situation' && (
             <>
+              <button
+                onClick={() => setStep('topic')}
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back
+              </button>
               <h2 className="text-3xl font-bold text-gray-900 mb-2">
                 What's the situation?
               </h2>
@@ -368,6 +377,15 @@ export default function CourseBuilderNew() {
 
           {step === 'timeline' && (
             <>
+              <button
+                onClick={() => setStep('situation')}
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back
+              </button>
               <h2 className="text-3xl font-bold text-gray-900 mb-2">
                 When do you need this?
               </h2>
@@ -380,6 +398,15 @@ export default function CourseBuilderNew() {
 
           {step === 'goal' && (
             <>
+              <button
+                onClick={() => setStep('timeline')}
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back
+              </button>
               <h2 className="text-3xl font-bold text-gray-900 mb-2">
                 What's the goal?
               </h2>
