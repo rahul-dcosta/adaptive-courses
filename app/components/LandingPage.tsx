@@ -11,8 +11,23 @@ export default function LandingPage() {
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (email.trim()) {
-      // TODO: Save email to database/mailing list
-      console.log('Email captured:', email);
+      try {
+        // Save email to Supabase
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+        );
+        
+        await supabase.from('email_signups').insert({
+          email,
+          source: 'landing_page'
+        });
+      } catch (error) {
+        console.error('Failed to save email:', error);
+        // Continue anyway - don't block the user
+      }
+      
       setEmailCaptured(true);
       setShowBuilder(true);
     }
@@ -169,12 +184,15 @@ export default function LandingPage() {
             <p className="text-gray-400 mb-4 md:mb-0">
               © 2026 Adaptive Courses. Built with Claude.
             </p>
-            <div className="flex gap-6">
+            <div className="flex gap-6 flex-wrap justify-center">
+              <a href="/faq" className="text-gray-400 hover:text-white transition">
+                FAQ
+              </a>
               <a href="/terms" className="text-gray-400 hover:text-white transition">
-                Terms of Service
+                Terms
               </a>
               <a href="/privacy" className="text-gray-400 hover:text-white transition">
-                Privacy Policy
+                Privacy
               </a>
               <a href="mailto:support@adaptive-courses.com" className="text-gray-400 hover:text-white transition">
                 Contact
