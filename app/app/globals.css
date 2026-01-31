@@ -1,5 +1,25 @@
 @import "tailwindcss";
 
+/* Glassmorphism base styles */
+body {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e3e7ed 100%);
+  min-height: 100vh;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.glass-dark {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
 /* Typography for course content */
 .prose {
   color: #111827;

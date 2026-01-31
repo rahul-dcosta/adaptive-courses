@@ -25,7 +25,7 @@ export default function LandingPagePremium() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen">
       {/* Hero */}
       <div className="max-w-6xl mx-auto px-6 pt-32 pb-20">
         <div className="max-w-4xl">
@@ -55,14 +55,14 @@ export default function LandingPagePremium() {
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder="What do you want to learn?"
-                className="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-900 transition-colors"
+                className="flex-1 px-4 py-3 glass rounded-xl text-base text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900/20 transition-all shadow-sm"
                 required
                 autoFocus
               />
               <button
                 type="submit"
                 disabled={!topic.trim()}
-                className="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 active:bg-black transition-colors disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+                className="px-6 py-3 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 active:bg-black transition-all disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap shadow-lg hover:shadow-xl"
               >
                 Get started
               </button>

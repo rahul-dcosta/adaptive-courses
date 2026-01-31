@@ -52,7 +52,7 @@ export default function LoadingSpinner({ topic }: LoadingSpinnerProps) {
   const currentMessage = LOADING_MESSAGES[messageIndex];
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           {/* Animated icon */}
@@ -91,7 +91,7 @@ export default function LoadingSpinner({ topic }: LoadingSpinnerProps) {
         </div>
         
         {/* Rotating status messages */}
-        <div className="space-y-3 bg-gray-50 rounded-2xl p-6 border border-gray-200 min-h-[200px]">
+        <div className="space-y-3 glass rounded-2xl p-6 min-h-[200px] shadow-xl">
           {LOADING_MESSAGES.map((msg, idx) => (
             <div 
               key={idx} 
@@ -122,7 +122,7 @@ export default function LoadingSpinner({ topic }: LoadingSpinnerProps) {
         </div>
 
         {/* Fun fact or tip */}
-        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
+        <div className="mt-6 glass-dark rounded-xl p-4 shadow-md">
           <p className="text-gray-700 text-sm text-center">
             💡 <strong>Did you know?</strong> AI-generated courses adapt to your unique situation, 
             not just your skill level.

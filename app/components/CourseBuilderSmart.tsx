@@ -188,7 +188,7 @@ export default function CourseBuilderSmart({ initialTopic }: { initialTopic?: st
             </p>
           </div>
 
-          <div className="bg-white rounded-3xl border border-gray-200 p-6 sm:p-8 md:p-12">
+          <div className="glass rounded-3xl p-6 sm:p-8 md:p-12 shadow-xl">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 md:mb-3">
               What do you want to learn?
             </h2>
@@ -202,14 +202,14 @@ export default function CourseBuilderSmart({ initialTopic }: { initialTopic?: st
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder="e.g., Egyptian civilization"
-                className="w-full px-4 sm:px-6 py-4 sm:py-5 text-lg sm:text-xl text-gray-900 placeholder-gray-400 border-2 border-gray-200 rounded-2xl focus:border-gray-900 focus:ring-4 focus:ring-gray-100 focus:outline-none mb-4 transition-all"
+                className="w-full px-4 sm:px-6 py-4 sm:py-5 text-lg sm:text-xl text-gray-900 placeholder-gray-500 glass rounded-2xl focus:ring-2 focus:ring-gray-900/20 focus:outline-none mb-4 transition-all shadow-sm"
                 autoFocus
                 required
               />
               <button
                 type="submit"
                 disabled={!topic.trim()}
-                className="w-full bg-gray-900 text-white font-medium text-base sm:text-lg py-4 sm:py-5 px-6 sm:px-8 rounded-lg hover:bg-gray-800 active:bg-black transition-colors disabled:opacity-40 disabled:cursor-not-allowed min-h-[56px]"
+                className="w-full bg-gray-900 text-white font-medium text-base sm:text-lg py-4 sm:py-5 px-6 sm:px-8 rounded-xl hover:bg-gray-800 active:bg-black transition-all disabled:opacity-40 disabled:cursor-not-allowed min-h-[56px] shadow-lg hover:shadow-xl"
               >
                 Continue →
               </button>
@@ -233,11 +233,11 @@ export default function CourseBuilderSmart({ initialTopic }: { initialTopic?: st
       onClick={() => onSelect(option.value)}
       disabled={selectedOption !== null}
       className={`
-        group relative overflow-hidden bg-white rounded-2xl p-6 border-2 
-        transition-all duration-300 transform w-full text-left
+        group relative overflow-hidden glass rounded-2xl p-6
+        transition-all duration-300 transform w-full text-left shadow-lg
         ${isSelected 
-          ? 'border-gray-900 scale-95 shadow-2xl' 
-          : 'border-gray-200 hover:border-gray-900 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]'
+          ? 'ring-2 ring-gray-900 scale-95 shadow-2xl' 
+          : 'hover:ring-2 hover:ring-gray-900/50 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]'
         }
         ${selectedOption !== null ? 'opacity-50 cursor-not-allowed' : ''}
       `}
@@ -268,13 +268,13 @@ export default function CourseBuilderSmart({ initialTopic }: { initialTopic?: st
   );
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
         <div className="bg-white rounded-3xl border border-gray-200 p-8 md:p-12">
           <ProgressBreadcrumbs currentStep={getStepNumber()} totalSteps={4} />
           
           {initialTopic && step === 'context' && (
-            <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <div className="mb-6 p-4 glass-dark rounded-xl shadow-md">
               <p className="text-gray-900 text-lg">
                 <span className="font-semibold">Cool! You want to learn:</span> {topic}
               </p>
