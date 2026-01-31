@@ -20,6 +20,7 @@ export async function track(event: string, properties?: Record<string, any>) {
 
 // Convenience functions
 export const analytics = {
+  track, // Generic track function
   pageView: (page: string) => track('page_view', { page }),
   emailSignup: (email: string) => track('email_signup', { email }),
   courseStarted: (topic: string) => track('course_started', { topic }),
