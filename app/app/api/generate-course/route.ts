@@ -34,7 +34,7 @@ Generate a structured course with:
    - A quick quiz question to test understanding
 4. Include practical examples and actionable takeaways
 
-Format the response as JSON with this structure:
+IMPORTANT: Return ONLY valid JSON, no markdown, no extra text. Use this exact structure:
 {
   "title": "Course Title",
   "modules": [
@@ -77,15 +77,29 @@ Make the content engaging, practical, and tailored to their ${skillLevel} skill 
     // Parse the course data
     let courseData;
     try {
-      // Try to extract JSON if it's wrapped in markdown code blocks
+      // Try multiple extraction strategies
+      let jsonString = responseText;
+      
+      // 1. Try to extract from markdown code blocks
       const jsonMatch = responseText.match(/```json\n([\s\S]*?)\n```/) || 
                        responseText.match(/```\n([\s\S]*?)\n```/);
-      const jsonString = jsonMatch ? jsonMatch[1] : responseText;
+      if (jsonMatch) {
+        jsonString = jsonMatch[1];
+      }
+      
+      // 2. Try to find JSON object boundaries
+      const jsonStart = jsonString.indexOf('{');
+      const jsonEnd = jsonString.lastIndexOf('}');
+      if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+        jsonString = jsonString.substring(jsonStart, jsonEnd + 1);
+      }
+      
       courseData = JSON.parse(jsonString);
-    } catch (parseError) {
+    } catch (parseError: any) {
       console.error('Failed to parse course JSON:', parseError);
+      console.error('Raw response:', responseText.substring(0, 500));
       return NextResponse.json(
-        { error: 'Failed to generate valid course structure' },
+        { error: `Failed to parse course: ${parseError.message}` },
         { status: 500 }
       );
     }
