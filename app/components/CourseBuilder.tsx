@@ -168,9 +168,33 @@ export default function CourseBuilder() {
     );
   }
 
+  const testAPI = async () => {
+    try {
+      const response = await fetch('/api/test-api');
+      const data = await response.json();
+      
+      if (data.success) {
+        alert(`✅ API works!\n\nClaude said: "${data.response}"\n\nModel: ${data.model}`);
+      } else {
+        alert(`❌ API failed!\n\nError: ${data.error}\n\nDetails: ${data.details || 'None'}`);
+      }
+    } catch (error: any) {
+      alert(`❌ Test failed: ${error.message}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
+        {/* Test API Button */}
+        <div className="mb-4 text-center">
+          <button
+            onClick={testAPI}
+            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 text-sm"
+          >
+            🔧 Test API Key
+          </button>
+        </div>
         {/* Conversation History */}
         <div className="mb-8 space-y-4">
           {topic && (
