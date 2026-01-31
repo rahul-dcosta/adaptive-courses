@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import ReferralCard from './ReferralCard';
 
 interface Module {
   title: string;
@@ -16,9 +17,10 @@ interface CoursePreviewProps {
   };
   onUnlock?: () => void;
   isFree?: boolean;
+  showReferral?: boolean;
 }
 
-export default function CoursePreview({ course, onUnlock, isFree = true }: CoursePreviewProps) {
+export default function CoursePreview({ course, onUnlock, isFree = true, showReferral = true }: CoursePreviewProps) {
   const [expandedModule, setExpandedModule] = useState<number>(0);
 
   const testimonials = [
@@ -247,6 +249,13 @@ export default function CoursePreview({ course, onUnlock, isFree = true }: Cours
                 💯 100% money-back guarantee if not satisfied
               </p>
             </div>
+          </div>
+        )}
+
+        {/* Referral Card */}
+        {showReferral && isFree && (
+          <div className="mt-8">
+            <ReferralCard />
           </div>
         )}
 
