@@ -137,47 +137,139 @@ export default function CourseBuilderNew() {
 
   if (step === 'complete' && generatedCourse) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
-        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-xl p-8">
-          <h1 className="text-3xl font-bold mb-6">{generatedCourse.title}</h1>
-          
-          {generatedCourse.modules?.map((module: any, idx: number) => (
-            <div key={idx} className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">
-                Module {idx + 1}: {module.title}
-              </h2>
-              
-              {module.lessons?.map((lesson: any, lessonIdx: number) => (
-                <div key={lessonIdx} className="ml-4 mb-6">
-                  <h3 className="text-xl font-medium mb-2">{lesson.title}</h3>
-                  <div className="prose max-w-none text-gray-700">
-                    {lesson.content}
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 md:p-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Course Header */}
+          <div className="bg-white rounded-t-2xl shadow-xl p-6 md:p-8 border-b-4 border-indigo-600">
+            <h1 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
+              {generatedCourse.title}
+            </h1>
+            {generatedCourse.estimated_time && (
+              <p className="text-gray-600 flex items-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {generatedCourse.estimated_time}
+              </p>
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="bg-white px-6 md:px-8 py-4 flex gap-3 flex-wrap border-b">
+            <button
+              onClick={() => alert('PDF export coming soon!')}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Download PDF
+            </button>
+            <button
+              onClick={() => alert('Email delivery coming soon!')}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Email Me This
+            </button>
+          </div>
+
+          {/* Course Content */}
+          <div className="bg-white rounded-b-2xl shadow-xl p-6 md:p-8">
+            {generatedCourse.modules?.map((module: any, idx: number) => (
+              <div key={idx} className="mb-10 last:mb-0">
+                <div className="flex items-start gap-3 mb-6">
+                  <div className="flex-shrink-0 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold">
+                    {idx + 1}
                   </div>
-                  
-                  {lesson.quiz && (
-                    <div className="mt-4 p-4 bg-blue-50 rounded">
-                      <p className="font-medium mb-2">Quick Quiz:</p>
-                      <p>{lesson.quiz.question}</p>
-                    </div>
-                  )}
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      {module.title}
+                    </h2>
+                    {module.description && (
+                      <p className="text-gray-600 mt-1">{module.description}</p>
+                    )}
+                  </div>
                 </div>
-              ))}
-            </div>
-          ))}
-          
-          <button
-            onClick={() => {
-              setStep('topic');
-              setTopic('');
-              setSituation('');
-              setTimeline('');
-              setGoal('');
-              setGeneratedCourse(null);
-            }}
-            className="mt-8 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700"
-          >
-            Generate Another Course
-          </button>
+                
+                {module.lessons?.map((lesson: any, lessonIdx: number) => (
+                  <div key={lessonIdx} className="ml-0 md:ml-13 mb-8 last:mb-0 pl-6 border-l-2 border-gray-200">
+                    <h3 className="text-xl font-semibold mb-3 text-gray-900">
+                      {lesson.title}
+                    </h3>
+                    <div className="prose max-w-none text-gray-700 leading-relaxed mb-4">
+                      {lesson.content}
+                    </div>
+                    
+                    {lesson.quiz && (
+                      <div className="mt-4 p-5 bg-indigo-50 rounded-xl border-l-4 border-indigo-600">
+                        <p className="font-semibold text-indigo-900 mb-2 flex items-center gap-2">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Quick Check:
+                        </p>
+                        <p className="text-gray-800">{lesson.quiz.question}</p>
+                        {lesson.quiz.answer && (
+                          <details className="mt-2">
+                            <summary className="cursor-pointer text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                              Show answer
+                            </summary>
+                            <p className="mt-2 text-gray-700 text-sm">{lesson.quiz.answer}</p>
+                          </details>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ))}
+
+            {/* Next Steps */}
+            {generatedCourse.next_steps && generatedCourse.next_steps.length > 0 && (
+              <div className="mt-10 p-6 bg-green-50 rounded-xl border-l-4 border-green-600">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                  What's Next?
+                </h3>
+                <ul className="space-y-2">
+                  {generatedCourse.next_steps.map((step: string, idx: number) => (
+                    <li key={idx} className="flex items-start gap-3 text-gray-700">
+                      <span className="text-green-600 font-bold mt-1">→</span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* Bottom Actions */}
+          <div className="mt-6 flex gap-4 flex-wrap">
+            <button
+              onClick={() => {
+                setStep('topic');
+                setTopic('');
+                setSituation('');
+                setTimeline('');
+                setGoal('');
+                setGeneratedCourse(null);
+              }}
+              className="flex-1 min-w-[200px] bg-indigo-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-indigo-700 transition"
+            >
+              Generate Another Course
+            </button>
+            <button
+              onClick={() => window.location.href = '/'}
+              className="px-6 py-3 bg-white text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition border-2 border-gray-200"
+            >
+              Back to Home
+            </button>
+          </div>
         </div>
       </div>
     );
