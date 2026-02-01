@@ -1,6 +1,9 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
 
+// Maintenance mode - blocks API usage on production
+const MAINTENANCE_MODE = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true';
+
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
@@ -42,6 +45,14 @@ function setCachedQuestion(topic: string, step: string, data: any): void {
 }
 
 export async function POST(request: Request) {
+  // Block requests in maintenance mode
+  if (MAINTENANCE_MODE) {
+    return NextResponse.json(
+      { error: 'Service temporarily unavailable. Launching soon!' },
+      { status: 503 }
+    );
+  }
+
   try {
     const { topic, step, previousAnswers } = await request.json();
 
