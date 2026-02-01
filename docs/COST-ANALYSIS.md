@@ -37,13 +37,13 @@ Assuming a typical course generation uses:
 
 Assuming ~500 input + 800 output tokens per prompt exchange:
 
-| Model | Cost per 10 prompts | 50 prompts/day (Unlimited) | 200 prompts/day (Pro) |
-|-------|---------------------|----------------------------|------------------------|
-| **Haiku 3** | $0.01 | $0.05 | $0.20 |
-| **Haiku 4.5** | $0.05 | $0.25 | $1.00 |
-| **Sonnet 4.5** | $0.14 | $0.70 | $2.80 |
-| **Opus 4.5** | $0.23 | $1.15 | $4.60 |
-| **GPT-4o Mini** | $0.006 | $0.03 | $0.12 |
+| Model | Cost per 10 prompts | 50 prompts/day (Pro) |
+|-------|---------------------|----------------------|
+| **Haiku 3** | $0.01 | $0.05 |
+| **Haiku 4.5** | $0.05 | $0.25 |
+| **Sonnet 4.5** | $0.14 | $0.70 |
+| **Opus 4.5** | $0.23 | $1.15 |
+| **GPT-4o Mini** | $0.006 | $0.03 |
 
 ---
 
@@ -62,15 +62,15 @@ Assuming ~500 input + 800 output tokens per prompt exchange:
 ┌─────────────────────────────────────────────────────────┐
 │  AI CHAT                                                │
 │  ═══════                                                │
-│  Free/Per-course users → Haiku 4.5 (5-10 prompts/day)  │
-│  Unlimited users        → Haiku 4.5 (50 prompts/day)   │
-│  Pro users              → Sonnet 4.5 (200 prompts/day) │
+│  Free users        → 5 prompts lifetime (Haiku 4.5)    │
+│  Per-course users  → 10 prompts/day/course (Haiku 4.5) │
+│  Pro users         → 50 prompts/day global (Haiku 4.5) │
 │                                                         │
 │  Alternative: GPT-4o Mini for chat (93% cheaper)       │
 └─────────────────────────────────────────────────────────┘
 ```
 
-**Key insight**: Using Sonnet for unlimited chat is unprofitable at 50 prompts/day ($21/mo cost vs $7.99 revenue). Use Haiku or GPT-4o Mini instead.
+**Key insight**: Using Sonnet for Pro chat is unprofitable at 50 prompts/day ($21/mo cost vs $9.99 revenue). Use Haiku or GPT-4o Mini instead.
 
 ---
 
@@ -86,24 +86,14 @@ Stripe fees:                $0.42
 Gross profit:               $3.20 (80.2% margin)
 ```
 
-### Unlimited Subscriber ($7.99/mo)
+### Pro Subscriber ($9.99/mo)
 ```
-Revenue:                    $7.99
+Revenue:                    $9.99
 3 courses (Haiku+Sonnet):   $1.02
 AI chat (Haiku, 50/day):    $0.70/mo
-Stripe fees:                $0.53
+Stripe fees:                $0.59
 ────────────────────────────────
-Gross profit:               $5.74 (71.8% margin)
-```
-
-### Pro Subscriber ($14.99/mo)
-```
-Revenue:                    $14.99
-5 courses (Haiku+Sonnet):   $1.70
-AI chat (Haiku, 200/day):   $2.80/mo
-Stripe fees:                $0.73
-────────────────────────────────
-Gross profit:               $9.76 (65.1% margin)
+Gross profit:               $7.68 (76.9% margin)
 ```
 
 ---
@@ -114,8 +104,7 @@ Using **GPT-4o Mini for AI chat** instead of Claude Haiku:
 
 | Tier | Claude Haiku Chat | GPT-4o Mini Chat | Savings |
 |------|-------------------|------------------|---------|
-| Unlimited (50/day) | $0.70/mo | $0.09/mo | 87% |
-| Pro (200/day) | $2.80/mo | $0.36/mo | 87% |
+| Pro (50/day) | $0.70/mo | $0.09/mo | 87% |
 
 **Hybrid strategy recommendation:**
 - **Claude Sonnet 4.5** for course generation (quality matters)
@@ -148,9 +137,8 @@ Using **GPT-4o Mini for AI chat** instead of Claude Haiku:
 |----------|----------|-------------------|--------|------------|---------|--------|
 | Free user | $0.34 | $0.02 | $0 | $0.36 | $0 | -$0.36 |
 | Per-course | $0.37 | $0.02 | $0.42 | $0.81 | $3.99 | **79.7%** |
-| Unlimited/mo | $1.72 | $0.05 | $0.53 | $2.30 | $7.99 | **71.2%** |
-| Pro/mo | $4.50 | $0.05 | $0.73 | $5.28 | $14.99 | **64.8%** |
-| Unlimited/yr | $20.64 | $0.60 | $2.59 | $23.83 | $79 | **69.8%** |
+| Pro/mo | $1.72 | $0.05 | $0.59 | $2.36 | $9.99 | **76.4%** |
+| Pro/yr | $20.64 | $0.60 | $3.17 | $24.41 | $99 | **75.3%** |
 
 ---
 
@@ -165,8 +153,8 @@ Using **GPT-4o Mini for AI chat** instead of Claude Haiku:
 
 **Break-even points:**
 - Per-course only: 15 courses/month ($3.20 margin each)
-- Unlimited subs only: 9 subscribers/month ($5.69 margin each)
-- Mixed (realistic): 5 courses + 4 subs = break-even
+- Pro subs only: 6 subscribers/month ($7.63 margin each)
+- Mixed (realistic): 5 courses + 3 subs = break-even
 
 ---
 
@@ -174,10 +162,10 @@ Using **GPT-4o Mini for AI chat** instead of Claude Haiku:
 
 | Platform | Model | Price | Our Advantage |
 |----------|-------|-------|---------------|
-| Skillshare | Subscription | $29-32/mo | We're **75% cheaper** at $7.99/mo |
-| MasterClass | Annual only | $120-240/yr | We offer monthly flexibility |
+| Skillshare | Subscription | $29-32/mo | We're **69% cheaper** at $9.99/mo |
+| MasterClass | Annual only | $120-240/yr | We offer monthly flexibility at $99/yr |
 | Udemy | Per-course | $20-200 each | We're **5-50x cheaper** at $3.99 |
-| Coursera | Subscription | $59/mo | We're **87% cheaper** |
+| Coursera | Subscription | $59/mo | We're **83% cheaper** |
 
 ---
 
@@ -187,8 +175,8 @@ Using **GPT-4o Mini for AI chat** instead of Claude Haiku:
 2. **Use Sonnet 4.5** for full course generation (quality matters)
 3. **Use Haiku 4.5 or GPT-4o Mini** for AI chat (NOT Sonnet—kills margins)
 4. **Stay on free tiers** until 500+ users
-5. **70%+ margins** achievable at all tiers with smart model selection
-6. **Break-even** at ~15 courses or ~9 subscribers per month
+5. **75%+ margins** achievable at all tiers with smart model selection
+6. **Break-even** at ~15 courses or ~6 Pro subscribers per month
 
 ---
 

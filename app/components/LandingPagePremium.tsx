@@ -1,34 +1,42 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import CourseBuilderSmart from './CourseBuilderSmart';
 import ExampleCourses from './ExampleCourses';
 import { analytics } from '@/lib/analytics';
 
 export default function LandingPagePremium() {
-  const [showBuilder, setShowBuilder] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [topic, setTopic] = useState('');
 
+  // Check if we're in builder mode from URL
+  const showBuilder = searchParams.get('mode') === 'build';
+  const initialTopic = searchParams.get('topic') || '';
+
   useEffect(() => {
-    analytics.pageView('landing');
-  }, []);
+    if (!showBuilder) {
+      analytics.pageView('landing');
+    }
+  }, [showBuilder]);
 
   const handleTopicSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (topic.trim()) {
       analytics.track('topic_entered_landing', { topic });
-      setShowBuilder(true);
+      // Navigate with search params to signal builder mode
+      router.push(`/?mode=build&topic=${encodeURIComponent(topic.trim())}`);
     }
   };
 
   const handleSelectExample = (exampleTopic: string) => {
     analytics.track('example_course_selected', { topic: exampleTopic });
-    setTopic(exampleTopic);
-    setShowBuilder(true);
+    router.push(`/?mode=build&topic=${encodeURIComponent(exampleTopic)}`);
   };
 
   if (showBuilder) {
-    return <CourseBuilderSmart initialTopic={topic} />;
+    return <CourseBuilderSmart initialTopic={initialTopic || topic} />;
   }
 
   return (

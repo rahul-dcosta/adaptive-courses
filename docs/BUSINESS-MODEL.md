@@ -10,7 +10,7 @@ Simple, honest pricing. Three tiers. No tricks.
 |------|-------|-------------|
 | **Free** | $0 | Try before you buy |
 | **Per-Course** | $3.99 | Casual learners |
-| **Unlimited** | $7.99/mo | Regular learners |
+| **Pro** | $9.99/mo | Regular learners |
 
 ---
 
@@ -35,8 +35,8 @@ Simple, honest pricing. Three tiers. No tricks.
   - Email delivery included
 - **Purpose**: Low commitment, fair exchange of value
 
-### Unlimited ($7.99/mo)
-- **Cost**: $7.99/month (or $79/year = 2 months free)
+### Pro ($9.99/mo)
+- **Cost**: $9.99/month (or $99/year = 2 months free)
 - **What you get**:
   - Unlimited course generation
   - 50 AI prompts/day (global, across all courses)
@@ -50,7 +50,7 @@ Simple, honest pricing. Three tiers. No tricks.
 
 ## Feature Matrix
 
-| Feature                    | Free | Per-Course | Unlimited |
+| Feature                    | Free | Per-Course | Pro |
 |----------------------------|------|------------|-----------|
 | Course generation          | 1    | Per purchase | Unlimited |
 | Course ownership           | Forever | Forever | Forever |
@@ -88,23 +88,23 @@ Stripe fees:                $0.42
 Gross margin:               $3.23 (81%)
 ```
 
-**Unlimited Subscriber ($7.99/mo)**
+**Pro Subscriber ($9.99/mo)**
 ```
-Revenue per month:          $7.99
+Revenue per month:          $9.99
 3 courses × $0.34:          $1.02
 AI chat (Haiku, 50/day):    $0.70
-Stripe fees:                $0.53
+Stripe fees:                $0.59
 ─────────────────────────────────
-Gross margin:               $5.74 (72%)
+Gross margin:               $7.68 (77%)
 ```
 
-**Annual Unlimited ($79/year)**
+**Annual Pro ($99/year)**
 ```
-Revenue:                    $79.00
+Revenue:                    $99.00
 12 months API costs:        ~$20.64
-Stripe:                     $2.59
+Stripe:                     $3.17
 ─────────────────────────────────
-Gross margin:               $55.77 (71%)
+Gross margin:               $75.19 (76%)
 Plus: 0% churn for 12 months
 ```
 
@@ -114,19 +114,19 @@ Plus: 0% churn for 12 months
 Month 1:
   - Free users: 1,500
   - Per-course purchases: 120 × $3.99 = $478.80
-  - New Unlimited subs: 45 × $7.99 = $359.55
-  - Total MRR: $838.35
+  - New Pro subs: 45 × $9.99 = $449.55
+  - Total MRR: $928.35
 
 Month 6:
   - Per-course: 720 purchases = $2,872.80
-  - Unlimited subs: 270 - churn(27) = 243 active = $1,941.57
-  - Total MRR: $4,814.37
+  - Pro subs: 270 - churn(27) = 243 active = $2,427.57
+  - Total MRR: $5,300.37
 
 Month 12:
   - Per-course: 1,440 purchases = $5,745.60
-  - Unlimited subs: 540 - churn(81) = 459 active = $3,667.41
-  - Annual conversions (~20%): 92 × $79 = $7,268
-  - Total MRR: $9,413.01 + annuals amortized
+  - Pro subs: 540 - churn(81) = 459 active = $4,585.41
+  - Annual conversions (~20%): 92 × $99 = $9,108
+  - Total MRR: $10,331.01 + annuals amortized
 ```
 
 ### The Upgrade Funnel
@@ -135,11 +135,11 @@ Month 12:
 
 At 3 courses/month:
 - Per-course cost: $11.97
-- Subscription cost: $7.99
-- Savings: $3.98/month
+- Pro subscription: $9.99
+- Savings: $1.98/month
 
 **Trigger point**: After 2nd course purchase, show upgrade prompt:
-> "You've spent $7.98 on courses this month. For $7.99, get unlimited courses + AI chat. [Upgrade]"
+> "You've spent $7.98 on courses this month. For $9.99/mo, get Pro with unlimited courses + 50 AI prompts/day. [Upgrade]"
 
 ---
 
@@ -163,8 +163,8 @@ At 3 courses/month:
 
 ### Break-Even
 - Per-course only: **15 courses/month**
-- Unlimited subs only: **9 subscribers/month**
-- Mixed: 5 courses + 4 subs = break-even
+- Pro subs only: **6 subscribers/month**
+- Mixed: 5 courses + 3 subs = break-even
 
 ---
 
@@ -186,8 +186,8 @@ At 3 courses/month:
 | Customer Type | LTV | Calculation |
 |---------------|-----|-------------|
 | Per-Course | $8.08 | 2.5 courses avg × $3.23 margin |
-| Monthly Sub | $114.80 | 20 months avg × $5.74 margin |
-| Annual Sub | $111.54 | $55.77 + 60% renewal × $55.77 |
+| Pro Monthly | $153.60 | 20 months avg × $7.68 margin |
+| Pro Annual | $120.30 | $75.19 + 60% renewal × $75.19 |
 
 ---
 
@@ -198,7 +198,7 @@ At 3 courses/month:
 interface User {
   id: string;
   email: string;
-  plan: 'free' | 'per_course' | 'unlimited';
+  plan: 'free' | 'per_course' | 'pro';
   stripeCustomerId?: string;
   subscriptionId?: string;
   subscriptionStatus?: 'active' | 'canceled' | 'past_due';
@@ -247,10 +247,10 @@ interface Subscription {
 - [ ] Course ownership tracking
 - [ ] Library page (your courses)
 
-### Phase 2: Subscription Tier
+### Phase 2: Pro Subscription Tier
 - [ ] Stripe subscription products
 - [ ] Subscription status middleware
-- [ ] Unlimited course generation for subs
+- [ ] Unlimited course generation for Pro subs
 - [ ] Cancel/reactivate flow
 
 ### Phase 3: AI Chat + Limits

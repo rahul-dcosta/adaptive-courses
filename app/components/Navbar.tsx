@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import AuthModal from './AuthModal';
 
 // Marketing pages where navbar should appear
@@ -11,12 +11,16 @@ export default function Navbar() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Check if we're in builder mode (even on homepage)
+  const isInBuilderMode = searchParams.get('mode') === 'build';
 
   // Only show navbar on marketing pages, not in-app (course builder, viewer, etc)
-  const isMarketingPage = MARKETING_PAGES.includes(pathname);
-  const isHomepage = pathname === '/';
+  const isMarketingPage = MARKETING_PAGES.includes(pathname) && !isInBuilderMode;
+  const isHomepage = pathname === '/' && !isInBuilderMode;
 
-  // Don't render navbar at all on in-app pages
+  // Don't render navbar at all on in-app pages or builder mode
   if (!isMarketingPage) {
     return null;
   }
