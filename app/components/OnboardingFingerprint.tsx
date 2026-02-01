@@ -94,14 +94,18 @@ const ONBOARDING_QUESTIONS: Record<Exclude<OnboardingStep, 'topic' | 'review'>, 
 };
 
 export default function OnboardingFingerprint({ 
-  onComplete 
+  onComplete,
+  initialTopic
 }: { 
-  onComplete: (fingerprint: LearnerFingerprint) => void 
+  onComplete: (fingerprint: LearnerFingerprint) => void;
+  initialTopic?: string;
 }) {
-  const [step, setStep] = useState<OnboardingStep>('topic');
-  const [fingerprint, setFingerprint] = useState<Partial<LearnerFingerprint>>({});
+  const [step, setStep] = useState<OnboardingStep>(initialTopic ? 'learningStyle' : 'topic');
+  const [fingerprint, setFingerprint] = useState<Partial<LearnerFingerprint>>(
+    initialTopic ? { topic: initialTopic } : {}
+  );
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [topic, setTopic] = useState('');
+  const [topic, setTopic] = useState(initialTopic || '');
 
   const steps: OnboardingStep[] = [
     'topic',
@@ -148,17 +152,17 @@ export default function OnboardingFingerprint({
     }
   };
 
-  // Topic Input
+  // Topic Input (only shown if no initialTopic provided)
   if (step === 'topic') {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
         <div className="max-w-2xl w-full">
           <div className="text-center mb-12">
             <h1 className="text-6xl md:text-7xl font-black mb-6 leading-tight tracking-tight" style={{ color: 'var(--royal-blue)' }}>
-              Learn Anything<br/>in 30 Minutes
+              What do you<br/>want to learn?
             </h1>
             <p className="text-xl md:text-2xl text-gray-700">
-              AI-powered courses tailored to YOUR brain
+              We'll build a course tailored to YOUR brain
             </p>
           </div>
 
@@ -257,6 +261,14 @@ export default function OnboardingFingerprint({
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
       <div className="max-w-2xl w-full">
+        {/* Show topic at top if they already entered it */}
+        {initialTopic && currentStepIndex === 1 && (
+          <div className="mb-6 text-center">
+            <p className="text-gray-600 text-sm mb-2">Building your course on</p>
+            <h2 className="text-3xl font-bold" style={{ color: 'var(--royal-blue)' }}>{initialTopic}</h2>
+          </div>
+        )}
+
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-2">

@@ -93,5 +93,5 @@ export default function CourseBuilderSmart({ initialTopic }: { initialTopic?: st
   }
 
   // Onboarding (fingerprint collection)
-  return <OnboardingFingerprint onComplete={handleFingerprintComplete} />;
+  return <OnboardingFingerprint onComplete={handleFingerprintComplete} initialTopic={initialTopic} />;
 }
