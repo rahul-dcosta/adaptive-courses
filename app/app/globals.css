@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* Brand Colors - Royce Royal Blue */
+:root {
+  --royal-blue: #003F87;
+  --royal-blue-light: #0056B3;
+  --royal-blue-dark: #002D5F;
+}
+
 /* Glassmorphism base styles */
 body {
   background: linear-gradient(135deg, #f5f7fa 0%, #e3e7ed 100%);
