@@ -209,7 +209,10 @@ export default function CourseBuilderSmart({ initialTopic }: { initialTopic?: st
               <button
                 type="submit"
                 disabled={!topic.trim()}
-                className="w-full bg-gray-900 text-white font-medium text-base sm:text-lg py-4 sm:py-5 px-6 sm:px-8 rounded-xl hover:bg-gray-800 active:bg-black transition-all disabled:opacity-40 disabled:cursor-not-allowed min-h-[56px] shadow-lg hover:shadow-xl"
+                className="w-full text-white font-medium text-base sm:text-lg py-4 sm:py-5 px-6 sm:px-8 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed min-h-[56px] shadow-lg hover:shadow-xl"
+                style={{ background: 'var(--royal-blue)' }}
+                onMouseEnter={(e) => !topic.trim() || (e.currentTarget.style.background = 'var(--royal-blue-light)')}
+                onMouseLeave={(e) => !topic.trim() || (e.currentTarget.style.background = 'var(--royal-blue)')}
               >
                 Continue →
               </button>

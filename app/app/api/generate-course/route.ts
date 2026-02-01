@@ -54,17 +54,19 @@ ${contextualGuidance}
 STRUCTURE:
 ${depthGuidance}
 
-Generate a structured course with:
+Generate a SIMPLE structured course with:
 1. A specific, actionable course title (not generic)
-2. 3-4 modules, each with 2-3 lessons
+2. EXACTLY 2 modules, each with EXACTLY 2 lessons
 3. Each lesson:
    - Clear, specific title
-   - 150-200 words of actionable content (concise!)
-   - Keep content simple and avoid complex quotes/punctuation
-   - A quiz question that tests understanding (include answer)
-4. Module descriptions (1 sentence explaining what the module covers)
+   - 100-150 words of actionable content (SHORT!)
+   - Use ONLY simple punctuation (periods, commas). NO quotes, apostrophes, or special characters in content
+   - A simple quiz question (include short answer)
+4. Module descriptions (ONE sentence, simple words)
 5. Estimated time for the entire course
-6. 3 concrete "next steps" they can take after finishing
+6. EXACTLY 3 concrete "next steps"
+
+KEEP IT SHORT AND SIMPLE TO ENSURE VALID JSON.
 
 CRITICAL JSON FORMATTING RULES:
 1. Return ONLY a single valid JSON object, nothing before or after
@@ -106,8 +108,8 @@ Make it engaging, practical, and worth $5.`;
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 6000, // Balanced - enough for quality course, not so long it breaks JSON
-      temperature: 0.5, // Lower temp = more predictable, less likely to break JSON
+      max_tokens: 4000, // Shorter = less chance of JSON errors
+      temperature: 0.3, // Very low temp for maximum predictability
       system: systemPrompt,
       messages: [
         {
@@ -122,42 +124,42 @@ Make it engaging, practical, and worth $5.`;
       ? message.content[0].text 
       : '';
 
-    // Parse the course data
+    // Parse the course data with aggressive error handling
     let courseData;
     try {
       let jsonString = responseText.trim();
       
-      // 1. Remove markdown code blocks
+      // 1. Remove ALL markdown/code blocks
       jsonString = jsonString
-        .replace(/^```json\s*/i, '')
-        .replace(/^```\s*/, '')
-        .replace(/\s*```$/,'');
+        .replace(/^```json\s*/gi, '')
+        .replace(/^```\s*/g, '')
+        .replace(/\s*```$/g, '')
+        .replace(/^`+/g, '')
+        .replace(/`+$/g, '');
       
-      // 2. Find JSON object boundaries more carefully
+      // 2. Extract JSON object more aggressively
       const jsonStart = jsonString.indexOf('{');
       const jsonEnd = jsonString.lastIndexOf('}');
-      if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
-        jsonString = jsonString.substring(jsonStart, jsonEnd + 1);
+      if (jsonStart === -1 || jsonEnd === -1 || jsonEnd <= jsonStart) {
+        throw new Error('No valid JSON object found in response');
       }
+      jsonString = jsonString.substring(jsonStart, jsonEnd + 1);
       
-      // 3. Remove trailing commas (common JSON error)
-      jsonString = jsonString.replace(/,(\s*[}\]])/g, '$1');
+      // 3. Fix common JSON errors (safe fixes only)
+      jsonString = jsonString
+        .replace(/,(\s*[}\]])/g, '$1'); // Remove trailing commas
       
+      // 4. Try to parse
       courseData = JSON.parse(jsonString);
       
-      // Validate course structure
-      if (!courseData.title || !courseData.modules || courseData.modules.length === 0) {
+      // Validate basic course structure
+      if (!courseData.title || !courseData.modules || !Array.isArray(courseData.modules) || courseData.modules.length === 0) {
         throw new Error('Invalid course structure: missing required fields');
-      }
-      
-      // Ensure at least 2 modules
-      if (courseData.modules.length < 2) {
-        throw new Error('Course must have at least 2 modules');
       }
       
       // Validate each module has lessons
       for (const module of courseData.modules) {
-        if (!module.lessons || module.lessons.length === 0) {
+        if (!module.lessons || !Array.isArray(module.lessons) || module.lessons.length === 0) {
           throw new Error(`Module "${module.title}" has no lessons`);
         }
       }

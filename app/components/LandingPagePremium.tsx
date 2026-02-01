@@ -62,7 +62,10 @@ export default function LandingPagePremium() {
               <button
                 type="submit"
                 disabled={!topic.trim()}
-                className="px-6 py-3 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 active:bg-black transition-all disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap shadow-lg hover:shadow-xl"
+                className="px-6 py-3 text-white rounded-xl font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap shadow-lg hover:shadow-xl"
+                style={{ background: 'var(--royal-blue)' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--royal-blue-light)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'var(--royal-blue)'}
               >
                 Get started
               </button>
