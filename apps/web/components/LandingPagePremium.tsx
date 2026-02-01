@@ -84,10 +84,10 @@ export default function LandingPagePremium() {
       {/* Hero */}
       <div className="max-w-6xl mx-auto px-6 pt-32 pb-20">
         <div className="max-w-4xl">
-          {/* Subtle badge */}
+          {/* Subtle badge with pulse animation */}
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full mb-8">
-            <div className="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
-            <span className="text-sm text-gray-700 font-medium">Early access</span>
+            <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-sm text-gray-700 font-medium">Now in beta</span>
           </div>
 
           {/* Hero headline */}
