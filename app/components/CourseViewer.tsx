@@ -48,7 +48,7 @@ function parseContent(content: string) {
         parts.push({ type: 'text', content: textContent });
       }
     }
-    
+
     // Add mermaid block
     parts.push({ type: 'mermaid', content: match[1].trim() });
     lastIndex = match.index + match[0].length;
@@ -68,6 +68,85 @@ function parseContent(content: string) {
   }
 
   return parts;
+}
+
+// Format text content with proper typography and structure
+function formatTextContent(text: string): string {
+  // Split into paragraphs (double newline or single newline followed by empty-ish content)
+  const paragraphs = text.split(/\n\n+/).filter(p => p.trim());
+
+  return paragraphs.map(para => {
+    let formatted = para.trim();
+
+    // Handle headers (### Header -> h4, ## Header -> h3)
+    if (formatted.startsWith('### ')) {
+      const headerText = formatted.slice(4);
+      return `<h4 class="text-lg font-bold text-gray-900 mt-8 mb-3 font-serif">${escapeHtml(headerText)}</h4>`;
+    }
+    if (formatted.startsWith('## ')) {
+      const headerText = formatted.slice(3);
+      return `<h3 class="text-xl font-bold text-gray-900 mt-10 mb-4 font-serif">${escapeHtml(headerText)}</h3>`;
+    }
+
+    // Handle bullet lists (lines starting with - or *)
+    const lines = formatted.split('\n');
+    const isList = lines.every(line => /^[\-\*]\s/.test(line.trim()) || line.trim() === '');
+    if (isList && lines.some(line => /^[\-\*]\s/.test(line.trim()))) {
+      const listItems = lines
+        .filter(line => /^[\-\*]\s/.test(line.trim()))
+        .map(line => `<li class="mb-2">${formatInlineText(line.replace(/^[\-\*]\s/, '').trim())}</li>`)
+        .join('');
+      return `<ul class="list-disc pl-6 my-4 space-y-1 text-gray-700">${listItems}</ul>`;
+    }
+
+    // Handle numbered lists (lines starting with 1. 2. etc)
+    const isNumberedList = lines.every(line => /^\d+\.\s/.test(line.trim()) || line.trim() === '');
+    if (isNumberedList && lines.some(line => /^\d+\.\s/.test(line.trim()))) {
+      const listItems = lines
+        .filter(line => /^\d+\.\s/.test(line.trim()))
+        .map(line => `<li class="mb-2">${formatInlineText(line.replace(/^\d+\.\s/, '').trim())}</li>`)
+        .join('');
+      return `<ol class="list-decimal pl-6 my-4 space-y-1 text-gray-700">${listItems}</ol>`;
+    }
+
+    // Handle definition-style content (Term: Definition)
+    if (/^[A-Z][^:]+:/.test(formatted) && formatted.includes(':')) {
+      const colonIndex = formatted.indexOf(':');
+      const term = formatted.slice(0, colonIndex);
+      const definition = formatted.slice(colonIndex + 1).trim();
+      // Handle multi-line definitions
+      const formattedDef = definition.split('\n').map(line => formatInlineText(line.trim())).join('<br/>');
+      return `<p class="my-4"><strong class="font-semibold text-gray-900">${escapeHtml(term)}:</strong> <span class="text-gray-700">${formattedDef}</span></p>`;
+    }
+
+    // Regular paragraph - handle inline newlines as soft breaks
+    const formattedPara = formatted.split('\n').map(line => formatInlineText(line.trim())).join('<br/>');
+    return `<p class="my-4 text-gray-700 leading-relaxed">${formattedPara}</p>`;
+  }).join('');
+}
+
+// Format inline text (bold, italic, code)
+function formatInlineText(text: string): string {
+  let result = escapeHtml(text);
+  // Bold: **text** or __text__
+  result = result.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>');
+  result = result.replace(/__([^_]+)__/g, '<strong class="font-semibold text-gray-900">$1</strong>');
+  // Italic: *text* or _text_
+  result = result.replace(/\*([^*]+)\*/g, '<em class="italic">$1</em>');
+  result = result.replace(/_([^_]+)_/g, '<em class="italic">$1</em>');
+  // Inline code: `code`
+  result = result.replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded text-sm font-mono" style="background-color: rgba(0, 63, 135, 0.08); color: var(--royal-blue-dark);">$1</code>');
+  return result;
+}
+
+// Escape HTML to prevent XSS
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 export default function CourseViewer({ course, onExit }: CourseViewerProps) {
@@ -400,12 +479,11 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
 
             {/* Lesson Content */}
             {lesson && (
-              <div 
-                className="prose prose-lg prose-gray max-w-none mb-16"
+              <div
+                className="lesson-prose max-w-none mb-16"
                 style={{
                   fontSize: '1.125rem',
-                  lineHeight: '1.875rem',
-                  color: '#374151'
+                  lineHeight: '1.875',
                 }}
               >
                 {parseContent(lesson.content).map((part, idx) => {
@@ -413,12 +491,10 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
                     return <MermaidDiagram key={idx} chart={part.content} />;
                   }
                   return (
-                    <div 
+                    <div
                       key={idx}
-                      dangerouslySetInnerHTML={{ __html: part.content.replace(/\n/g, '<br />') }}
-                      style={{
-                        whiteSpace: 'pre-wrap'
-                      }}
+                      className="lesson-content"
+                      dangerouslySetInnerHTML={{ __html: formatTextContent(part.content) }}
                     />
                   );
                 })}

@@ -115,7 +115,21 @@ This feedback loop ensures quality..."
     };
     const timeGuidance = timeMap[finalTimeAvailable] || '4 modules with 2-3 lessons each. 200-300 words per lesson.';
 
-    const systemPrompt = `You are a course creation AI. You MUST respond with valid JSON only. No markdown, no explanations, just pure JSON.`;
+    const systemPrompt = `You are a course creation AI that outputs valid JSON with embedded mermaid diagrams.
+
+ABSOLUTE REQUIREMENTS:
+1. Output raw JSON only (no markdown wrapper)
+2. You MUST include \`\`\`mermaid code blocks in lesson content strings
+3. Use \\n for all newlines in JSON strings
+4. NEVER use ASCII art like [A]-->[B] or arrows like →. ONLY use \`\`\`mermaid blocks.
+
+Example of CORRECT content field:
+"content": "Scaling explained:\\n\\n\`\`\`mermaid\\ngraph LR\\n    A[Server] --> B[Load Balancer]\\n    B --> C[Server 1]\\n    B --> D[Server 2]\\n\`\`\`\\n\\nThis shows horizontal scaling."
+
+WRONG (never do this):
+"content": "Scaling: [Server] → [Load Balancer] → [Servers]"
+
+Always use the mermaid format, never ASCII diagrams.`;
 
     // Generate course using Claude with FINGERPRINT
     const prompt = `Create a PERSONALIZED learning course for someone learning about "${topic}".
@@ -144,53 +158,24 @@ ${timeGuidance}
 🎚️ DIFFICULTY PROGRESSION:
 ${challengeGuidance}
 
-📊 VISUAL DIAGRAMS (MANDATORY FOR MOST TOPICS):
-You MUST include at least ONE Mermaid diagram in the course content when the topic involves:
-- Processes, workflows, or sequences
-- Hierarchies or organizational structures  
-- Relationships between concepts or entities
-- Decision trees or conditional logic
-- Timelines or project phases
-- Comparisons or trade-offs
-- Data models or system architecture
+📊 MERMAID DIAGRAMS - CRITICAL REQUIREMENT:
 
-DIAGRAM SYNTAX (copy this format exactly):
+FORBIDDEN - Never output these patterns:
+❌ [Box] --> [Box] or [A]-->[B]
+❌ Unicode arrows like → or ➔
+❌ ASCII art diagrams
+❌ Plain text representations of flows
 
-Process/Flow example:
-\`\`\`mermaid
-graph TD
-    A[Start Point] --> B{Decision?}
-    B -->|Option 1| C[Outcome A]
-    B -->|Option 2| D[Outcome B]
-    C --> E[End]
-    D --> E
-\`\`\`
+REQUIRED - Always use this exact format:
+✅ \`\`\`mermaid\\ngraph TD\\n    A[Label] --> B[Label]\\n\`\`\`
 
-Sequence example:
-\`\`\`mermaid
-sequenceDiagram
-    Actor->>System: Request
-    System->>Database: Query
-    Database-->>System: Results
-    System-->>Actor: Response
-\`\`\`
+CORRECT EXAMPLE (copy this pattern exactly):
+"content": "Here is how scaling works:\\n\\n\`\`\`mermaid\\ngraph LR\\n    C[Client] --> LB[Load Balancer]\\n    LB --> S1[Server 1]\\n    LB --> S2[Server 2]\\n    S1 --> DB[(Database)]\\n    S2 --> DB\\n\`\`\`\\n\\nThe load balancer distributes traffic across servers."
 
-CRITICAL: Place the diagram WITHIN the lesson content field, embedded in the text naturally.
+WRONG EXAMPLE (never do this):
+"content": "Here is how scaling works: [Client] → [Load Balancer] → [Server 1, Server 2] → [Database]"
 
-Example lesson content with diagram:
-"Game theory studies strategic interactions. Here's how a simple negotiation flows:
-
-\`\`\`mermaid
-graph LR
-    A[Your Offer] --> B{Counterparty}
-    B -->|Accept| C[Deal Done]
-    B -->|Reject| D[Negotiate]
-    D --> A
-\`\`\`
-
-This cycle continues until both parties find a Nash equilibrium..."
-
-Include diagrams naturally in the lesson text, NOT as separate fields.
+Include at least ONE mermaid diagram in the course. Use graph LR, graph TD, or sequenceDiagram.
 
 💡 TEACH LIKE AN EXPERT (CRITICAL):
 Don't just define concepts. Teach the THINKING:
@@ -217,60 +202,54 @@ Generate a SIMPLE structured course with:
 2. EXACTLY 2 modules, each with EXACTLY 2 lessons
 3. Each lesson:
    - Clear, specific title
-   - 100-150 words of actionable content (SHORT!)
-   - **INCLUDE MERMAID DIAGRAMS in the content when relevant** (see examples above)
-   - Use ONLY simple punctuation (periods, commas). NO quotes, apostrophes, or special characters in content (except backticks for mermaid blocks)
-   - A simple quiz question (include short answer)
+   - 100-200 words of content WITH embedded \`\`\`mermaid code blocks (NOT ASCII art)
+   - A simple quiz question with short answer
 4. Module descriptions (ONE sentence, simple words)
 5. Estimated time for the entire course
 6. EXACTLY 3 concrete "next steps"
 
-⚠️ MERMAID REMINDER: If the topic involves processes, relationships, hierarchies, or flows, you MUST include at least one \`\`\`mermaid diagram in the lesson content. Embed it naturally within the text.
+⚠️ CRITICAL: You MUST include \`\`\`mermaid code blocks (not ASCII art). If you write [A]-->[B] instead of a mermaid block, you have FAILED. Use the exact mermaid format shown above.
 
 KEEP IT SHORT AND SIMPLE TO ENSURE VALID JSON.
 
 CRITICAL JSON FORMATTING RULES:
 1. Return ONLY a single valid JSON object, nothing before or after
-2. NO markdown code blocks or backticks
+2. Do NOT wrap the JSON in markdown code blocks (no \`\`\`json wrapper)
 3. NO trailing commas after last array/object item
 4. Use double quotes for all string keys and values
 5. Escape quotes inside strings: use \" not "
-6. For multi-line content, use \\n not actual newlines
-7. Test your JSON is valid before responding
+6. For multi-line content, use \\n (literal backslash-n) not actual newlines
+7. IMPORTANT: Backticks (\`) ARE allowed and REQUIRED inside content strings for mermaid diagrams
 
-Use this exact structure:
+EXACT JSON FORMAT WITH MERMAID EXAMPLE:
 {
-  "title": "Specific Course Title (not generic)",
-  "estimated_time": "X hours/minutes total",
+  "title": "Specific Course Title",
+  "estimated_time": "1 hour",
   "modules": [
     {
       "title": "Module Title",
-      "description": "What this module covers in one sentence",
+      "description": "What this module covers",
       "lessons": [
         {
           "title": "Lesson Title",
-          "content": "200-300 words of actionable content with real examples",
+          "content": "Introduction text here.\\n\\nHere is a diagram:\\n\\n\`\`\`mermaid\\ngraph TD\\n    A[Start] --> B{Decision}\\n    B -->|Yes| C[Result 1]\\n    B -->|No| D[Result 2]\\n\`\`\`\\n\\nAs you can see in the diagram above...",
           "quiz": {
-            "question": "Test understanding question?",
-            "answer": "Detailed answer explanation"
+            "question": "Test question?",
+            "answer": "Answer explanation"
           }
         }
       ]
     }
   ],
-  "next_steps": [
-    "Concrete action step 1",
-    "Concrete action step 2",
-    "Concrete action step 3"
-  ]
+  "next_steps": ["Step 1", "Step 2", "Step 3"]
 }
 
 Make it engaging, practical, and worth $5.`;
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 4000, // Shorter = less chance of JSON errors
-      temperature: 0.3, // Very low temp for maximum predictability
+      max_tokens: 4000,
+      temperature: 0.5, // Slightly higher to allow mermaid code generation
       system: systemPrompt,
       messages: [
         {

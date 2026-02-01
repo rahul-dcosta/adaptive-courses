@@ -588,17 +588,13 @@ export const analytics = {
 ## ⚠️ Known Issues
 
 ### 1. Mermaid Diagrams Not Rendering
-**Status:** IN PROGRESS  
-**Issue:** Claude API not consistently generating mermaid syntax despite instructions  
-**Attempted Fixes:**
-- Added mermaid instructions to prompt (v1)
-- Made instructions mandatory with examples (v2)
-- Multiple reminders in prompt (v3)
-
-**Next Steps:**
-- Test with different topics
-- Consider post-processing to inject diagrams
-- May need to use different model or few-shot examples
+**Status:** FIXED
+**Issue:** Claude API not generating mermaid syntax despite instructions
+**Root Cause:** Conflicting prompt instructions - told Claude "NO markdown code blocks or backticks" while also requiring mermaid blocks (which need backticks)
+**Fix:** Updated prompt in generate-course/route.ts to:
+- Clarify backticks are only forbidden for wrapping JSON, but REQUIRED inside content for mermaid
+- Added explicit JSON example showing exact mermaid format with \\n escaping
+- Strengthened mermaid requirements in system prompt and throughout user prompt
 
 ### 2. Quiz Answer Persistence
 **Status:** FIXED (commit ba0157a)  
