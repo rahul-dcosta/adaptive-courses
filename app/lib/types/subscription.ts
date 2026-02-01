@@ -1,7 +1,7 @@
 // Subscription & User Types
 // See /docs/BUSINESS-MODEL.md for full context
 
-export type PlanType = 'free' | 'per_course' | 'unlimited' | 'pro';
+export type PlanType = 'free' | 'per_course' | 'pro';
 export type SubscriptionPlan = 'monthly' | 'annual';
 export type SubscriptionStatus = 'active' | 'canceled' | 'past_due' | 'trialing';
 export type PurchaseType = 'free' | 'purchased' | 'subscription';
@@ -57,8 +57,6 @@ export const PLAN_LIMITS = {
     pdfExport: false,
     emailDelivery: false,
     priorityGeneration: false,
-    certificates: false,
-    prioritySupport: false,
   },
   per_course: {
     maxCourses: Infinity, // pay per course
@@ -67,28 +65,14 @@ export const PLAN_LIMITS = {
     pdfExport: true,
     emailDelivery: true,
     priorityGeneration: false,
-    certificates: false,
-    prioritySupport: false,
   },
-  unlimited: {
+  pro: {
     maxCourses: Infinity,
     aiPromptsPerDay: 50, // global across all courses
     aiPromptsLifetime: Infinity,
     pdfExport: true,
     emailDelivery: true,
     priorityGeneration: true,
-    certificates: false,
-    prioritySupport: false,
-  },
-  pro: {
-    maxCourses: Infinity,
-    aiPromptsPerDay: 200, // effectively unlimited for most users
-    aiPromptsLifetime: Infinity,
-    pdfExport: true,
-    emailDelivery: true,
-    priorityGeneration: true,
-    certificates: true,
-    prioritySupport: true,
   },
 } as const;
 
@@ -97,8 +81,6 @@ export const STRIPE_PRICES = {
   per_course: process.env.NEXT_PUBLIC_STRIPE_PRICE_COURSE || 'price_xxx',
   unlimited_monthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_UNLIMITED_MONTHLY || 'price_xxx',
   unlimited_annual: process.env.NEXT_PUBLIC_STRIPE_PRICE_UNLIMITED_ANNUAL || 'price_xxx',
-  pro_monthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY || 'price_xxx',
-  pro_annual: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ANNUAL || 'price_xxx',
 } as const;
 
 // Helper functions
@@ -118,8 +100,8 @@ export function canUseAIChat(
 ): { allowed: boolean; remaining: number; reason?: string } {
   const limits = PLAN_LIMITS[user.plan];
 
-  // Pro and Unlimited: global daily limit across all courses
-  if (user.plan === 'pro' || user.plan === 'unlimited') {
+  // Unlimited: global daily limit across all courses
+  if (user.plan === 'unlimited') {
     const remaining = limits.aiPromptsPerDay - globalPromptsUsedToday;
     if (remaining <= 0) {
       return {

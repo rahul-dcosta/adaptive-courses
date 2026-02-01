@@ -15,11 +15,19 @@ import {
 const resend = new Resend(env.RESEND_API_KEY);
 
 // Email configuration
-// Use onboarding@resend.dev for testing, switch to custom domain in production
-const FROM_EMAIL = env.IS_PRODUCTION
-  ? 'Adaptive Courses <noreply@adaptive-courses.com>'
-  : 'Adaptive Courses <onboarding@resend.dev>';
-const REPLY_TO = 'rahuldcosta@example.com'; // Replace with your email
+// TODO: Switch to custom domain once adaptivecourses.com is set up
+// For now, always use onboarding@resend.dev (only sends to verified emails/contacts)
+const FROM_EMAIL = 'Adaptive Courses <onboarding@resend.dev>';
+const REPLY_TO = 'rahuldc2000@gmail.com';
+
+// Log configuration on startup
+if (typeof window === 'undefined') {
+  console.log('[EMAIL] Config:', {
+    from: FROM_EMAIL,
+    hasApiKey: !!env.RESEND_API_KEY,
+    apiKeyPrefix: env.RESEND_API_KEY?.slice(0, 10) + '...',
+  });
+}
 
 export interface SendEmailResult {
   success: boolean;

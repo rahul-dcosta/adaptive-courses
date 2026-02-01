@@ -1,11 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import AuthModal from './AuthModal';
 
 export default function Navbar() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
+
+  // Only show nav links on homepage
+  const isHomepage = pathname === '/';
 
   // Handle scroll effect
   useEffect(() => {
@@ -45,27 +50,29 @@ export default function Navbar() {
             </div>
           </a>
 
-          {/* Nav Links */}
-          <div className="hidden md:flex items-center gap-8">
-            <a
-              href="#how-it-works"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              How it works
-            </a>
-            <a
-              href="#examples"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Examples
-            </a>
-            <a
-              href="/pricing"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Pricing
-            </a>
-          </div>
+          {/* Nav Links - only on homepage */}
+          {isHomepage && (
+            <div className="hidden md:flex items-center gap-8">
+              <a
+                href="#how-it-works"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                How it works
+              </a>
+              <a
+                href="#examples"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Examples
+              </a>
+              <a
+                href="/pricing"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Pricing
+              </a>
+            </div>
+          )}
 
           {/* Auth Buttons */}
           <div className="flex items-center gap-3">
