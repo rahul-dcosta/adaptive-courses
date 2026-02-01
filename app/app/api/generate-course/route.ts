@@ -8,13 +8,32 @@ const anthropic = new Anthropic({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { topic, skillLevel, goal, timeAvailable, context, timeline, depth } = body;
+    const { 
+      topic, 
+      skillLevel, 
+      goal, 
+      timeAvailable, 
+      context, 
+      timeline, 
+      depth,
+      // NEW: Learner Fingerprint fields
+      fingerprint,
+      learningStyle,
+      priorKnowledge,
+      learningGoal,
+      timeCommitment,
+      contentFormat,
+      challengePreference
+    } = body;
 
-    // Accept either old format (skillLevel, goal, timeAvailable) or new format (context, timeline, depth)
-    const finalSkillLevel = skillLevel || 'intermediate';
-    const finalGoal = goal || depth || 'understand';
-    const finalTimeAvailable = timeAvailable || timeline || 'flexible';
+    // Use fingerprint if provided, otherwise fall back to old format
+    const finalSkillLevel = priorKnowledge || skillLevel || 'intermediate';
+    const finalGoal = learningGoal || goal || depth || 'understand';
+    const finalTimeAvailable = timeCommitment || timeAvailable || timeline || 'flexible';
     const learningContext = context || '';
+    const finalLearningStyle = learningStyle || 'mixed';
+    const finalContentFormat = contentFormat || 'mixed';
+    const finalChallengePreference = challengePreference || 'adaptive';
 
     // Validate inputs
     if (!topic) {
@@ -24,35 +43,75 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build context-aware prompt
-    const contextualGuidance = finalGoal.includes('smart') 
-      ? 'Focus on key buzzwords, frameworks, and talking points. Make them sound conversational and confident.'
-      : finalGoal.includes('questions')
-      ? 'Focus on smart questions to ask, what to look for, and how to engage meaningfully. Include specific question examples.'
-      : 'Focus on deep understanding with clear explanations, examples, and why things work the way they do.';
+    // Build FINGERPRINT-aware prompt
+    const learningStyleGuidance = {
+      'visual': 'Use lots of concrete examples, analogies to visual concepts, and describe things in spatial/visual terms. Mention when diagrams would be helpful.',
+      'auditory': 'Use conversational tone, explain concepts as if speaking to them. Include discussion prompts and verbal examples.',
+      'reading': 'Provide detailed written explanations, definitions, and structured text. Use clear hierarchies and bullet points.',
+      'kinesthetic': 'Focus on practical exercises, hands-on examples, and actionable steps. "How to DO this" over "what it IS".',
+      'mixed': 'Balance all approaches - visuals, detailed text, practical examples, and conversational explanations.'
+    }[finalLearningStyle] || 'Balance different learning approaches.';
 
-    const depthGuidance = finalTimeAvailable.includes('2 hours') || finalTimeAvailable.includes('tomorrow')
-      ? 'Keep it concise and tactical. 3-4 modules max. Focus on the essentials someone needs RIGHT NOW.'
-      : finalTimeAvailable.includes('week')
-      ? '4-5 modules with practical depth. Balance theory with application.'
-      : '4-5 modules with comprehensive coverage. Go deeper on concepts.';
+    const contentFormatGuidance = {
+      'examples_first': 'Start each concept with a concrete, real-world example, THEN explain the theory behind it.',
+      'theory_first': 'Explain the foundational concept first, THEN provide examples to illustrate it.',
+      'visual_diagrams': 'Describe visual representations, flowcharts, and diagrams in text. Use spatial language.',
+      'text_heavy': 'Provide comprehensive, detailed written explanations with precise terminology.',
+      'mixed': 'Mix theory and examples naturally, using both detailed explanations and concrete cases.'
+    }[finalContentFormat] || 'Use a balanced mix of theory and examples.';
+
+    const challengeGuidance = {
+      'easy_to_hard': 'Start with the absolute basics and progressively build complexity. Each lesson should be slightly harder than the last.',
+      'adaptive': 'Mix difficulty levels. Include easier and harder examples in each lesson to match different comfort levels.',
+      'deep_dive': 'Jump into advanced concepts quickly. Assume quick understanding and focus on nuanced details.',
+      'practical_only': 'Skip theoretical foundations. Focus entirely on "how to use this" and practical applications.'
+    }[finalChallengePreference] || 'Balance difficulty appropriately.';
+
+    const goalGuidance = {
+      'job_interview': 'Focus on key talking points, common interview questions, and how to discuss this topic confidently in 5-10 minute conversations.',
+      'career': 'Focus on professional applications, industry relevance, and how this skill translates to job performance.',
+      'sound_smart': 'Focus on key buzzwords, frameworks, and impressive-sounding insights someone can drop in conversations.',
+      'academic': 'Focus on definitions, frameworks, testable knowledge, and academic understanding.',
+      'hobby': 'Focus on interesting facts, enjoyment, and personal enrichment. Make it fun and engaging.',
+      'teach_others': 'Focus on clarity, analogies, and how to explain concepts simply to someone else.'
+    }[finalGoal] || 'Focus on comprehensive understanding.';
+
+    const timeGuidance = {
+      '30_min': 'VERY concise. 2 modules, 2 lessons each. 100-150 words per lesson max. Hit only the critical essentials.',
+      '1_hour': 'Concise. 2-3 modules with 2-3 lessons each. 150-200 words per lesson. Core concepts only.',
+      '2_hours': '3-4 modules with 2-3 lessons each. 200-300 words per lesson. Include some depth.',
+      '1_week': '4-5 modules with 3-4 lessons each. 250-350 words per lesson. Comprehensive coverage.',
+      'no_rush': '5-6 modules with 3-4 lessons each. 300-400 words per lesson. Deep, thorough exploration.'
+    }[finalTimeAvailable] || '4 modules with 2-3 lessons each. 200-300 words per lesson.';
 
     const systemPrompt = `You are a course creation AI. You MUST respond with valid JSON only. No markdown, no explanations, just pure JSON.`;
 
-    // Generate course using Claude
-    const prompt = `Create a personalized learning course for someone learning about "${topic}".
+    // Generate course using Claude with FINGERPRINT
+    const prompt = `Create a PERSONALIZED learning course for someone learning about "${topic}".
 
-CONTEXT:
-- Skill Level: ${finalSkillLevel}
-- Learning Context: ${learningContext || 'general interest'}
-- Timeline: ${finalTimeAvailable}
-- Depth Goal: ${finalGoal}
+🧠 LEARNER FINGERPRINT:
+- Prior Knowledge: ${finalSkillLevel}
+- Learning Style: ${finalLearningStyle}
+- Learning Goal: ${finalGoal}
+- Time Available: ${finalTimeAvailable}
+- Content Format: ${finalContentFormat}
+- Challenge Preference: ${finalChallengePreference}
+${learningContext ? `- Context: ${learningContext}` : ''}
 
-TONE & APPROACH:
-${contextualGuidance}
+📚 LEARNING STYLE ADAPTATION:
+${learningStyleGuidance}
 
-STRUCTURE:
-${depthGuidance}
+📖 CONTENT FORMAT:
+${contentFormatGuidance}
+
+🎯 GOAL-SPECIFIC APPROACH:
+${goalGuidance}
+
+⏱️ TIME & STRUCTURE:
+${timeGuidance}
+
+🎚️ DIFFICULTY PROGRESSION:
+${challengeGuidance}
 
 Generate a SIMPLE structured course with:
 1. A specific, actionable course title (not generic)

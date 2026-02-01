@@ -57,8 +57,8 @@ export default function LoadingSpinner({ topic }: LoadingSpinnerProps) {
         <div className="text-center mb-8">
           {/* Animated icon */}
           <div className="relative w-24 h-24 mx-auto mb-6">
-            <div className="absolute inset-0 bg-gray-900 rounded-full animate-ping opacity-20"></div>
-            <div className="relative bg-gray-900 rounded-full w-24 h-24 flex items-center justify-center">
+            <div className="absolute inset-0 rounded-full animate-ping opacity-20" style={{ backgroundColor: 'var(--royal-blue)' }}></div>
+            <div className="relative rounded-full w-24 h-24 flex items-center justify-center" style={{ backgroundColor: 'var(--royal-blue)' }}>
               <svg className="w-12 h-12 text-white animate-spin" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -66,7 +66,7 @@ export default function LoadingSpinner({ topic }: LoadingSpinnerProps) {
             </div>
           </div>
           
-          <h2 className="text-3xl font-bold text-gray-900 mb-3">
+          <h2 className="text-3xl font-bold mb-3" style={{ color: 'var(--royal-blue)' }}>
             Crafting Your Course
           </h2>
           {topic && (
@@ -81,8 +81,11 @@ export default function LoadingSpinner({ topic }: LoadingSpinnerProps) {
         <div className="mb-6">
           <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
             <div 
-              className="bg-gray-900 h-3 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
+              className="h-3 rounded-full transition-all duration-500 ease-out"
+              style={{ 
+                width: `${progress}%`,
+                backgroundColor: 'var(--royal-blue)'
+              }}
             />
           </div>
           <p className="text-gray-600 text-sm text-center mt-2">
@@ -104,11 +107,15 @@ export default function LoadingSpinner({ topic }: LoadingSpinnerProps) {
             >
               <div className={`
                 w-8 h-8 rounded-full flex items-center justify-center text-xl
-                ${idx < messageIndex ? 'bg-green-500 text-white' : 
-                  idx === messageIndex ? 'bg-gray-900 text-white animate-pulse' : 
+                ${idx < messageIndex ? 'text-white' : 
+                  idx === messageIndex ? 'text-white animate-pulse' : 
                   'bg-gray-200'}
                 transition-all duration-500
-              `}>
+              `}
+              style={{
+                backgroundColor: idx < messageIndex ? '#10b981' : 
+                  idx === messageIndex ? 'var(--royal-blue)' : undefined
+              }}>
                 {idx < messageIndex ? '✓' : msg.emoji}
               </div>
               <span className={`

@@ -1,0 +1,344 @@
+'use client';
+
+import { useState } from 'react';
+import { LearnerFingerprint, isOnboardingComplete } from '@/lib/types';
+
+type OnboardingStep = 
+  | 'topic'
+  | 'learningStyle' 
+  | 'priorKnowledge'
+  | 'learningGoal'
+  | 'timeCommitment'
+  | 'contentFormat'
+  | 'challengePreference'
+  | 'review';
+
+interface OnboardingQuestion {
+  question: string;
+  subtitle: string;
+  options: Array<{
+    value: string;
+    label: string;
+    emoji: string;
+    description: string;
+  }>;
+}
+
+const ONBOARDING_QUESTIONS: Record<Exclude<OnboardingStep, 'topic' | 'review'>, OnboardingQuestion> = {
+  learningStyle: {
+    question: "How do you learn best?",
+    subtitle: "Everyone absorbs information differently",
+    options: [
+      { value: 'visual', label: 'Visual Learner', emoji: '👁️', description: 'Charts, diagrams, images help me understand' },
+      { value: 'reading', label: 'Reading/Writing', emoji: '📝', description: 'I learn by reading and taking notes' },
+      { value: 'auditory', label: 'Listening', emoji: '🎧', description: 'I prefer explanations and discussions' },
+      { value: 'kinesthetic', label: 'Hands-on', emoji: '🛠️', description: 'I learn by doing and practicing' },
+      { value: 'mixed', label: 'Mix of Everything', emoji: '🎨', description: 'I like variety in learning methods' },
+    ]
+  },
+  priorKnowledge: {
+    question: "What's your current level?",
+    subtitle: "Be honest - we'll meet you where you are",
+    options: [
+      { value: 'none', label: 'Complete Beginner', emoji: '🌱', description: "I've never studied this before" },
+      { value: 'beginner', label: 'Beginner', emoji: '📚', description: 'I know the very basics' },
+      { value: 'some_exposure', label: 'Some Exposure', emoji: '🎯', description: "I've encountered this but need structure" },
+      { value: 'intermediate', label: 'Intermediate', emoji: '🚀', description: 'I have a decent foundation' },
+      { value: 'advanced', label: 'Advanced', emoji: '⚡', description: 'I just need to fill specific gaps' },
+    ]
+  },
+  learningGoal: {
+    question: "Why are you learning this?",
+    subtitle: "Your goal shapes the course",
+    options: [
+      { value: 'job_interview', label: 'Job Interview', emoji: '💼', description: 'I have an interview coming up' },
+      { value: 'career', label: 'Career Growth', emoji: '📈', description: 'Building skills for my profession' },
+      { value: 'sound_smart', label: 'Conversational Fluency', emoji: '🎤', description: 'I want to sound knowledgeable in discussions' },
+      { value: 'academic', label: 'Academic/Test', emoji: '🎓', description: 'Studying for school or certification' },
+      { value: 'hobby', label: 'Personal Interest', emoji: '🌟', description: 'Learning for fun and curiosity' },
+      { value: 'teach_others', label: 'Teach Others', emoji: '👨‍🏫', description: 'I need to explain this to someone else' },
+    ]
+  },
+  timeCommitment: {
+    question: "How much time do you have?",
+    subtitle: "We'll pace the course accordingly",
+    options: [
+      { value: '30_min', label: '30 Minutes', emoji: '⚡', description: 'Quick crash course right now' },
+      { value: '1_hour', label: '1 Hour', emoji: '⏱️', description: 'Focused session today' },
+      { value: '2_hours', label: '2 Hours', emoji: '📅', description: 'Deep dive this afternoon' },
+      { value: '1_week', label: 'This Week', emoji: '🗓️', description: 'I can spread it over several days' },
+      { value: 'no_rush', label: 'No Rush', emoji: '🌊', description: 'Learning at my own pace' },
+    ]
+  },
+  contentFormat: {
+    question: "What content style works for you?",
+    subtitle: "How should we structure the material?",
+    options: [
+      { value: 'examples_first', label: 'Examples First', emoji: '🎯', description: 'Show me concrete cases, then explain why' },
+      { value: 'theory_first', label: 'Theory First', emoji: '🧠', description: 'Explain concepts, then give examples' },
+      { value: 'visual_diagrams', label: 'Visual & Diagrams', emoji: '📊', description: 'More charts, fewer walls of text' },
+      { value: 'text_heavy', label: 'Detailed Text', emoji: '📖', description: 'Comprehensive written explanations' },
+      { value: 'mixed', label: 'Mixed Approach', emoji: '🎨', description: 'Balance of all formats' },
+    ]
+  },
+  challengePreference: {
+    question: "How should we challenge you?",
+    subtitle: "Pick your difficulty curve",
+    options: [
+      { value: 'easy_to_hard', label: 'Gradual Build-up', emoji: '📈', description: 'Start simple, progressively get harder' },
+      { value: 'adaptive', label: 'Adaptive', emoji: '🎚️', description: 'Adjust based on my responses' },
+      { value: 'deep_dive', label: 'Deep Dive', emoji: '🏊', description: 'Jump into advanced material quickly' },
+      { value: 'practical_only', label: 'Practical Focus', emoji: '🔧', description: 'Skip theory, give me actionable skills' },
+    ]
+  },
+};
+
+export default function OnboardingFingerprint({ 
+  onComplete 
+}: { 
+  onComplete: (fingerprint: LearnerFingerprint) => void 
+}) {
+  const [step, setStep] = useState<OnboardingStep>('topic');
+  const [fingerprint, setFingerprint] = useState<Partial<LearnerFingerprint>>({});
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [topic, setTopic] = useState('');
+
+  const steps: OnboardingStep[] = [
+    'topic',
+    'learningStyle',
+    'priorKnowledge',
+    'learningGoal',
+    'timeCommitment',
+    'contentFormat',
+    'challengePreference',
+    'review'
+  ];
+
+  const currentStepIndex = steps.indexOf(step);
+  const progressPercent = Math.round((currentStepIndex / (steps.length - 1)) * 100);
+
+  const handleTopicSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (topic.trim()) {
+      setFingerprint({ ...fingerprint, topic: topic.trim() });
+      setStep('learningStyle');
+    }
+  };
+
+  const handleOptionSelect = async (field: keyof LearnerFingerprint, value: string) => {
+    setSelectedOption(value);
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    const updatedFingerprint = { ...fingerprint, [field]: value };
+    setFingerprint(updatedFingerprint);
+    setSelectedOption(null);
+
+    // Move to next step
+    const nextIndex = currentStepIndex + 1;
+    if (nextIndex < steps.length) {
+      setStep(steps[nextIndex]);
+    }
+  };
+
+  const handleComplete = () => {
+    const completion = isOnboardingComplete(fingerprint);
+    if (completion.isComplete && completion.fingerprint) {
+      completion.fingerprint.createdAt = new Date().toISOString();
+      onComplete(completion.fingerprint);
+    }
+  };
+
+  // Topic Input
+  if (step === 'topic') {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
+        <div className="max-w-2xl w-full">
+          <div className="text-center mb-12">
+            <h1 className="text-6xl md:text-7xl font-black mb-6 leading-tight tracking-tight" style={{ color: 'var(--royal-blue)' }}>
+              Learn Anything<br/>in 30 Minutes
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-700">
+              AI-powered courses tailored to YOUR brain
+            </p>
+          </div>
+
+          <div className="glass rounded-3xl p-12 shadow-2xl">
+            <h2 className="text-3xl font-bold mb-3" style={{ color: 'var(--royal-blue)' }}>
+              What do you want to learn?
+            </h2>
+            <p className="text-base text-gray-600 mb-6">
+              💡 Type anything — from "supply chain logistics" to "quantum physics"
+            </p>
+            
+            <form onSubmit={handleTopicSubmit}>
+              <input
+                type="text"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                placeholder="e.g., Game Theory for Business Strategy"
+                className="w-full px-6 py-5 text-xl text-gray-900 placeholder-gray-400 glass rounded-2xl focus:ring-2 focus:outline-none mb-4 transition-all shadow-sm"
+                style={{ borderColor: 'var(--royal-blue)' }}
+                autoFocus
+                required
+              />
+              <button
+                type="submit"
+                disabled={!topic.trim()}
+                className="w-full text-white font-semibold text-lg py-5 px-8 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                style={{ 
+                  backgroundColor: 'var(--royal-blue)',
+                  ':hover': { backgroundColor: 'var(--royal-blue-light)' }
+                }}
+                onMouseEnter={(e) => !topic.trim() || (e.currentTarget.style.backgroundColor = 'var(--royal-blue-light)')}
+                onMouseLeave={(e) => !topic.trim() || (e.currentTarget.style.backgroundColor = 'var(--royal-blue)')}
+              >
+                Start Learning Journey →
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Review Step
+  if (step === 'review') {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
+        <div className="max-w-2xl w-full glass rounded-3xl p-12 shadow-2xl">
+          <h2 className="text-4xl font-bold mb-4" style={{ color: 'var(--royal-blue)' }}>
+            Perfect! Here's Your Learning Profile
+          </h2>
+          <p className="text-gray-600 text-lg mb-8">
+            We'll use this to craft the perfect course for you
+          </p>
+
+          <div className="space-y-4 mb-8">
+            <div className="glass-dark p-4 rounded-xl">
+              <p className="text-sm text-gray-600 font-medium">Topic</p>
+              <p className="text-lg font-semibold" style={{ color: 'var(--royal-blue)' }}>{fingerprint.topic}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="glass-dark p-4 rounded-xl">
+                <p className="text-sm text-gray-600 font-medium">Learning Style</p>
+                <p className="text-base font-semibold text-gray-900">{fingerprint.learningStyle}</p>
+              </div>
+              <div className="glass-dark p-4 rounded-xl">
+                <p className="text-sm text-gray-600 font-medium">Current Level</p>
+                <p className="text-base font-semibold text-gray-900">{fingerprint.priorKnowledge}</p>
+              </div>
+              <div className="glass-dark p-4 rounded-xl">
+                <p className="text-sm text-gray-600 font-medium">Goal</p>
+                <p className="text-base font-semibold text-gray-900">{fingerprint.learningGoal}</p>
+              </div>
+              <div className="glass-dark p-4 rounded-xl">
+                <p className="text-sm text-gray-600 font-medium">Time</p>
+                <p className="text-base font-semibold text-gray-900">{fingerprint.timeCommitment}</p>
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={handleComplete}
+            className="w-full text-white font-semibold text-lg py-5 px-8 rounded-xl transition-all shadow-lg hover:shadow-xl"
+            style={{ backgroundColor: 'var(--royal-blue)' }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--royal-blue-light)')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--royal-blue)')}
+          >
+            Generate My Course 🚀
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Question Steps
+  const currentQuestion = ONBOARDING_QUESTIONS[step as keyof typeof ONBOARDING_QUESTIONS];
+  
+  if (!currentQuestion) return null;
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
+      <div className="max-w-2xl w-full">
+        {/* Progress Bar */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-medium text-gray-700">
+              Step {currentStepIndex} of {steps.length - 1}
+            </span>
+            <span className="text-sm font-medium" style={{ color: 'var(--royal-blue)' }}>
+              {progressPercent}% Complete
+            </span>
+          </div>
+          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div 
+              className="h-full transition-all duration-500 rounded-full"
+              style={{ 
+                width: `${progressPercent}%`,
+                backgroundColor: 'var(--royal-blue)'
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="glass rounded-3xl p-12 shadow-2xl">
+          <h2 className="text-4xl font-bold mb-3" style={{ color: 'var(--royal-blue)' }}>
+            {currentQuestion.question}
+          </h2>
+          <p className="text-gray-600 text-lg mb-8">
+            {currentQuestion.subtitle}
+          </p>
+
+          <div className="space-y-4">
+            {currentQuestion.options.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => handleOptionSelect(step as keyof LearnerFingerprint, option.value)}
+                disabled={selectedOption !== null}
+                className={`
+                  group relative overflow-hidden glass rounded-2xl p-6
+                  transition-all duration-300 transform w-full text-left shadow-lg
+                  ${selectedOption === option.value 
+                    ? 'ring-2 scale-95 shadow-2xl' 
+                    : 'hover:ring-2 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]'
+                  }
+                  ${selectedOption !== null ? 'opacity-50 cursor-not-allowed' : ''}
+                `}
+                style={{
+                  borderColor: selectedOption === option.value ? 'var(--royal-blue)' : 'transparent',
+                  '--tw-ring-color': 'var(--royal-blue)'
+                } as any}
+              >
+                <div className="relative flex items-start gap-4">
+                  <span className={`
+                    text-5xl transition-transform duration-300
+                    ${selectedOption === option.value ? 'scale-110' : 'group-hover:scale-110'}
+                  `}>
+                    {option.emoji}
+                  </span>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-semibold mb-1" style={{ color: 'var(--royal-blue)' }}>
+                      {option.label}
+                    </h3>
+                    <p className="text-sm text-gray-600">{option.description}</p>
+                  </div>
+                  
+                  {selectedOption === option.value && (
+                    <div 
+                      className="absolute top-4 right-4 w-6 h-6 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: 'var(--royal-blue)' }}
+                    >
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

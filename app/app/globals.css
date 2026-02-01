@@ -7,24 +7,26 @@
   --royal-blue-dark: #002D5F;
 }
 
-/* Glassmorphism base styles */
+/* Glassmorphism base styles with Royal Blue */
 body {
-  background: linear-gradient(135deg, #f5f7fa 0%, #e3e7ed 100%);
+  background: linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%);
   min-height: 100vh;
 }
 
 .glass {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 2px solid rgba(0, 63, 135, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 63, 135, 0.1);
 }
 
 .glass-dark {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(0, 63, 135, 0.08);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 2px solid rgba(0, 63, 135, 0.25);
+  box-shadow: 0 4px 16px rgba(0, 63, 135, 0.15);
 }
 
 /* Typography for course content */
@@ -121,12 +123,33 @@ body {
 }
 
 .prose a {
-  color: #111827;
+  color: var(--royal-blue);
   text-decoration: underline;
 }
 
 .prose a:hover {
-  color: #374151;
+  color: var(--royal-blue-dark);
+}
+
+/* Royal Blue Utility Classes */
+.text-royal-blue {
+  color: var(--royal-blue);
+}
+
+.bg-royal-blue {
+  background-color: var(--royal-blue);
+}
+
+.border-royal-blue {
+  border-color: var(--royal-blue);
+}
+
+.hover\:bg-royal-blue-light:hover {
+  background-color: var(--royal-blue-light);
+}
+
+.ring-royal-blue {
+  --tw-ring-color: var(--royal-blue);
 }
 
 .prose hr {

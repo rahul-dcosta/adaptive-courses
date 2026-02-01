@@ -140,3 +140,60 @@ export interface OnboardingState {
 }
 
 export type ConversationStep = 'topic' | 'situation' | 'timeline' | 'goal' | 'generating' | 'complete';
+
+// LEARNER FINGERPRINT MODEL
+export interface LearnerFingerprint {
+  // Core Demographics
+  topic: string;
+  
+  // Learning Style (how they absorb information)
+  learningStyle: 'visual' | 'auditory' | 'reading' | 'kinesthetic' | 'mixed';
+  
+  // Prior Knowledge (foundation level)
+  priorKnowledge: 'none' | 'beginner' | 'some_exposure' | 'intermediate' | 'advanced';
+  
+  // Learning Goal (what they want to achieve)
+  learningGoal: 'career' | 'job_interview' | 'hobby' | 'academic' | 'teach_others' | 'sound_smart';
+  
+  // Time Commitment (how much time they have)
+  timeCommitment: '30_min' | '1_hour' | '2_hours' | '1_week' | 'no_rush';
+  
+  // Content Format (preferred delivery method)
+  contentFormat: 'text_heavy' | 'visual_diagrams' | 'examples_first' | 'theory_first' | 'mixed';
+  
+  // Challenge Preference (difficulty progression)
+  challengePreference: 'easy_to_hard' | 'adaptive' | 'deep_dive' | 'practical_only';
+  
+  // Context (why learning this NOW)
+  context?: string;
+  
+  // Timestamp
+  createdAt: string;
+}
+
+export interface OnboardingComplete {
+  isComplete: boolean;
+  fingerprint?: LearnerFingerprint;
+  missingFields?: string[];
+}
+
+// Function to check if onboarding is complete
+export function isOnboardingComplete(fingerprint: Partial<LearnerFingerprint>): OnboardingComplete {
+  const requiredFields: (keyof LearnerFingerprint)[] = [
+    'topic',
+    'learningStyle', 
+    'priorKnowledge',
+    'learningGoal',
+    'timeCommitment',
+    'contentFormat',
+    'challengePreference'
+  ];
+  
+  const missingFields = requiredFields.filter(field => !fingerprint[field]);
+  
+  return {
+    isComplete: missingFields.length === 0,
+    fingerprint: missingFields.length === 0 ? fingerprint as LearnerFingerprint : undefined,
+    missingFields
+  };
+}
