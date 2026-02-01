@@ -161,20 +161,20 @@ export default function OnboardingFingerprint({
       <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
         <div className="max-w-2xl w-full">
           <div className="text-center mb-12">
-            <h1 className="text-6xl md:text-7xl font-black mb-6 leading-tight tracking-tight" style={{ color: 'var(--royal-blue)' }}>
-              What do you<br/>want to learn?
+            <h1 className="text-6xl md:text-7xl font-black mb-6 leading-tight tracking-tight font-serif" style={{ color: 'var(--royal-blue)' }}>
+              What would you<br/>like to study?
             </h1>
-            <p className="text-xl md:text-2xl text-gray-700">
-              We'll build a course tailored to YOUR brain
+            <p className="text-xl md:text-2xl text-gray-700 leading-relaxed">
+              Enter your subject of interest and we will construct a personalized curriculum
             </p>
           </div>
 
           <div className="glass rounded-3xl p-12 shadow-2xl">
-            <h2 className="text-3xl font-bold mb-3" style={{ color: 'var(--royal-blue)' }}>
-              What do you want to learn?
+            <h2 className="text-3xl font-bold mb-4 font-serif" style={{ color: 'var(--royal-blue)' }}>
+              Subject of Study
             </h2>
-            <p className="text-base text-gray-600 mb-6">
-              💡 Type anything — from "supply chain logistics" to "quantum physics"
+            <p className="text-base text-gray-600 mb-6 leading-relaxed">
+              Enter your topic of interest — from supply chain management to quantum mechanics
             </p>
             
             <form onSubmit={handleTopicSubmit}>
@@ -182,7 +182,7 @@ export default function OnboardingFingerprint({
                 type="text"
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
-                placeholder="e.g., Game Theory for Business Strategy"
+                placeholder="Example: Game Theory for Strategic Business Decisions"
                 className="w-full px-6 py-5 text-xl text-gray-900 placeholder-gray-400 glass rounded-2xl focus:ring-2 focus:outline-none mb-4 transition-all shadow-sm"
                 style={{ borderColor: 'var(--royal-blue)' }}
                 autoFocus
@@ -240,17 +240,17 @@ export default function OnboardingFingerprint({
           </div>
 
           <div className="glass rounded-3xl p-12 shadow-2xl">
-            <h2 className="text-4xl font-bold mb-3" style={{ color: 'var(--royal-blue)' }}>
-              Tell us more about your situation
+            <h2 className="text-4xl font-bold mb-4 font-serif" style={{ color: 'var(--royal-blue)' }}>
+              Additional Context
             </h2>
-            <p className="text-gray-600 text-lg mb-8">
-              💡 Any specific context, deadlines, or goals we should know? (Optional but helpful!)
+            <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+              Provide any specific context, deadlines, or objectives that will help us tailor your course more precisely. This step is optional but recommended for optimal personalization.
             </p>
 
             <textarea
               value={freeformText}
               onChange={(e) => setFreeformText(e.target.value)}
-              placeholder="e.g., 'I have a factory visit at Mercedes next week and need to understand their assembly line metrics' or 'I'm preparing for a job interview where they mentioned game theory'"
+              placeholder="Example: 'Strategy consulting interview scheduled for next week focusing on competitive scenarios and Nash equilibrium applications' or 'Manufacturing site visit requiring familiarity with assembly line optimization metrics'"
               className="w-full px-6 py-4 text-lg text-gray-900 placeholder-gray-400 glass rounded-2xl focus:ring-2 focus:outline-none mb-6 transition-all shadow-sm resize-none"
               style={{ 
                 borderColor: 'var(--royal-blue)',
@@ -313,11 +313,11 @@ export default function OnboardingFingerprint({
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
         <div className="max-w-2xl w-full glass rounded-3xl p-12 shadow-2xl">
-          <h2 className="text-4xl font-bold mb-4" style={{ color: 'var(--royal-blue)' }}>
-            Perfect! Here's Your Learning Profile
+          <h2 className="text-4xl font-bold mb-4 font-serif" style={{ color: 'var(--royal-blue)' }}>
+            Learner Profile Summary
           </h2>
-          <p className="text-gray-600 text-lg mb-8">
-            We'll use this to craft the perfect course for you
+          <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+            Review your specifications below. We will use this profile to structure your personalized curriculum.
           </p>
 
           <div className="space-y-4 mb-8">
@@ -397,10 +397,10 @@ export default function OnboardingFingerprint({
         </div>
 
         <div className="glass rounded-3xl p-12 shadow-2xl">
-          <h2 className="text-4xl font-bold mb-3" style={{ color: 'var(--royal-blue)' }}>
+          <h2 className="text-4xl font-bold mb-4 font-serif" style={{ color: 'var(--royal-blue)' }}>
             {currentQuestion.question}
           </h2>
-          <p className="text-gray-600 text-lg mb-8">
+          <p className="text-gray-600 text-lg mb-8 leading-relaxed">
             {currentQuestion.subtitle}
           </p>
 

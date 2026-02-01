@@ -7,13 +7,13 @@ interface LoadingSpinnerProps {
 }
 
 const LOADING_MESSAGES = [
-  { emoji: '🧠', text: 'Analyzing your learning needs...' },
-  { emoji: '📚', text: 'Selecting the best learning path...' },
-  { emoji: '✨', text: 'Crafting your personalized modules...' },
-  { emoji: '🎯', text: 'Tailoring examples to your situation...' },
-  { emoji: '🔍', text: 'Finding the most relevant insights...' },
-  { emoji: '💡', text: 'Adding real-world applications...' },
-  { emoji: '🚀', text: 'Almost there...' }
+  { emoji: '1', text: 'Analyzing learner profile specifications' },
+  { emoji: '2', text: 'Constructing optimal learning pathway' },
+  { emoji: '3', text: 'Structuring personalized curriculum modules' },
+  { emoji: '4', text: 'Adapting content to learner context' },
+  { emoji: '5', text: 'Integrating domain-specific insights' },
+  { emoji: '6', text: 'Incorporating practical applications' },
+  { emoji: '7', text: 'Finalizing course structure' }
 ];
 
 export default function LoadingSpinner({ topic }: LoadingSpinnerProps) {
@@ -66,15 +66,15 @@ export default function LoadingSpinner({ topic }: LoadingSpinnerProps) {
             </div>
           </div>
           
-          <h2 className="text-3xl font-bold mb-3" style={{ color: 'var(--royal-blue)' }}>
-            Crafting Your Course
+          <h2 className="text-3xl font-bold mb-3 font-serif" style={{ color: 'var(--royal-blue)' }}>
+            Generating Course Content
           </h2>
           {topic && (
-            <p className="text-gray-600 text-lg mb-2">
-              on <span className="font-semibold">{topic}</span>
+            <p className="text-gray-600 text-lg mb-2 leading-relaxed">
+              Subject: <span className="font-semibold">{topic}</span>
             </p>
           )}
-          <p className="text-gray-500 text-sm">This usually takes 30-60 seconds</p>
+          <p className="text-gray-500 text-sm">Processing time: approximately 30-60 seconds</p>
         </div>
         
         {/* Progress bar */}
@@ -106,10 +106,10 @@ export default function LoadingSpinner({ topic }: LoadingSpinnerProps) {
               `}
             >
               <div className={`
-                w-8 h-8 rounded-full flex items-center justify-center text-xl
+                w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
                 ${idx < messageIndex ? 'text-white' : 
-                  idx === messageIndex ? 'text-white animate-pulse' : 
-                  'bg-gray-200'}
+                  idx === messageIndex ? 'text-white' : 
+                  'bg-gray-200 text-gray-500'}
                 transition-all duration-500
               `}
               style={{
@@ -128,11 +128,11 @@ export default function LoadingSpinner({ topic }: LoadingSpinnerProps) {
           ))}
         </div>
 
-        {/* Fun fact or tip */}
+        {/* Academic note */}
         <div className="mt-6 glass-dark rounded-xl p-4 shadow-md">
-          <p className="text-gray-700 text-sm text-center">
-            💡 <strong>Did you know?</strong> AI-generated courses adapt to your unique situation, 
-            not just your skill level.
+          <p className="text-gray-700 text-sm text-center leading-relaxed">
+            <strong>Note:</strong> Course content is dynamically generated based on your learner profile, 
+            incorporating context-specific examples and adaptive difficulty progression.
           </p>
         </div>
       </div>
