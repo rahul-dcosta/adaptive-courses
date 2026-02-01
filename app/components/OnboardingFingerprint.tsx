@@ -11,6 +11,7 @@ type OnboardingStep =
   | 'timeCommitment'
   | 'contentFormat'
   | 'challengePreference'
+  | 'freeform'
   | 'review';
 
 interface OnboardingQuestion {
@@ -24,7 +25,7 @@ interface OnboardingQuestion {
   }>;
 }
 
-const ONBOARDING_QUESTIONS: Record<Exclude<OnboardingStep, 'topic' | 'review'>, OnboardingQuestion> = {
+const ONBOARDING_QUESTIONS: Record<Exclude<OnboardingStep, 'topic' | 'freeform' | 'review'>, OnboardingQuestion> = {
   learningStyle: {
     question: "How do you learn best?",
     subtitle: "Everyone absorbs information differently",
@@ -106,6 +107,7 @@ export default function OnboardingFingerprint({
   );
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [topic, setTopic] = useState(initialTopic || '');
+  const [freeformText, setFreeformText] = useState('');
 
   const steps: OnboardingStep[] = [
     'topic',
@@ -115,6 +117,7 @@ export default function OnboardingFingerprint({
     'timeCommitment',
     'contentFormat',
     'challengePreference',
+    'freeform',
     'review'
   ];
 
@@ -196,6 +199,109 @@ export default function OnboardingFingerprint({
                 Start Learning Journey →
               </button>
             </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Free-form Context Step
+  if (step === 'freeform') {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
+        <div className="max-w-2xl w-full">
+          {/* Show topic at top */}
+          {initialTopic && (
+            <div className="mb-6 text-center">
+              <p className="text-gray-600 text-sm mb-2">Building your course on</p>
+              <h2 className="text-3xl font-bold" style={{ color: 'var(--royal-blue)' }}>{initialTopic}</h2>
+            </div>
+          )}
+
+          {/* Progress Bar */}
+          <div className="mb-8">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium text-gray-700">
+                Step {currentStepIndex} of {steps.length - 1}
+              </span>
+              <span className="text-sm font-medium" style={{ color: 'var(--royal-blue)' }}>
+                {progressPercent}% Complete
+              </span>
+            </div>
+            <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full transition-all duration-500 rounded-full"
+                style={{ 
+                  width: `${progressPercent}%`,
+                  backgroundColor: 'var(--royal-blue)'
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="glass rounded-3xl p-12 shadow-2xl">
+            <h2 className="text-4xl font-bold mb-3" style={{ color: 'var(--royal-blue)' }}>
+              Tell us more about your situation
+            </h2>
+            <p className="text-gray-600 text-lg mb-8">
+              💡 Any specific context, deadlines, or goals we should know? (Optional but helpful!)
+            </p>
+
+            <textarea
+              value={freeformText}
+              onChange={(e) => setFreeformText(e.target.value)}
+              placeholder="e.g., 'I have a factory visit at Mercedes next week and need to understand their assembly line metrics' or 'I'm preparing for a job interview where they mentioned game theory'"
+              className="w-full px-6 py-4 text-lg text-gray-900 placeholder-gray-400 glass rounded-2xl focus:ring-2 focus:outline-none mb-6 transition-all shadow-sm resize-none"
+              style={{ 
+                borderColor: 'var(--royal-blue)',
+                minHeight: '180px'
+              }}
+              maxLength={500}
+              autoFocus
+            />
+            
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-sm text-gray-500">
+                {freeformText.length}/500 characters
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  // Skip - go to review
+                  setStep('review');
+                }}
+                className="flex-1 px-6 py-4 border-2 rounded-xl font-semibold transition-all"
+                style={{ 
+                  borderColor: 'var(--royal-blue)',
+                  color: 'var(--royal-blue)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(0, 63, 135, 0.05)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                Skip
+              </button>
+              
+              <button
+                onClick={() => {
+                  if (freeformText.trim()) {
+                    setFingerprint({ ...fingerprint, context: freeformText.trim() });
+                  }
+                  setStep('review');
+                }}
+                className="flex-1 text-white font-semibold text-lg py-4 px-8 rounded-xl transition-all shadow-lg hover:shadow-xl"
+                style={{ backgroundColor: 'var(--royal-blue)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--royal-blue-light)')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--royal-blue)')}
+              >
+                Continue →
+              </button>
+            </div>
           </div>
         </div>
       </div>

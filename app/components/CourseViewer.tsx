@@ -210,13 +210,67 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
         {showNav && (
           <aside className="w-80 min-h-screen sticky top-[89px] hidden lg:block">
             <div className="p-8">
+              {/* Progress Summary */}
+              <div className="mb-8 p-6 rounded-2xl" style={{ backgroundColor: 'rgba(0, 63, 135, 0.05)', border: '2px solid rgba(0, 63, 135, 0.1)' }}>
+                <h3 className="text-xs font-bold uppercase tracking-wider mb-4" style={{ color: 'var(--royal-blue)' }}>
+                  Course Progress
+                </h3>
+                
+                {/* Circular Progress */}
+                <div className="flex items-center gap-6 mb-4">
+                  <div className="relative w-20 h-20">
+                    <svg className="transform -rotate-90 w-20 h-20">
+                      <circle
+                        cx="40"
+                        cy="40"
+                        r="32"
+                        stroke="rgba(0, 63, 135, 0.1)"
+                        strokeWidth="8"
+                        fill="none"
+                      />
+                      <circle
+                        cx="40"
+                        cy="40"
+                        r="32"
+                        stroke="var(--royal-blue)"
+                        strokeWidth="8"
+                        fill="none"
+                        strokeDasharray={`${2 * Math.PI * 32}`}
+                        strokeDashoffset={`${2 * Math.PI * 32 * (1 - progress / 100)}`}
+                        strokeLinecap="round"
+                        style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-xl font-bold" style={{ color: 'var(--royal-blue)' }}>
+                        {Math.round(progress)}%
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {completedCount}/{totalLessons}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      lessons complete
+                    </p>
+                  </div>
+                </div>
+
+                {/* Estimated time remaining */}
+                {course.estimated_time && (
+                  <p className="text-xs text-gray-500">
+                    ⏱️ {course.estimated_time} total
+                  </p>
+                )}
+              </div>
+
+              {/* Module outline header */}
               <div className="mb-6">
-                <h3 className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--royal-blue)' }}>
+                <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--royal-blue)' }}>
                   Course Outline
                 </h3>
-                <p className="text-xs text-gray-500">
-                  {completedCount} of {totalLessons} lessons complete
-                </p>
               </div>
               
               <nav className="space-y-6">
