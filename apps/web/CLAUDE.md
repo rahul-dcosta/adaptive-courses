@@ -1,913 +1,619 @@
 # CLAUDE.md - Adaptive Courses Platform Master Reference
 
-**Last Updated:** 2026-02-01 07:15 UTC  
-**Product:** Adaptive personalized course generation platform  
-**Status:** MVP / Early Access
+**Last Updated:** 2026-02-01 15:00 UTC
+**Domain:** [adaptivecourses.ai](https://adaptivecourses.ai)
+**Status:** Beta (Production Locked / Dev Active)
+**Architecture:** Monorepo (npm workspaces)
 
-This document is the single source of truth for understanding the entire product - business, design, technical, and operational aspects.
+> This document is the single source of truth for the entire product—business, design, technical, and operational aspects.
 
 ---
 
-## 🆕 Recent Changes (2026-02-01)
+## 🚀 Quick Start
 
-### Major Update: Auth System + Tiered Pricing Model
+```bash
+# Clone and install
+git clone https://github.com/rahul-dcosta/adaptive-courses.git
+cd adaptive-courses
+npm install
 
-**What Changed:**
-1. ✅ **FIXED: Mermaid diagrams now rendering!**
-   - Root cause: Conflicting prompt instructions about backticks
-   - Fixed: Clarified backticks forbidden for JSON wrapper, but REQUIRED for mermaid blocks
-   - Status: Verified working
+# Development (on dev branch)
+git checkout dev
+npm run dev
 
-2. 🔐 **Full authentication system**
-   - Email OTP verification (6-digit codes)
-   - Magic link authentication (one-click login)
-   - Device fingerprinting for abuse prevention
-   - Session management with JWT
-   - Resend integration for transactional emails
-   - Complete Supabase schema migrations
+# Build
+npm run build
+```
 
-3. 💰 **New tiered pricing model** (evolved from simple $3.99)
-   - Free: 1 course + 5 AI prompts
-   - Per-Course: $3.99 (coffee price - impulse buy)
-   - Unlimited: $7.99/mo (streaming sweet spot - Netflix pricing)
-   - Pro: $14.99/mo (serious learner signal - price anchor)
-   - "Keep forever" differentiator: courses remain yours after cancellation
-   - Natural upgrade funnel: Free → Per-Course → Unlimited → Pro
+**Live URLs:**
+- 🔒 **Production:** https://adaptivecourses.ai (maintenance mode)
+- 🧪 **Development:** https://adaptive-courses.vercel.app (full features)
 
-4. 📊 **Business strategy documentation**
-   - Complete competitive analysis vs Skillshare, Coursera, Udemy, MasterClass
-   - Unit economics: 50%+ gross margins across all tiers
-   - Financial projections with churn assumptions
-   - Upgrade psychology and pricing anchoring strategy
-   - See `docs/BUSINESS-MODEL.md` for full analysis
+---
 
-5. 🎨 **UI improvements**
-   - Updated landing page with new branding
-   - Refined example courses
-   - New context menu component
-   - Better success celebration flow
-   - Enhanced onboarding experience
+## 🆕 Latest Updates (2026-02-01)
 
-**Files Changed:**
-- Added: `lib/services/auth.ts`, `lib/services/email.ts`, `lib/email-templates.ts`
-- Added: `lib/types/auth.ts`, `lib/types/subscription.ts`
-- Added: `supabase/migrations/001_auth_tables.sql`
-- Added: `docs/BUSINESS-MODEL.md`
-- Updated: `CLAUDE.md` (this file)
-- Updated: Course generation prompt, landing page, onboarding
+### Monorepo Restructure + Domain Launch
 
-**Credit:** Co-authored by Claude Opus 4.5 via Claude Code
+**What's New:**
+
+| Change | Details |
+|--------|---------|
+| 🏗️ **Monorepo** | npm workspaces: `apps/web`, `packages/api-client` |
+| 🌐 **Domain** | Launched on `adaptivecourses.ai` |
+| 🔒 **Maintenance Mode** | Production locked, waitlist modal active |
+| 🌿 **Git Workflow** | `dev` branch → testing, `main` → production |
+| 🇦🇪 **Business Entity** | UAE Free Zone LLC planned (Stripe-ready) |
+
+**Branch Strategy:**
+```
+dev branch  →  adaptive-courses.vercel.app  (full features)
+    ↓ merge
+main branch →  adaptivecourses.ai           (locked/waitlist)
+```
 
 ---
 
 ## 📋 Table of Contents
 
-1. [Product Vision & Positioning](#product-vision--positioning)
-2. [Business Model](#business-model)
-3. [User Journey](#user-journey)
-4. [Technical Architecture](#technical-architecture)
-5. [Design System](#design-system)
-6. [Key Features](#key-features)
-7. [Tech Stack](#tech-stack)
-8. [File Structure](#file-structure)
-9. [API Endpoints](#api-endpoints)
-10. [Database Schema](#database-schema)
-11. [Deployment](#deployment)
-12. [Analytics & Tracking](#analytics--tracking)
-13. [Known Issues](#known-issues)
-14. [Future Roadmap](#future-roadmap)
+1. [Product Vision](#-product-vision)
+2. [Business Model](#-business-model)
+3. [Architecture](#-architecture)
+4. [Monorepo Structure](#-monorepo-structure)
+5. [User Journey](#-user-journey)
+6. [Design System](#-design-system)
+7. [Tech Stack](#-tech-stack)
+8. [API Reference](#-api-reference)
+9. [Database Schema](#-database-schema)
+10. [Deployment & DevOps](#-deployment--devops)
+11. [Security](#-security)
+12. [Roadmap](#-roadmap)
 
 ---
 
-## 🎯 Product Vision & Positioning
+## 🎯 Product Vision
+
+### The One-Liner
+**AI-powered courses built around *why* you're learning, not just what.**
 
 ### What We Are
-**Academic Premium Personalized Learning Platform**
+A personalized learning platform that generates custom courses adapted to your specific context, goals, and timeline. Learn game theory for your job interview, not a generic textbook.
 
-We generate custom courses on complex academic topics (game theory, behavioral economics, supply chain optimization) adapted to the user's specific context, goals, and timeline.
+### What We're NOT
+- ❌ A subscription course library (Skillshare, Coursera)
+- ❌ A marketplace for pre-made courses (Udemy)
+- ❌ A casual "learn fun facts" app
+- ❌ A MOOC competitor
 
-### What We Are NOT
-- Not a casual "learn anything" platform
-- Not a subscription learning service
-- Not a generic online course marketplace
-- Not a MOOC competitor
+### Target Users
+Professionals who need to learn complex topics for specific situations:
 
-### Target User
-**Professionals who need to learn complex topics for specific situations:**
-- Factory engineer visiting a new plant → needs supply chain basics
-- Product manager preparing for strategy meeting → needs game theory
-- Startup founder facing legal questions → needs constitutional law fundamentals
-- Data scientist switching industries → needs Bayesian stats refresher
+| User | Situation | Topic |
+|------|-----------|-------|
+| Product Manager | Strategy meeting prep | Game Theory |
+| Factory Engineer | Plant visit | Supply Chain |
+| Startup Founder | Fundraising | Term Sheet Basics |
+| Career Switcher | Interview prep | Industry Fundamentals |
 
 ### Unique Value Proposition
-**"Complex topics, adapted to your context"**
-
-Traditional courses ask: "What's your skill level?"  
-We ask: "What's the situation? What's your goal? When do you need it?"
-
-Then we build a course that teaches game theory *for workplace negotiations* or behavioral economics *for product design* - not generic textbook knowledge.
-
-### Positioning Statement
-Serious academic subjects, personalized for professionals. Learn game theory, behavioral economics, supply chain - not for fun, but for your next meeting, project, or career move.
+> "Traditional courses ask: What's your skill level?
+> We ask: What's the situation? What's your goal? When do you need it?"
 
 ---
 
 ## 💰 Business Model
 
-### Pricing Strategy: "The Netflix of Courses at Spotify Prices"
+### Pricing Philosophy
+**"Netflix quality at coffee prices"**
 
-**Competitive Positioning:**
-- 75% cheaper than Skillshare ($29-32/mo) at $7.99/mo
+We occupy the impulse-buy territory that doesn't exist in learning:
+- 75% cheaper than Skillshare ($29/mo)
 - 87% cheaper than Coursera ($59/mo)
 - 5-50x cheaper than Udemy per-course ($20-200)
-- Monthly flexibility vs MasterClass annual-only ($120-240/yr)
-
-**We occupy the impulse-buy territory for learning** - price points that don't exist in the market.
-
----
 
 ### Pricing Tiers
 
-#### **Free Tier**
-- **Cost:** $0
-- **Includes:**
-  - 1 free course (first ever)
-  - Full course content forever
-  - 5 AI prompts total (lifetime)
-  - No PDF export, no email delivery
-- **Purpose:** Get users hooked, reduce friction to first value
-
-#### **Per-Course: $3.99** — The "Coffee Price"
-- **Cost:** $3.99 per course
-- **Includes:**
-  - Course is yours forever (even if you later subscribe and cancel)
-  - 10 AI prompts/day on that topic
-  - PDF export + email delivery
-- **Psychology:**
-  - Below $5 "mental accounting" threshold
-  - Same price as a latte, but you keep it forever
-  - Low enough to buy impulsively, high enough to filter zero-intent users
-  - 65.7% gross margin (highly profitable)
-- **Purpose:** Low commitment, fair value exchange
-
-#### **Unlimited: $7.99/mo** — The "Streaming Sweet Spot"
-- **Cost:** $7.99/month (or $79/year = 2 months free)
-- **Includes:**
-  - Unlimited course generation
-  - 50 AI prompts/day (global)
-  - Priority generation (faster API)
-  - PDF export + email delivery
-  - Early access to features
-  - All courses remain yours if you cancel
-- **Psychology:**
-  - Below Netflix ($15.49), Spotify ($10.99), most subscriptions
-  - The "why not?" price - costs less than a Chipotle bowl
-  - 3 courses/month = break-even vs per-course
-  - Subscription psychology: feels like nothing, compounds to real revenue
-  - 51.4% gross margin
-- **Purpose:** Regular learners, hobbyists, impulse subscribers
-
-#### **Pro: $14.99/mo** — The "Serious Learner" Signal
-- **Cost:** $14.99/month (or $149/year = 2 months free)
-- **Includes:**
-  - Everything in Unlimited, plus:
-  - 200 AI prompts/day (effectively unlimited)
-  - Advanced AI features (deeper explanations, custom paths)
-  - Priority support
-  - Course certificates (AI-personalized, verifiable)
-  - API access (future)
-- **Psychology:**
-  - Still under cost of a single Udemy course
-  - Certificates create perceived value worth 2x Unlimited tier
-  - 200 prompts = unlimited for any human
-  - **This tier exists primarily to make $7.99 look like a bargain** (price anchoring)
-  - Only ~10% of subscribers need Pro - but it drives Unlimited conversions
-  - 53.4% gross margin
-- **Purpose:** Power users, educators, professionals, price anchor
-
----
-
-### The Upgrade Funnel Math
-
-Natural escalator that creates itself:
-
-```
-Free (1 course) 
-  → "I want more" 
-  → Per-course ($3.99)
-    ↓
-After 2nd purchase: "You've spent $7.98..."
-  → "...for $7.99/mo get unlimited"
-    ↓
-Power users → Pro ($14.99)
-```
-
-**At 3 courses/month, per-course costs $11.97 vs $7.99 subscription.**  
-**The economics force the upgrade.**
-
----
+| Tier | Price | What You Get | Gross Margin |
+|------|-------|--------------|--------------|
+| **Free** | $0 | 1 course, 5 AI prompts lifetime | N/A |
+| **Per-Course** | $3.99 | Course forever + 10 prompts/day | 65.7% |
+| **Unlimited** | $7.99/mo | Unlimited courses, 50 prompts/day | 51.4% |
+| **Pro** | $14.99/mo | Everything + 200 prompts + certificates | 53.4% |
 
 ### The "Keep It Forever" Differentiator
-
-**Every competitor's problem:** "What happens when I cancel?"
-
-**Our answer:** You keep every course you generated.
-
-**Why this matters:**
+Every course you generate is **yours forever**, even if you cancel. This:
 - ✅ Builds trust (no hostage-taking)
-- ✅ Reduces churn anxiety (people subscribe longer when not afraid)
-- ✅ Creates word-of-mouth ("I canceled but still have all my courses")
-- ✅ Doesn't hurt us - value is in generation + AI chat, not storage
+- ✅ Reduces churn anxiety
+- ✅ Creates word-of-mouth
+- ✅ Costs us nothing (value is in generation, not storage)
+
+### Business Entity Plan
+**UAE Free Zone LLC** (planned for payment activation)
+- Meydan or SHAMS Free Zone (~$1,500-3,000)
+- Stripe UAE integration
+- 0% personal income tax
+- Golden Visa holder = simplified setup
 
 ---
 
-### Annual Pricing: The LTV Multiplier
-
-Annual plans give 2 months free but provide massive benefits:
-- **Zero churn risk for 12 months** (5%/month → 0%)
-- **Cash upfront** for reinvestment
-- **At 60% renewal rate, annual LTV exceeds monthly LTV**
-
-Pricing:
-- Unlimited: $79/year (vs $95.88 monthly)
-- Pro: $149/year (vs $179.88 monthly)
-
----
-
-### Revenue Strategy
-
-1. **Free → Per-Course funnel** (lead gen + revenue)
-2. **Per-Course → Unlimited** (natural upgrade at 3 courses)
-3. **Unlimited → Pro** (10% of power users)
-4. **Annual conversion** (20-30% of subscribers)
-
-**See `docs/BUSINESS-MODEL.md` for complete financial projections, unit economics, and competitive analysis.**
-
----
-
-## 🚀 User Journey
-
-### Landing Page
-1. User arrives at homepage
-2. Sees headline: "Master Complex Topics, Adapted to Your Goals"
-3. Views example courses (6 impressive academic topics)
-4. Enters topic in search bar OR clicks example course
-
-### Onboarding (Fingerprint Collection)
-User answers questions to build "learner fingerprint":
-1. **Topic confirmation:** What do you want to learn?
-2. **Prior knowledge:** Beginner / Some exposure / Intermediate / Advanced
-3. **Learning goal:** Job interview / Career / Sound smart / Academic / Hobby / Teach others
-4. **Time commitment:** 30 min / 1 hour / 2 hours / 1 week / No rush
-5. **Learning style:** Visual / Auditory / Reading / Kinesthetic / Mixed
-6. **Content format:** Examples first / Theory first / Visual diagrams / Text heavy / Mixed
-7. **Challenge preference:** Easy to hard / Adaptive / Deep dive / Practical only
-8. **Context (optional):** Tell us more about your situation
-
-### Outline Generation
-1. AI generates course outline (2 modules, 2-3 lessons each)
-2. User reviews outline
-3. User can:
-   - ✅ Approve → generates full course
-   - 🔄 Request changes → AI regenerates with feedback
-
-### Course Generation
-1. Loading screen with progress messages
-2. AI generates full course (30-60 seconds)
-3. Success celebration animation
-4. Transition to course viewer
-
-### Course Viewing
-1. Premium course viewer with:
-   - Sidebar navigation (progress tracking, module outline)
-   - Main content area (lesson text, quizzes, diagrams)
-   - Progress tracking (lessons completed, percentage)
-   - Keyboard shortcuts (← → M)
-2. User reads lessons, marks complete
-3. Optional PDF download (future)
-
----
-
-## 🏗️ Technical Architecture
+## 🏗️ Architecture
 
 ### High-Level Flow
 ```
-User Input → Onboarding → Fingerprint → Outline Generation → Review → Full Course Generation → Course Viewer
+Landing Page → Onboarding (Fingerprint) → Outline Preview → Course Generation → Course Viewer
 ```
 
-### Core Components
-1. **Landing Page** (`LandingPagePremium.tsx`)
-2. **Onboarding** (`OnboardingFingerprint.tsx`)
-3. **Outline Preview** (`CourseOutlinePreview.tsx`)
-4. **Course Builder** (`CourseBuilderSmart.tsx`) - orchestrates the flow
-5. **Course Viewer** (`CourseViewer.tsx`) - reading experience
-6. **Example Courses** (`ExampleCourses.tsx`) - showcase section
+### System Diagram
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         FRONTEND                                 │
+│  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────────┐ │
+│  │   Landing   │→ │  Onboarding  │→ │    Course Viewer        │ │
+│  │    Page     │  │ (Fingerprint)│  │  (Lessons + Quizzes)    │ │
+│  └─────────────┘  └──────────────┘  └─────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        API LAYER                                 │
+│  ┌────────────────┐  ┌────────────────┐  ┌──────────────────┐   │
+│  │ /generate-     │  │ /generate-     │  │ /generate-       │   │
+│  │  outline       │  │  course        │  │  onboarding-qs   │   │
+│  └────────────────┘  └────────────────┘  └──────────────────┘   │
+│  ┌────────────────┐  ┌────────────────┐  ┌──────────────────┐   │
+│  │ /auth/*        │  │ /stripe-webhook│  │ /email-capture   │   │
+│  └────────────────┘  └────────────────┘  └──────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                       SERVICES                                   │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
+│  │  Anthropic  │  │  Supabase   │  │   Stripe    │              │
+│  │  Claude API │  │  (Postgres) │  │  Payments   │              │
+│  └─────────────┘  └─────────────┘  └─────────────┘              │
+└─────────────────────────────────────────────────────────────────┘
+```
 
-### API Layer
+---
 
-**Course Generation:**
-- `/api/generate-onboarding-questions` - Dynamic question generation
-- `/api/generate-outline` - Course structure creation
-- `/api/generate-course` - Full course content generation
+## 📁 Monorepo Structure
 
-**Authentication:**
-- `/api/auth/send-otp` - Email OTP verification
-- `/api/auth/verify-otp` - Verify OTP code
-- `/api/auth/send-magic-link` - Send magic link email
-- `/api/auth/verify` - Verify magic link token
+```
+adaptive-courses/
+├── package.json              # Root workspace config
+├── .gitignore               # Root gitignore
+│
+├── apps/
+│   └── web/                 # Next.js web application
+│       ├── app/
+│       │   ├── api/         # API routes
+│       │   │   ├── auth/    # Authentication endpoints
+│       │   │   ├── generate-course/
+│       │   │   ├── generate-outline/
+│       │   │   └── ...
+│       │   ├── page.tsx     # Homepage
+│       │   ├── layout.tsx   # Root layout
+│       │   └── globals.css  # Global styles
+│       ├── components/      # React components
+│       │   ├── LandingPagePremium.tsx
+│       │   ├── CourseBuilderSmart.tsx
+│       │   ├── CourseViewer.tsx
+│       │   └── ...
+│       ├── lib/             # Utilities & services
+│       │   ├── services/    # Auth, email services
+│       │   ├── types/       # TypeScript types
+│       │   └── ...
+│       ├── CLAUDE.md        # This file
+│       ├── DESIGN.md        # Design system
+│       └── package.json     # Web app dependencies
+│
+├── packages/
+│   └── api-client/          # Shared types & Supabase client
+│       ├── src/
+│       │   ├── index.ts     # Exports
+│       │   ├── types.ts     # Shared types
+│       │   └── supabase.ts  # Supabase client factory
+│       ├── package.json
+│       └── tsconfig.json
+│
+└── docs/                    # Documentation
+    ├── BUSINESS-MODEL.md
+    └── marketing/
+```
 
-**User & Analytics:**
-- `/api/email-capture` - Lead capture
-- `/api/feedback` - User feedback collection
-- `/api/track` - Analytics events
+### Workspace Commands
 
-**Payments:**
-- `/api/stripe-webhook` - Payment processing
+```bash
+# From root directory:
+npm run dev          # Start web dev server
+npm run build        # Build web app
+npm run dev:web      # Explicit web dev
+npm run lint         # Lint web app
+```
 
-### AI Generation
-**Model:** Claude Sonnet 4.5 (via Anthropic API)
+---
 
-**Prompt Engineering:**
-- Learner fingerprint variables injected into system prompt
-- Style adaptation based on learning preferences
-- Length control based on time commitment
-- Goal-specific framing (interview prep vs academic deep dive)
-- Visual diagram instructions (Mermaid.js syntax)
+## 🚶 User Journey
 
-### Data Storage
-**Supabase (PostgreSQL)**
+### 1. Landing Page
+- Hero: "Learn Anything, Your Way"
+- Topic input field
+- Example courses grid
+- **Maintenance Mode:** Shows waitlist modal instead of builder
 
-Tables:
-- `courses` - Generated course content + metadata
-- `users` - Email capture, payment status
-- `analytics_events` - User behavior tracking
+### 2. Onboarding (Learner Fingerprint)
+Collects 8 dimensions to personalize the course:
 
-### State Management
-- React hooks (useState, useEffect)
-- localStorage for progress persistence
-- URL params for session state (module/lesson position)
+| Dimension | Options | Impact |
+|-----------|---------|--------|
+| Prior Knowledge | Beginner → Advanced | Depth & vocabulary |
+| Learning Goal | Interview / Career / Curiosity | Framing & examples |
+| Time Commitment | 30min → No rush | Length & density |
+| Learning Style | Visual / Reading / Mixed | Diagrams vs text |
+| Content Format | Examples-first / Theory-first | Structure |
+| Challenge Pref | Easy→Hard / Adaptive | Difficulty curve |
+| Context | Free text | Specific tailoring |
+
+### 3. Outline Preview
+- AI generates 2-module outline
+- User can approve or request changes
+- Natural language feedback loop
+
+### 4. Course Generation
+- 30-60 second generation
+- Progress messages during wait
+- Success celebration animation
+
+### 5. Course Viewer
+- Sidebar navigation
+- Progress tracking (localStorage)
+- Interactive quizzes
+- Mermaid diagrams
+- Keyboard shortcuts (← → M)
 
 ---
 
 ## 🎨 Design System
 
-**Full documentation:** `DESIGN.md`
+> Full details in `DESIGN.md`
 
 ### Brand Colors
-- **Royal Blue:** `#003F87` (primary)
-- **Royal Blue Light:** `#0056B3` (hover)
-- **Royal Blue Dark:** `#002D5F` (emphasis)
+```css
+--royal-blue: #003F87      /* Primary */
+--royal-blue-light: #0056B3 /* Hover */
+--royal-blue-dark: #002D5F  /* Emphasis */
+```
 
 ### Typography
-- **Serif (Headings):** Merriweather
-- **Sans-Serif (Body):** Inter
-- **Monospace (Code):** Monaco
+- **Headings:** Merriweather (serif, academic)
+- **Body:** Inter (clean, readable)
+- **Code:** Monaco (monospace)
 
 ### Design Principles
 1. **Academic Premium** - Serious, sophisticated, credible
-2. **Subtle Borders** - 1px, 0.08-0.12 opacity (never heavy)
-3. **Generous White Space** - Breathing room, not cluttered
-4. **Restrained Shadows** - Depth without drama
-5. **Royal Blue Accents** - Used sparingly for impact
-6. **Clean Typography** - Large, readable, hierarchical
-
-### Component Patterns
-- **Cards:** White bg, subtle border, rounded-xl
-- **Buttons:** Royal blue with shadow, hover effects
-- **Badges:** Pill shape, light blue tint
-- **Progress:** Circular SVG or linear bar
-- **Quiz sections:** Light background, bordered box
-- **Completion badges:** Green tint, checkmark icon
-
-### Spacing
-Multiples of 4px (Tailwind scale): 4, 8, 12, 16, 24, 32, 48, 64px
-
----
-
-## ✨ Key Features
-
-### 1. Learner Fingerprinting
-Collects 8 dimensions of user context to personalize course:
-- Prior knowledge level
-- Learning goal (why they're learning)
-- Time available
-- Learning style (visual, auditory, etc.)
-- Content format preference
-- Challenge preference
-- Context/situation
-
-### 2. Outline Approval Flow
-User reviews AI-generated outline before full course generation:
-- See module/lesson structure upfront
-- Request changes with natural language feedback
-- AI regenerates outline incorporating feedback
-- Approve when satisfied
-
-### 3. Progress Tracking
-- Tracks completed lessons via localStorage
-- Circular progress indicator in sidebar
-- Percentage completion
-- Persists across sessions (keyed by course ID)
-
-### 4. Interactive Quizzes
-- Each lesson includes quiz question + answer
-- Collapsible answer (click to reveal)
-- Reinforces learning without being pushy
-
-### 5. Visual Diagrams (Mermaid.js)
-- Client-side diagram rendering
-- Flowcharts, sequence diagrams, state machines, ER diagrams
-- Embedded directly in lesson content
-- Styled to match royal blue theme
-
-### 6. Keyboard Navigation
-- `→` Next lesson
-- `←` Previous lesson
-- `M` Toggle sidebar
-- Smooth scrolling between lessons
-
-### 7. Responsive Design
-- Mobile-first approach
-- Sidebar collapses on mobile
-- Touch-friendly navigation
-- Readable typography at all sizes
-
-### 8. Email Authentication System
-- **OTP verification** - 6-digit code sent via email
-- **Magic link** - One-click login links
-- **Device fingerprinting** - Abuse prevention
-- **Session management** - Secure JWT tokens
-- **Email service** - Resend integration for transactional emails
-- **Email templates** - Branded OTP and magic link emails
+2. **Subtle Borders** - 1px, 0.08-0.12 opacity
+3. **Generous White Space** - Breathing room
+4. **Royal Blue Accents** - Used sparingly
+5. **Clean Typography** - Large, readable, hierarchical
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **Framework:** Next.js 16 (App Router)
-- **UI:** React 19
-- **Styling:** Tailwind CSS + Custom CSS
-- **Fonts:** Google Fonts (Merriweather, Inter)
-- **Diagrams:** Mermaid.js 11.12.2
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| Next.js | 16.1.6 | Framework (App Router) |
+| React | 19.2.3 | UI Library |
+| Tailwind CSS | 4.x | Styling |
+| Mermaid.js | 11.12.2 | Diagrams |
 
 ### Backend
-- **Runtime:** Next.js API Routes (serverless)
-- **AI:** Anthropic Claude API (Sonnet 4.5)
-- **Database:** Supabase (PostgreSQL)
-- **Authentication:** Custom email auth (OTP + magic links)
-- **Email:** Resend (transactional emails)
-- **Payments:** Stripe
-- **Analytics:** Custom implementation (Supabase events)
+| Technology | Purpose |
+|------------|---------|
+| Next.js API Routes | Serverless endpoints |
+| Anthropic Claude | AI course generation |
+| Supabase | Database (PostgreSQL) |
+| Resend | Transactional email |
+| Stripe | Payments (planned) |
 
 ### Infrastructure
-- **Hosting:** Vercel
-- **Database:** Supabase Cloud
-- **Domain:** Custom domain (TBD)
-- **CDN:** Vercel Edge Network
-
-### Development
-- **Language:** TypeScript
-- **Package Manager:** npm
-- **Version Control:** Git + GitHub
-- **Linting:** ESLint
-- **Formatting:** Prettier (default)
+| Service | Purpose |
+|---------|---------|
+| Vercel | Hosting & deployment |
+| Supabase Cloud | Database hosting |
+| Porkbun | Domain registrar |
+| GitHub | Source control |
 
 ---
 
-## 📁 File Structure
+## 🔌 API Reference
 
-```
-app/
-├── app/
-│   ├── api/
-│   │   ├── auth/
-│   │   │   ├── send-otp/route.ts            # Send OTP email
-│   │   │   ├── verify-otp/route.ts          # Verify OTP code
-│   │   │   ├── send-magic-link/route.ts     # Send magic link
-│   │   │   └── verify/route.ts              # Verify magic link
-│   │   ├── generate-course/route.ts         # Full course generation
-│   │   ├── generate-outline/route.ts        # Outline generation
-│   │   ├── generate-onboarding-questions/   # Dynamic questions
-│   │   ├── email-capture/route.ts           # Lead capture
-│   │   ├── feedback/route.ts                # User feedback
-│   │   ├── track/route.ts                   # Analytics
-│   │   ├── stripe-webhook/route.ts          # Payment webhook
-│   │   └── health/route.ts                  # Healthcheck
-│   ├── page.tsx                             # Homepage
-│   ├── globals.css                          # Global styles + theme
-│   └── layout.tsx                           # Root layout
-├── components/
-│   ├── LandingPagePremium.tsx               # Main landing page
-│   ├── CourseBuilderSmart.tsx               # Flow orchestrator
-│   ├── OnboardingFingerprint.tsx            # Fingerprint collection
-│   ├── CourseOutlinePreview.tsx             # Outline review
-│   ├── CourseViewer.tsx                     # Course reading UI
-│   ├── ExampleCourses.tsx                   # Example showcase
-│   ├── MermaidDiagram.tsx                   # Diagram renderer
-│   ├── ContextMenu.tsx                      # Right-click menu
-│   ├── LoadingSpinner.tsx                   # Loading states
-│   └── SuccessCelebration.tsx               # Completion animation
-├── lib/
-│   ├── services/
-│   │   ├── auth.ts                          # Auth service (OTP, sessions)
-│   │   └── email.ts                         # Email service (Resend)
-│   ├── types/
-│   │   ├── auth.ts                          # Auth types
-│   │   └── subscription.ts                  # Subscription types
-│   ├── analytics.ts                         # Analytics helpers
-│   ├── supabase.ts                          # Supabase client
-│   ├── email-templates.ts                   # Email HTML templates
-│   ├── validation.ts                        # Input validation
-│   └── helpers.ts                           # Utility functions
-├── supabase/
-│   └── migrations/
-│       └── 001_auth_tables.sql              # Auth schema
-├── docs/
-│   └── BUSINESS-MODEL.md                    # Pricing & projections
-├── DESIGN.md                                # Design system
-├── MERMAID.md                               # Mermaid usage guide
-├── CLAUDE.md                                # This file
-└── package.json                             # Dependencies
-```
+### Course Generation
 
----
+#### `POST /api/generate-outline`
+Generates course outline for preview.
 
-## 🔌 API Endpoints
-
-### POST `/api/generate-course`
-**Purpose:** Generate full course content
-
-**Input:**
-```json
+```typescript
+// Request
 {
-  "topic": "Game Theory",
-  "learningStyle": "visual",
-  "priorKnowledge": "beginner",
-  "learningGoal": "job_interview",
-  "timeCommitment": "1_hour",
-  "contentFormat": "examples_first",
-  "challengePreference": "adaptive",
-  "context": "Preparing for strategy consultant interview"
+  topic: string;
+  learningStyle: "visual" | "reading" | "mixed";
+  priorKnowledge: "beginner" | "intermediate" | "advanced";
+  learningGoal: string;
+  timeCommitment: string;
+  context?: string;
 }
-```
 
-**Output:**
-```json
+// Response
 {
-  "success": true,
-  "course": {
-    "title": "Game Theory for Job Interviews",
-    "estimated_time": "1 hour",
-    "modules": [
-      {
-        "title": "Module 1",
-        "description": "...",
-        "lessons": [
-          {
-            "title": "Lesson 1",
-            "content": "...",
-            "quiz": {
-              "question": "...",
-              "answer": "..."
-            }
-          }
-        ]
-      }
-    ],
-    "next_steps": ["...", "...", "..."]
-  },
-  "courseId": "uuid"
-}
-```
-
-### POST `/api/generate-outline`
-**Purpose:** Generate course outline for preview
-
-**Input:** Same as `/api/generate-course` + optional `previousOutline` and `feedback`
-
-**Output:**
-```json
-{
-  "outline": {
-    "title": "Course Title",
-    "modules": [
-      {
-        "title": "Module 1",
-        "lessons": [
-          { "title": "Lesson 1" },
-          { "title": "Lesson 2" }
-        ]
-      }
-    ],
-    "estimated_time": "1 hour"
+  outline: {
+    title: string;
+    modules: Array<{
+      title: string;
+      lessons: Array<{ title: string }>;
+    }>;
+    estimated_time: string;
   }
 }
 ```
 
-### POST `/api/generate-onboarding-questions`
-**Purpose:** Generate dynamic follow-up questions
+#### `POST /api/generate-course`
+Generates full course content.
 
-**Input:**
-```json
+```typescript
+// Response
 {
-  "topic": "Supply Chain Optimization",
-  "answers": {
-    "priorKnowledge": "beginner",
-    "learningGoal": "career"
-  }
+  success: true;
+  course: {
+    title: string;
+    modules: Array<{
+      title: string;
+      lessons: Array<{
+        title: string;
+        content: string;  // Markdown with Mermaid
+        quiz: { question: string; answer: string; }
+      }>;
+    }>;
+  };
+  courseId: string;
 }
 ```
 
-**Output:**
-```json
-{
-  "questions": [
-    {
-      "id": "context",
-      "question": "Tell us about your factory/warehouse setup",
-      "type": "text"
-    }
-  ]
-}
-```
+### Authentication
 
-### POST `/api/email-capture`
-**Purpose:** Capture email for free course
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/auth/send-otp` | POST | Send 6-digit OTP email |
+| `/api/auth/verify-otp` | POST | Verify OTP code |
+| `/api/auth/send-magic-link` | POST | Send magic link |
+| `/api/auth/verify` | GET | Verify magic link token |
+| `/api/auth/logout` | POST | Clear session |
 
-**Input:**
-```json
-{
-  "email": "user@example.com",
-  "topic": "Game Theory"
-}
-```
-
-### POST `/api/feedback`
-**Purpose:** Collect user feedback
-
-**Input:**
-```json
-{
-  "courseId": "uuid",
-  "rating": 5,
-  "feedback": "Great course!",
-  "email": "user@example.com"
-}
-```
-
-### POST `/api/track`
-**Purpose:** Track analytics events
-
-**Input:**
-```json
-{
-  "event": "course_generated",
-  "properties": {
-    "topic": "Game Theory",
-    "duration": 1234
-  }
-}
-```
+### Maintenance Mode
+When `NEXT_PUBLIC_MAINTENANCE_MODE=true`:
+- All generation APIs return `503 Service Unavailable`
+- Landing page shows waitlist modal instead of builder
+- URL params `?mode=build` redirect to home
 
 ---
 
 ## 💾 Database Schema
 
-### Table: `courses`
-```sql
-CREATE TABLE courses (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  topic TEXT NOT NULL,
-  skill_level TEXT,
-  goal TEXT,
-  time_available TEXT,
-  content JSONB NOT NULL,
-  paid BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP DEFAULT NOW(),
-  user_email TEXT,
-  fingerprint JSONB
-);
-```
+### Core Tables
 
-### Table: `users`
 ```sql
+-- Users
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   email TEXT UNIQUE NOT NULL,
-  created_at TIMESTAMP DEFAULT NOW(),
-  stripe_customer_id TEXT,
-  courses_purchased INTEGER DEFAULT 0
+  plan TEXT DEFAULT 'free',  -- free | per_course | pro
+  created_at TIMESTAMP DEFAULT NOW()
 );
-```
 
-### Table: `analytics_events`
-```sql
-CREATE TABLE analytics_events (
+-- Courses
+CREATE TABLE courses (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  event_name TEXT NOT NULL,
-  properties JSONB,
-  created_at TIMESTAMP DEFAULT NOW(),
-  session_id TEXT,
-  user_id UUID REFERENCES users(id)
+  user_id UUID REFERENCES users(id),
+  topic TEXT NOT NULL,
+  content JSONB NOT NULL,
+  fingerprint JSONB,
+  status TEXT DEFAULT 'complete',
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Sessions
+CREATE TABLE sessions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id),
+  token TEXT UNIQUE NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- OTP Codes
+CREATE TABLE otp_codes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  email TEXT NOT NULL,
+  code TEXT NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  used BOOLEAN DEFAULT FALSE
 );
 ```
 
 ---
 
-## 🚢 Deployment
-
-### Vercel
-- **Framework:** Next.js (auto-detected)
-- **Build Command:** `npm run build`
-- **Output Directory:** `.next`
-- **Install Command:** `npm install`
+## 🚢 Deployment & DevOps
 
 ### Environment Variables
+
 ```env
+# AI
 ANTHROPIC_API_KEY=sk-ant-...
+
+# Database
 NEXT_PUBLIC_SUPABASE_URL=https://...supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 SUPABASE_SERVICE_ROLE_KEY=eyJ...
+
+# Payments (future)
 STRIPE_SECRET_KEY=sk_...
 STRIPE_WEBHOOK_SECRET=whsec_...
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_...
+
+# Email
+RESEND_API_KEY=re_...
+
+# Feature Flags
+NEXT_PUBLIC_MAINTENANCE_MODE=true  # Production only
 ```
+
+### Vercel Configuration
+
+| Setting | Value |
+|---------|-------|
+| Root Directory | `apps/web` |
+| Build Command | `npm run build` |
+| Output Directory | `.next` |
+| Node Version | 20.x |
 
 ### Git Workflow
-1. Main branch: `main`
-2. Push to main triggers Vercel deployment
-3. Preview deployments for PRs (if needed)
 
-### Build Process
-1. `npm install` - Install dependencies
-2. `npm run build` - Next.js production build
-3. TypeScript compilation
-4. Static page generation
-5. Deploy to Vercel edge network
+```bash
+# Development flow
+git checkout dev
+# ... make changes ...
+git add -A && git commit -m "feat: description"
+git push origin dev
+# → Deploys to adaptive-courses.vercel.app
 
----
-
-## 📊 Analytics & Tracking
-
-### Events Tracked
-- `page_view` - Landing page visit
-- `topic_entered_landing` - User enters topic
-- `example_course_selected` - Clicks example course
-- `onboarding_started` - Begins fingerprint
-- `onboarding_completed` - Finishes fingerprint
-- `outline_generated` - Outline created
-- `outline_approved` - User approves outline
-- `outline_revision_requested` - User requests changes
-- `course_generated` - Full course created
-- `lesson_completed` - User marks lesson complete
-- `pdf_download` - Downloads course (future)
-
-### Analytics Helper
-```typescript
-// lib/analytics.ts
-export const analytics = {
-  track: (event: string, properties?: any) => void,
-  pageView: (page: string) => void,
-  courseStarted: (topic: string) => void,
-  courseGenerated: (topic: string, duration: number) => void
-};
+# Production release
+git checkout main
+git merge dev
+git push origin main
+# → Deploys to adaptivecourses.ai
 ```
 
-### Future Analytics
-- Funnel conversion rates
-- Time to course completion
-- Most popular topics
-- Drop-off points
-- A/B testing framework
+### Deployment Checklist
+- [ ] Build passes locally (`npm run build`)
+- [ ] Test on dev deployment
+- [ ] Merge to main
+- [ ] Verify production deployment
+- [ ] Check error logs in Vercel
 
 ---
 
-## ⚠️ Known Issues
+## 🔒 Security
 
-### 1. Mermaid Diagrams Not Rendering
-**Status:** FIXED
-**Issue:** Claude API not generating mermaid syntax despite instructions
-**Root Cause:** Conflicting prompt instructions - told Claude "NO markdown code blocks or backticks" while also requiring mermaid blocks (which need backticks)
-**Fix:** Updated prompt in generate-course/route.ts to:
-- Clarify backticks are only forbidden for wrapping JSON, but REQUIRED inside content for mermaid
-- Added explicit JSON example showing exact mermaid format with \\n escaping
-- Strengthened mermaid requirements in system prompt and throughout user prompt
+### Production Lockdown (Current State)
+- ✅ `NEXT_PUBLIC_MAINTENANCE_MODE=true` on production
+- ✅ Landing page visible (marketing/SEO)
+- ✅ Course creation blocked → waitlist modal
+- ✅ API routes return 503
+- ✅ Dev environment has full access
 
-### 2. Quiz Answer Persistence
-**Status:** FIXED (commit ba0157a)  
-**Issue:** Quiz answers stayed expanded when navigating lessons  
-**Fix:** Added unique keys to quiz details element
+### Authentication Security
+- 6-digit OTP codes (5-minute expiry)
+- Magic links (1-hour expiry, single-use)
+- Session tokens (7-day expiry)
+- Device fingerprinting for abuse prevention
 
-### 3. Loading Screen Not Centered
-**Status:** FIXED (commit b6edd06)  
-**Issue:** Loading screens used min-h-screen instead of fixed positioning  
-**Fix:** Changed to `fixed inset-0` for true centering
-
-### 4. Metadata Warnings
-**Status:** KNOWN, LOW PRIORITY  
-**Issue:** Next.js warnings about viewport/themeColor in metadata  
-**Impact:** None (just build warnings)  
-**Fix:** Move to viewport export (future)
+### API Security
+- Rate limiting on generation endpoints
+- Input validation and sanitization
+- No secrets in client-side code
+- CORS configured for domain
 
 ---
 
-## 🔮 Future Roadmap
+## 🗺️ Roadmap
 
-### Short Term (Next 2-4 weeks)
-- [ ] Fix mermaid diagram generation reliability
-- [ ] Add PDF export functionality
-- [ ] Implement Stripe payment flow
-- [ ] Email delivery of courses
-- [ ] Basic user accounts (email + password)
-- [ ] Course library (view past courses)
+### Phase 1: MVP Launch (Current)
+- [x] Monorepo restructure
+- [x] Domain setup (adaptivecourses.ai)
+- [x] Maintenance mode + waitlist
+- [x] Dev/prod branch workflow
+- [ ] Finish core features on dev
+- [ ] Stripe integration
+- [ ] UAE company formation
+- [ ] Launch to waitlist
 
-### Medium Term (1-3 months)
-- [ ] Course sharing (shareable links)
-- [ ] Team/organization accounts
-- [ ] Course editing/regeneration
-- [ ] More visual diagram types
-- [ ] Audio narration (TTS)
+### Phase 2: Growth
+- [ ] PDF export
+- [ ] Email course delivery
+- [ ] Course library (past courses)
+- [ ] Referral system
+- [ ] Product Hunt launch
+
+### Phase 3: Scale
 - [ ] Mobile app (React Native)
+- [ ] Team accounts
+- [ ] API for integrations
+- [ ] Course marketplace
 
-### Long Term (3-6 months)
-- [ ] Interactive exercises/coding challenges
-- [ ] Live expert Q&A sessions
-- [ ] Course marketplace (user-generated)
-- [ ] API for enterprise integrations
-- [ ] White-label licensing
-- [ ] Certificates of completion
-
-### Experimental Ideas
-- [ ] AI tutor chat alongside course
-- [ ] Spaced repetition quiz system
-- [ ] Community discussion forums
-- [ ] Course recommendations engine
-- [ ] Integration with calendars (study scheduling)
+### Phase 4: Expand
+- [ ] AI tutor chat
+- [ ] Certificates
+- [ ] Enterprise features
+- [ ] Internationalization
 
 ---
 
-## 📚 Related Documentation
+## 📞 Quick Reference
 
-- **DESIGN.md** - Complete design system and component patterns
-- **MERMAID.md** - Guide to using Mermaid diagrams in courses
-- **README.md** - Developer setup and contribution guide (if exists)
+### Key Files
+| File | Purpose |
+|------|---------|
+| `apps/web/components/LandingPagePremium.tsx` | Main landing page |
+| `apps/web/components/CourseBuilderSmart.tsx` | Course generation flow |
+| `apps/web/components/CourseViewer.tsx` | Course reading UI |
+| `apps/web/app/api/generate-course/route.ts` | AI generation endpoint |
+| `apps/web/lib/constants.ts` | App-wide constants |
 
----
-
-## 🤝 Development Workflow
-
-### Making Changes
-1. Read `DESIGN.md` first for UI changes
-2. Read `CLAUDE.md` (this file) for context
-3. Make changes locally
-4. Test locally: `npm run dev`
-5. Build: `npm run build`
-6. Commit with descriptive message
-7. Push to main → auto-deploys to Vercel
-
-### Commit Message Format
-```
-🎨 UI: Visual design changes
-✨ Feature: New feature
-🐛 Fix: Bug fix
-📝 Docs: Documentation
-♻️ Refactor: Code restructure
-⚡ Performance: Speed improvement
+### Useful Commands
+```bash
+npm run dev              # Start dev server
+npm run build            # Production build
+git checkout dev         # Switch to dev branch
+git merge main           # Sync with main
 ```
 
-### Testing Checklist
-- [ ] Test on mobile (375px width)
-- [ ] Test on desktop (1920px width)
-- [ ] Test all user flows end-to-end
-- [ ] Check console for errors
-- [ ] Verify API responses
-- [ ] Test edge cases (empty states, errors)
+### Links
+- **Production:** https://adaptivecourses.ai
+- **Staging:** https://adaptive-courses.vercel.app
+- **GitHub:** https://github.com/rahul-dcosta/adaptive-courses
+- **Vercel:** https://vercel.com/rahuls-projects/adaptive-courses
 
 ---
 
-## 💡 Philosophy & Principles
+## 🤝 Contributing
 
-### Product Philosophy
-1. **Respect the user's time** - No fluff, no filler, just what they need
-2. **Personalization over scale** - Better to serve 100 users perfectly than 10,000 mediocrely
-3. **Academic rigor** - Real learning, not edutainment
-4. **Fair pricing** - $3.99 for quality content, no tricks
+### Commit Format
+```
+emoji type: description
 
-### Design Philosophy
-1. **Subtle over flashy** - Elegance comes from restraint
-2. **Academic premium** - Sophisticated without being stuffy
-3. **Function drives form** - Beauty in service of usability
-4. **Consistency builds trust** - Follow DESIGN.md religiously
+Types:
+🎨 UI      - Visual changes
+✨ feat    - New feature
+🐛 fix     - Bug fix
+📝 docs    - Documentation
+♻️ refactor - Code restructure
+⚡ perf    - Performance
+🔒 security - Security fix
+🏗️ build   - Build/deploy changes
+```
 
-### Technical Philosophy
-1. **Simple over clever** - Boring tech that works > exciting tech that breaks
-2. **Ship fast, iterate faster** - MVP mentality
-3. **User experience > developer experience** - But not at the cost of maintainability
-4. **Measure everything** - Analytics guide decisions
+### Code Standards
+- TypeScript strict mode
+- Components in PascalCase
+- Hooks prefix with `use`
+- No `any` types (use `unknown`)
+- Tailwind for styling (no inline styles)
 
 ---
 
 **End of CLAUDE.md**
 
-*This document is maintained by Clawd (AI assistant) and should be updated as the product evolves. When making significant changes, update this file to reflect new understanding.*
+*Maintained by Claude Code. Update this file when making significant product changes.*
+
+*Co-Authored-By: Claude Opus 4.5*
