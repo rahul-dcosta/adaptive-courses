@@ -118,6 +118,26 @@ ${timeGuidance}
 🎚️ DIFFICULTY PROGRESSION:
 ${challengeGuidance}
 
+💡 TEACH LIKE AN EXPERT (CRITICAL):
+Don't just define concepts. Teach the THINKING:
+- Definition: What is it?
+- Why it matters: Real-world impact and relevance
+- Trade-offs: Pros AND cons, tensions, when to use vs not use
+- Context: How it fits in the bigger picture
+- Common mistakes: What people get wrong
+- Practical application: How to actually use this
+
+Example (DO THIS):
+"WIP (Work in Progress) = units that started but aren't finished.
+
+Why WIP is bad: Tied-up capital, takes space, can become obsolete, hides bottlenecks.
+
+Why WIP exists: Buffers against variability. If one station has issues, the next keeps working.
+
+The art: Find the MINIMUM WIP to keep flow stable without excessive holding costs."
+
+DON'T just say "WIP = work in progress" and move on. Teach the nuances.
+
 Generate a SIMPLE structured course with:
 1. A specific, actionable course title (not generic)
 2. EXACTLY 2 modules, each with EXACTLY 2 lessons
