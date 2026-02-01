@@ -110,6 +110,41 @@ export interface ContextMenuData {
   moduleTitle?: string;
 }
 
+// Types for CourseViewer and KnowledgeGraph components
+// These represent the course content structure as rendered in the viewer
+export interface ViewerLesson {
+  title: string;
+  content: string;
+  quiz?: Quiz;
+}
+
+export interface ViewerModule {
+  title: string;
+  description?: string;
+  lessons?: ViewerLesson[];
+  content?: string;
+}
+
+export interface ViewerCourse {
+  id?: string;
+  title: string;
+  description?: string;
+  estimated_time?: string;
+  modules: ViewerModule[];
+  next_steps?: string[];
+  topic?: string;
+}
+
+// Context menu state type for CourseViewer
+export type ContextMenuType = 'lesson' | 'diagram' | 'text' | 'quiz';
+
+export interface ContextMenuState {
+  x: number;
+  y: number;
+  type: ContextMenuType;
+  data?: string;
+}
+
 export interface Stats {
   totalCourses: number;
   paidCourses: number;
@@ -136,7 +171,7 @@ export interface HealthCheck {
   };
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;

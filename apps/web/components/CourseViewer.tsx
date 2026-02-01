@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Component, ReactNode } from 'react';
 import { analytics } from '@/lib/analytics';
 import { generateCoursePDF } from '@/lib/generateCoursePDF';
 import MermaidDiagram from './MermaidDiagram';
@@ -8,34 +8,104 @@ import ContextMenu, { ContextMenuItem, Icons } from './ContextMenu';
 import { ProgressTable } from './ProgressTable';
 import { KnowledgeGraph } from './KnowledgeGraph';
 import { useProgressTracking, loadProgressFromStorage, saveProgressToStorage } from '@/hooks/useProgressTracking';
-
-interface Module {
-  title: string;
-  description?: string;
-  lessons?: Array<{
-    title: string;
-    content: string;
-    quiz?: {
-      question: string;
-      answer?: string;
-    };
-  }>;
-  content?: string;
-}
-
-interface Course {
-  id?: string;
-  title: string;
-  description?: string;
-  estimated_time?: string;
-  modules: Module[];
-  next_steps?: string[];
-  topic?: string;
-}
+import { EmptyState } from './EmptyState';
+import type { ViewerCourse, ContextMenuState, ContextMenuType } from '@/lib/types';
 
 interface CourseViewerProps {
-  course: Course;
+  course: ViewerCourse;
   onExit?: () => void;
+}
+
+// Error Boundary for CourseViewer component
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  onReset?: () => void;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
+class CourseViewerErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('CourseViewer error:', error, errorInfo);
+    analytics.track('course_viewer_error', {
+      error: error.message,
+      componentStack: errorInfo.componentStack?.slice(0, 500)
+    });
+  }
+
+  handleReset = () => {
+    this.setState({ hasError: false, error: undefined });
+    this.props.onReset?.();
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #ffffff 100%)' }}>
+          <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)' }}>
+              <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+
+            <h2 className="text-2xl font-bold text-gray-900 mb-3 font-serif">Course Display Error</h2>
+            <p className="text-gray-600 mb-6">
+              We had trouble displaying this course. Don't worry, your progress is saved.
+            </p>
+
+            {process.env.NODE_ENV === 'development' && this.state.error && (
+              <div className="mb-6 p-4 bg-red-50 rounded-xl text-left">
+                <p className="text-xs text-red-700 font-mono break-all">
+                  {this.state.error.message}
+                </p>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={this.handleReset}
+                className="w-full py-3 rounded-xl font-semibold text-white transition-all shadow-lg hover:shadow-xl"
+                style={{ backgroundColor: 'var(--royal-blue)' }}
+              >
+                Try Again
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                className="w-full py-3 rounded-xl font-medium text-gray-600 hover:text-gray-900 transition-all"
+                style={{ backgroundColor: 'rgba(0, 63, 135, 0.05)' }}
+              >
+                Reload Page
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+// Export a wrapper component that includes error boundary
+export function CourseViewerWithErrorBoundary({ course, onExit }: CourseViewerProps) {
+  return (
+    <CourseViewerErrorBoundary onReset={() => window.location.reload()}>
+      <CourseViewerContent course={course} onExit={onExit} />
+    </CourseViewerErrorBoundary>
+  );
 }
 
 // Helper function to parse content and extract mermaid diagrams
@@ -291,42 +361,42 @@ function QuizSection({ quiz, lessonKey, previousAttempt, onAttempt, onContextMen
   );
 }
 
-export default function CourseViewer({ course, onExit }: CourseViewerProps) {
+function CourseViewerContent({ course, onExit }: CourseViewerProps) {
   const [currentModule, setCurrentModule] = useState(0);
   const [currentLesson, setCurrentLesson] = useState(0);
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
   const [quizAttempts, setQuizAttempts] = useState<Map<string, boolean>>(new Map());
   const [showNav, setShowNav] = useState(true);
   const [viewMode, setViewMode] = useState<'outline' | 'graph'>('outline');
+  const [showMobileGraph, setShowMobileGraph] = useState(false);
+  // Animation states
+  const [lessonTransition, setLessonTransition] = useState<'idle' | 'slide-left' | 'slide-right'>('idle');
+  const [showMasteryCelebration, setShowMasteryCelebration] = useState(false);
+  // Context menu state
+  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
+  // PDF download state
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
-  // Progress tracking hook - pass course content directly
+  // Check if course has valid content
+  const hasValidCourse = course && course.modules && course.modules.length > 0;
+
+  // Progress tracking hook - must be called unconditionally (before any early returns)
   const { moduleProgress, overallProgress, lessonsMastered, totalLessons } = useProgressTracking(
-    { content: { modules: course.modules } },
+    hasValidCourse ? { content: { modules: course.modules } } : null,
     completedLessons,
     quizAttempts
   );
 
-  // Context menu state
-  const [contextMenu, setContextMenu] = useState<{
-    x: number;
-    y: number;
-    type: 'lesson' | 'diagram' | 'text' | 'quiz';
-    data?: any;
-  } | null>(null);
-
-  // PDF download state
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-
   useEffect(() => {
     // Load progress from localStorage (including quiz attempts)
-    if (course.id) {
+    if (hasValidCourse && course.id) {
       const savedProgress = loadProgressFromStorage(course.id);
       setCompletedLessons(savedProgress.completed);
       setQuizAttempts(savedProgress.quizAttempts);
     }
 
     // Read URL params for deep linking
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && hasValidCourse) {
       const params = new URLSearchParams(window.location.search);
       const moduleParam = params.get('module');
       const lessonParam = params.get('lesson');
@@ -347,7 +417,24 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
         }
       }
     }
-  }, [course.id, course.modules]);
+  }, [course?.id, course?.modules, hasValidCourse]);
+
+  // Handle empty course - show empty state (after all hooks)
+  if (!hasValidCourse) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #ffffff 100%)' }}>
+        <EmptyState
+          type="no-modules"
+          title="Course Not Available"
+          description="This course doesn't have any content yet. Please try generating it again."
+          action={onExit ? {
+            label: 'Go Back',
+            onClick: onExit
+          } : undefined}
+        />
+      </div>
+    );
+  }
 
   useEffect(() => {
     // Save progress (including quiz attempts)
@@ -397,26 +484,42 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
   const handleNext = () => {
     const module = course.modules[currentModule];
     const lessons = module.lessons || [];
-    
-    if (currentLesson < lessons.length - 1) {
-      setCurrentLesson(currentLesson + 1);
-    } else if (currentModule < course.modules.length - 1) {
-      setCurrentModule(currentModule + 1);
-      setCurrentLesson(0);
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Start transition animation
+    setLessonTransition('slide-left');
+
+    setTimeout(() => {
+      if (currentLesson < lessons.length - 1) {
+        setCurrentLesson(currentLesson + 1);
+      } else if (currentModule < course.modules.length - 1) {
+        setCurrentModule(currentModule + 1);
+        setCurrentLesson(0);
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Reset transition after navigation
+      setTimeout(() => setLessonTransition('idle'), 50);
+    }, 150);
   };
 
   const handlePrevious = () => {
-    if (currentLesson > 0) {
-      setCurrentLesson(currentLesson - 1);
-    } else if (currentModule > 0) {
-      const prevModule = course.modules[currentModule - 1];
-      const prevLessons = prevModule.lessons || [];
-      setCurrentModule(currentModule - 1);
-      setCurrentLesson(Math.max(0, prevLessons.length - 1));
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Start transition animation
+    setLessonTransition('slide-right');
+
+    setTimeout(() => {
+      if (currentLesson > 0) {
+        setCurrentLesson(currentLesson - 1);
+      } else if (currentModule > 0) {
+        const prevModule = course.modules[currentModule - 1];
+        const prevLessons = prevModule.lessons || [];
+        setCurrentModule(currentModule - 1);
+        setCurrentLesson(Math.max(0, prevLessons.length - 1));
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Reset transition after navigation
+      setTimeout(() => setLessonTransition('idle'), 50);
+    }, 150);
   };
 
   const handleDownloadPDF = async () => {
@@ -453,8 +556,8 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
   // Context menu handlers
   const handleContextMenu = useCallback((
     e: React.MouseEvent,
-    type: 'lesson' | 'diagram' | 'text' | 'quiz',
-    data?: any
+    type: ContextMenuType,
+    data?: string
   ) => {
     e.preventDefault();
     e.stopPropagation();
@@ -588,13 +691,13 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
     >
       {/* Premium Header */}
       <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b shadow-sm" style={{ borderColor: 'rgba(0, 63, 135, 0.1)' }}>
-        <div className="max-w-6xl mx-auto px-6 py-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-5">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
               {onExit && (
                 <button
                   onClick={onExit}
-                  className="text-gray-500 hover:text-gray-900 transition-colors p-1"
+                  className="text-gray-500 hover:text-gray-900 transition-colors p-1 flex-shrink-0"
                   title="Exit course"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -602,17 +705,17 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
                   </svg>
                 </button>
               )}
-              
-              <div>
-                <h1 className="text-xl font-bold text-gray-900 font-serif">{course.title}</h1>
-                <div className="flex items-center gap-3 mt-1">
-                  <p className="text-sm text-gray-600">
-                    Module {currentModule + 1} of {course.modules.length}
+
+              <div className="min-w-0">
+                <h1 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 font-serif truncate">{course.title}</h1>
+                <div className="flex items-center gap-2 sm:gap-3 mt-0.5 sm:mt-1">
+                  <p className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
+                    Module {currentModule + 1}/{course.modules.length}
                   </p>
                   {course.estimated_time && (
                     <>
-                      <span className="text-gray-300">•</span>
-                      <p className="text-sm text-gray-600">{course.estimated_time}</p>
+                      <span className="text-gray-300 hidden sm:inline">•</span>
+                      <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">{course.estimated_time}</p>
                     </>
                   )}
                 </div>
@@ -620,27 +723,43 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
             </div>
 
             <div className="flex items-center gap-4">
-              {/* Progress bar */}
-              <div className="hidden md:flex items-center gap-3">
-                <div className="w-40 h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <div 
+              {/* Progress bar - responsive width */}
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-16 sm:w-24 md:w-40 h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div
                     className="h-2 transition-all duration-500 rounded-full"
-                    style={{ 
+                    style={{
                       width: `${progress}%`,
                       backgroundColor: 'var(--royal-blue)'
                     }}
                   />
                 </div>
-                <span className="text-sm font-medium" style={{ color: 'var(--royal-blue)' }}>
+                <span className="text-xs sm:text-sm font-medium" style={{ color: 'var(--royal-blue)' }}>
                   {Math.round(progress)}%
                 </span>
               </div>
 
-              {/* Download PDF */}
+              {/* Mobile Knowledge Graph button */}
+              <button
+                onClick={() => setShowMobileGraph(true)}
+                className="lg:hidden flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg transition-all"
+                style={{
+                  backgroundColor: 'rgba(0, 63, 135, 0.08)',
+                  color: 'var(--royal-blue)'
+                }}
+                title="View Knowledge Graph"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+                <span className="hidden sm:inline">Graph</span>
+              </button>
+
+              {/* Download PDF - icon only on mobile */}
               <button
                 onClick={handleDownloadPDF}
                 disabled={isGeneratingPDF}
-                className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-wait"
+                className="flex items-center gap-2 px-2 sm:px-4 py-2 text-sm font-medium rounded-lg transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-wait"
                 style={{ color: 'var(--royal-blue)' }}
                 title={isGeneratingPDF ? 'Generating PDF...' : 'Download PDF'}
               >
@@ -654,7 +773,7 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 )}
-                {isGeneratingPDF ? 'Generating...' : 'Download'}
+                <span className="hidden sm:inline">{isGeneratingPDF ? 'Generating...' : 'Download'}</span>
               </button>
             </div>
           </div>
@@ -837,7 +956,7 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
 
         {/* Premium Main Content */}
         <main className="flex-1 min-h-screen">
-          <article className="max-w-3xl mx-auto px-8 py-16">
+          <article className="max-w-3xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12 md:py-16">
             {/* Module badge */}
             <div className="mb-6">
               <span 
@@ -854,7 +973,7 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
 
             {/* Lesson Title */}
             {lesson && (
-              <h2 className="text-5xl font-bold text-gray-900 mb-8 leading-tight font-serif">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 sm:mb-8 leading-tight font-serif">
                 {lesson.title}
               </h2>
             )}
@@ -1080,6 +1199,120 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
           context={{ type: contextMenu.type, data: contextMenu.data }}
         />
       )}
+
+      {/* Mobile Knowledge Graph Modal */}
+      {showMobileGraph && (
+        <div
+          className="fixed inset-0 z-50 lg:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Knowledge Graph"
+        >
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowMobileGraph(false)}
+          />
+
+          {/* Modal Content */}
+          <div className="absolute inset-4 sm:inset-6 md:inset-8 bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+            {/* Modal Header */}
+            <div
+              className="flex items-center justify-between px-4 sm:px-6 py-4 border-b"
+              style={{ borderColor: 'rgba(0, 63, 135, 0.1)' }}
+            >
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 font-serif">Knowledge Graph</h3>
+                <p className="text-sm text-gray-500 mt-0.5">
+                  Tap a lesson to navigate
+                </p>
+              </div>
+              <button
+                onClick={() => setShowMobileGraph(false)}
+                className="p-2 rounded-lg transition-colors hover:bg-gray-100"
+                aria-label="Close"
+              >
+                <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Progress Summary */}
+            <div
+              className="px-4 sm:px-6 py-4 border-b"
+              style={{ borderColor: 'rgba(0, 63, 135, 0.1)', backgroundColor: 'rgba(0, 63, 135, 0.02)' }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="relative w-14 h-14">
+                    <svg className="transform -rotate-90 w-14 h-14">
+                      <circle
+                        cx="28"
+                        cy="28"
+                        r="22"
+                        stroke="rgba(0, 63, 135, 0.1)"
+                        strokeWidth="6"
+                        fill="none"
+                      />
+                      <circle
+                        cx="28"
+                        cy="28"
+                        r="22"
+                        stroke="var(--royal-blue)"
+                        strokeWidth="6"
+                        fill="none"
+                        strokeDasharray={`${2 * Math.PI * 22}`}
+                        strokeDashoffset={`${2 * Math.PI * 22 * (1 - progress / 100)}`}
+                        strokeLinecap="round"
+                        style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-sm font-bold" style={{ color: 'var(--royal-blue)' }}>
+                        {Math.round(progress)}%
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-gray-900">
+                      {completedCount}/{totalLessons}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      lessons complete
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Knowledge Graph */}
+            <div className="flex-1 p-4 sm:p-6 overflow-hidden">
+              <KnowledgeGraph
+                course={course}
+                completedLessons={completedLessons}
+                quizAttempts={quizAttempts}
+                currentLesson={lessonKey}
+                onLessonClick={(modIdx, lesIdx) => {
+                  setCurrentModule(modIdx);
+                  setCurrentLesson(lesIdx);
+                  setShowMobileGraph(false);
+                }}
+                fullHeight
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+// Default export wraps content with error boundary
+export default function CourseViewer({ course, onExit }: CourseViewerProps) {
+  return (
+    <CourseViewerErrorBoundary onReset={() => window.location.reload()}>
+      <CourseViewerContent course={course} onExit={onExit} />
+    </CourseViewerErrorBoundary>
   );
 }

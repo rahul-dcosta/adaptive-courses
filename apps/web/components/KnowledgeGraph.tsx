@@ -2,26 +2,16 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 import { Network, Options, Data } from 'vis-network';
-
-interface Module {
-  title: string;
-  lessons?: Array<{
-    title: string;
-    quiz?: { question: string; answer?: string };
-  }>;
-}
-
-interface Course {
-  title: string;
-  modules: Module[];
-}
+import type { ViewerCourse } from '@/lib/types';
 
 interface KnowledgeGraphProps {
-  course: Course;
+  course: ViewerCourse;
   completedLessons: Set<string>;
   quizAttempts: Map<string, boolean>;
   currentLesson: string;
   onLessonClick: (moduleIdx: number, lessonIdx: number) => void;
+  /** When true, graph fills parent container height (for mobile modal) */
+  fullHeight?: boolean;
 }
 
 // Royal blue theme colors
@@ -92,7 +82,7 @@ function getNodeColor(
 }
 
 function courseToGraph(
-  course: Course,
+  course: ViewerCourse,
   completedLessons: Set<string>,
   quizAttempts: Map<string, boolean>,
   currentLesson: string
@@ -184,6 +174,7 @@ export function KnowledgeGraph({
   quizAttempts,
   currentLesson,
   onLessonClick,
+  fullHeight = false,
 }: KnowledgeGraphProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const networkRef = useRef<Network | null>(null);
@@ -307,30 +298,30 @@ export function KnowledgeGraph({
   }, [course, completedLessons, quizAttempts, currentLesson, handleClick]);
 
   return (
-    <div className="relative">
+    <div className={`relative ${fullHeight ? 'h-full' : ''}`}>
       {/* Legend */}
       <div
-        className="absolute top-3 left-3 z-10 p-3 rounded-lg text-xs space-y-2"
+        className="absolute top-3 left-3 z-10 p-2 sm:p-3 rounded-lg text-xs space-y-1.5 sm:space-y-2"
         style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', border: '1px solid rgba(0, 63, 135, 0.1)' }}
       >
-        <div className="font-semibold text-gray-700 mb-2">Progress</div>
+        <div className="font-semibold text-gray-700 mb-1.5 sm:mb-2">Progress</div>
         <div className="flex items-center gap-2">
           <div
-            className="w-4 h-4 rounded"
+            className="w-3 h-3 sm:w-4 sm:h-4 rounded"
             style={{ backgroundColor: COLORS.notStarted.background, border: `2px solid ${COLORS.notStarted.border}` }}
           />
           <span className="text-gray-600">Not started</span>
         </div>
         <div className="flex items-center gap-2">
           <div
-            className="w-4 h-4 rounded"
+            className="w-3 h-3 sm:w-4 sm:h-4 rounded"
             style={{ backgroundColor: COLORS.inProgress.background, border: `2px solid ${COLORS.inProgress.border}` }}
           />
           <span className="text-gray-600">In progress</span>
         </div>
         <div className="flex items-center gap-2">
           <div
-            className="w-4 h-4 rounded"
+            className="w-3 h-3 sm:w-4 sm:h-4 rounded"
             style={{ backgroundColor: COLORS.mastered.background, border: `2px solid ${COLORS.mastered.border}` }}
           />
           <span className="text-gray-600">Mastered</span>
@@ -339,18 +330,20 @@ export function KnowledgeGraph({
 
       {/* Instructions */}
       <div
-        className="absolute bottom-3 left-3 z-10 px-3 py-2 rounded-lg text-xs text-gray-500"
+        className="absolute bottom-3 left-3 z-10 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs text-gray-500"
         style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)' }}
       >
-        Click a lesson to navigate • Scroll to zoom • Drag to pan
+        <span className="hidden sm:inline">Click a lesson to navigate</span>
+        <span className="sm:hidden">Tap to navigate</span>
+        <span className="hidden sm:inline"> • Scroll to zoom • Drag to pan</span>
       </div>
 
       {/* Graph container */}
       <div
         ref={containerRef}
-        className="w-full rounded-xl"
+        className={`w-full rounded-xl ${fullHeight ? 'h-full' : ''}`}
         style={{
-          height: '450px',
+          height: fullHeight ? '100%' : '450px',
           backgroundColor: 'rgba(0, 63, 135, 0.02)',
           border: '1px solid rgba(0, 63, 135, 0.08)',
         }}
