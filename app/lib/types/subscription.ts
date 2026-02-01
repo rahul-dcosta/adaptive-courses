@@ -42,7 +42,7 @@ export interface OwnedCourse {
 
 export interface AIUsage {
   userId: string;
-  courseId?: string; // null = global usage (for unlimited users)
+  courseId?: string; // null = global usage (for pro users)
   promptsToday: number;
   promptsAllTime: number;
   lastPromptAt: string;
@@ -79,13 +79,13 @@ export const PLAN_LIMITS = {
 // Stripe price IDs (to be configured)
 export const STRIPE_PRICES = {
   per_course: process.env.NEXT_PUBLIC_STRIPE_PRICE_COURSE || 'price_xxx',
-  unlimited_monthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_UNLIMITED_MONTHLY || 'price_xxx',
-  unlimited_annual: process.env.NEXT_PUBLIC_STRIPE_PRICE_UNLIMITED_ANNUAL || 'price_xxx',
+  pro_monthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY || 'price_xxx',
+  pro_annual: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ANNUAL || 'price_xxx',
 } as const;
 
 // Helper functions
 export function canGenerateCourse(user: User, ownedCourses: OwnedCourse[]): boolean {
-  if (user.plan === 'unlimited') return true;
+  if (user.plan === 'pro') return true;
   if (user.plan === 'free' && ownedCourses.length === 0) return true;
   // per_course users can always buy more
   return user.plan === 'per_course';
@@ -100,8 +100,8 @@ export function canUseAIChat(
 ): { allowed: boolean; remaining: number; reason?: string } {
   const limits = PLAN_LIMITS[user.plan];
 
-  // Unlimited: global daily limit across all courses
-  if (user.plan === 'unlimited') {
+  // Pro: global daily limit across all courses
+  if (user.plan === 'pro') {
     const remaining = limits.aiPromptsPerDay - globalPromptsUsedToday;
     if (remaining <= 0) {
       return {
@@ -158,8 +158,8 @@ export function getUpgradeMessage(ownedCourses: OwnedCourse[]): string {
   const spent = purchasedCourses.length * 3.99;
 
   if (spent >= 7.98) {
-    return `You've spent $${spent.toFixed(2)} on courses. For $9.99/month, get unlimited courses + AI chat.`;
+    return `You've spent $${spent.toFixed(2)} on courses. For $9.99/month, get Pro and generate unlimited courses.`;
   }
 
-  return 'Upgrade to Unlimited for unlimited courses and AI chat.';
+  return 'Upgrade to Pro for unlimited courses and AI chat.';
 }
