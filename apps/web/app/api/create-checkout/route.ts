@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getErrorMessage } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,10 +43,10 @@ export async function POST(request: NextRequest) {
       message: 'Payment integration coming soon'
     }, { status: 501 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Checkout creation error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to create checkout session' },
+      { error: getErrorMessage(error) || 'Failed to create checkout session' },
       { status: 500 }
     );
   }

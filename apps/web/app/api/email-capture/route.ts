@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getErrorMessage } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,10 +47,10 @@ export async function POST(request: NextRequest) {
       id: data.id
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Email capture error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to capture email' },
+      { error: getErrorMessage(error) || 'Failed to capture email' },
       { status: 500 }
     );
   }

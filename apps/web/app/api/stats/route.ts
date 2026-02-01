@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getErrorMessage } from '@/lib/types';
 
 export async function GET() {
   try {
@@ -60,7 +61,7 @@ export async function GET() {
       lastUpdated: new Date().toISOString()
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Stats error:', error);
     return NextResponse.json({
       totalCourses: 0,
