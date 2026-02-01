@@ -298,3 +298,38 @@ body {
   fill: var(--royal-blue) !important;
   stroke: var(--royal-blue) !important;
 }
+
+/* Custom Cursor for Course Viewer */
+.course-viewer-cursor {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Cpath d='M3 2l12 9.5-5.5 1.5 3.5 5-2 1-3.5-5L3 18V2z' fill='%23003F87' stroke='%23ffffff' stroke-width='1.2'/%3E%3C/svg%3E") 3 2, auto;
+}
+
+.course-viewer-cursor a,
+.course-viewer-cursor button,
+.course-viewer-cursor [role="button"],
+.course-viewer-cursor .cursor-pointer {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Cpath d='M4 2l13 10-6 1.5 4 5.5-2.2 1.2-4-5.5L4 19V2z' fill='%230056B3' stroke='%23ffffff' stroke-width='1.2'/%3E%3Ccircle cx='17' cy='5' r='3' fill='%23003F87' stroke='%23fff' stroke-width='0.8'/%3E%3C/svg%3E") 3 2, pointer;
+}
+
+/* Disable custom context menu indicator */
+.custom-context-area {
+  position: relative;
+}
+
+.custom-context-area::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--royal-blue);
+  opacity: 0.3;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.custom-context-area:hover::after {
+  opacity: 0.6;
+}

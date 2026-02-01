@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+  <!-- Clean academic pointer with subtle book accent -->
+  <path d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87a.5.5 0 0 0 .35-.85L6.35 2.86a.5.5 0 0 0-.85.35Z" fill="#003F87" stroke="#fff" stroke-width="1.5"/>
+  <!-- Small book accent at base -->
+  <rect x="14" y="18" width="6" height="4" rx="0.5" fill="#003F87" stroke="#fff" stroke-width="0.5"/>
+  <line x1="17" y1="18" x2="17" y2="22" stroke="#fff" stroke-width="0.5"/>
+</svg>

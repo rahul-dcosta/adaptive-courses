@@ -381,7 +381,17 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
                        currentLesson === (module.lessons?.length || 1) - 1;
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #ffffff 100%)' }}>
+    <div
+      className="min-h-screen course-viewer-cursor"
+      style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #ffffff 100%)' }}
+      onContextMenu={(e) => {
+        // Show custom menu everywhere unless clicking on specific nested areas
+        const target = e.target as HTMLElement;
+        if (!target.closest('[data-context-type]')) {
+          handleContextMenu(e, 'lesson');
+        }
+      }}
+    >
       {/* Premium Header */}
       <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b shadow-sm" style={{ borderColor: 'rgba(0, 63, 135, 0.1)' }}>
         <div className="max-w-6xl mx-auto px-6 py-5">

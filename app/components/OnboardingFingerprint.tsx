@@ -324,58 +324,68 @@ export default function OnboardingFingerprint({
     const contentFormatLabel = getDisplayLabel(fingerprint.contentFormat, ONBOARDING_QUESTIONS.contentFormat.options);
     const challengePreferenceLabel = getDisplayLabel(fingerprint.challengePreference, ONBOARDING_QUESTIONS.challengePreference.options);
 
+    const profileItems = [
+      { label: 'Learning Style', value: learningStyleLabel },
+      { label: 'Prior Knowledge', value: priorKnowledgeLabel },
+      { label: 'Learning Goal', value: learningGoalLabel },
+      { label: 'Time Commitment', value: timeCommitmentLabel },
+      { label: 'Content Format', value: contentFormatLabel },
+      { label: 'Challenge Level', value: challengePreferenceLabel },
+    ];
+
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
-        <div className="max-w-2xl w-full glass rounded-3xl p-12 shadow-2xl">
-          <h2 className="text-4xl font-bold mb-4 font-serif" style={{ color: 'var(--royal-blue)' }}>
-            Learner Profile Summary
-          </h2>
-          <p className="text-gray-600 text-lg mb-8 leading-relaxed">
-            Review your specifications below. We will use this profile to structure your personalized curriculum.
-          </p>
+        <div className="max-w-xl w-full">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-2 font-serif" style={{ color: 'var(--royal-blue)' }}>
+              Ready to Generate
+            </h2>
+            <p className="text-gray-500 text-sm">
+              Your personalized course on{' '}
+              <span className="font-semibold" style={{ color: 'var(--royal-blue)' }}>
+                "{fingerprint.topic}"
+              </span>
+            </p>
+          </div>
 
-          <div className="space-y-4 mb-8">
-            <div className="glass-dark p-4 rounded-xl">
-              <p className="text-sm text-gray-600 font-medium uppercase tracking-wide">Subject</p>
-              <p className="text-lg font-semibold" style={{ color: 'var(--royal-blue)' }}>{fingerprint.topic}</p>
+          {/* Clean card */}
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden" style={{ border: '1px solid rgba(0, 63, 135, 0.08)' }}>
+            {/* Profile list */}
+            <div className="divide-y" style={{ borderColor: 'rgba(0, 63, 135, 0.06)' }}>
+              {profileItems.map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between px-6 py-4">
+                  <span className="text-[13px] text-gray-400 uppercase tracking-wider">{item.label}</span>
+                  <span className="text-[15px] font-medium text-gray-800">{item.value}</span>
+                </div>
+              ))}
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="glass-dark p-4 rounded-xl">
-                <p className="text-sm text-gray-600 font-medium uppercase tracking-wide">Learning Style</p>
-                <p className="text-base font-semibold text-gray-900">{learningStyleLabel}</p>
-              </div>
-              <div className="glass-dark p-4 rounded-xl">
-                <p className="text-sm text-gray-600 font-medium uppercase tracking-wide">Prior Knowledge</p>
-                <p className="text-base font-semibold text-gray-900">{priorKnowledgeLabel}</p>
-              </div>
-              <div className="glass-dark p-4 rounded-xl">
-                <p className="text-sm text-gray-600 font-medium uppercase tracking-wide">Learning Goal</p>
-                <p className="text-base font-semibold text-gray-900">{learningGoalLabel}</p>
-              </div>
-              <div className="glass-dark p-4 rounded-xl">
-                <p className="text-sm text-gray-600 font-medium uppercase tracking-wide">Time Commitment</p>
-                <p className="text-base font-semibold text-gray-900">{timeCommitmentLabel}</p>
-              </div>
-              <div className="glass-dark p-4 rounded-xl">
-                <p className="text-sm text-gray-600 font-medium uppercase tracking-wide">Content Format</p>
-                <p className="text-base font-semibold text-gray-900">{contentFormatLabel}</p>
-              </div>
-              <div className="glass-dark p-4 rounded-xl">
-                <p className="text-sm text-gray-600 font-medium uppercase tracking-wide">Challenge Level</p>
-                <p className="text-base font-semibold text-gray-900">{challengePreferenceLabel}</p>
-              </div>
+
+            {/* CTA */}
+            <div className="p-6 pt-4">
+              <button
+                onClick={handleComplete}
+                className="w-full text-white font-semibold text-base py-4 rounded-xl transition-all shadow-md hover:shadow-lg"
+                style={{ backgroundColor: 'var(--royal-blue)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--royal-blue-light)')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--royal-blue)')}
+              >
+                Generate Course Outline
+              </button>
             </div>
           </div>
 
-          <button
-            onClick={handleComplete}
-            className="w-full text-white font-bold text-lg py-5 px-8 rounded-xl transition-all shadow-lg hover:shadow-xl"
-            style={{ backgroundColor: 'var(--royal-blue)' }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--royal-blue-light)')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--royal-blue)')}
-          >
-            Generate Course Outline
-          </button>
+          {/* Edit link */}
+          <p className="text-center mt-4 text-sm text-gray-400">
+            Something wrong?{' '}
+            <button
+              onClick={() => setStep('learningStyle')}
+              className="font-medium hover:underline"
+              style={{ color: 'var(--royal-blue)' }}
+            >
+              Start over
+            </button>
+          </p>
         </div>
       </div>
     );
