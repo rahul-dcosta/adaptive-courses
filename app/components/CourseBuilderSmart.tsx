@@ -25,7 +25,7 @@ export default function CourseBuilderSmart({ initialTopic }: { initialTopic?: st
 
   const generateOutline = async (fp: LearnerFingerprint, previousOutline?: any, userFeedback?: string) => {
     setStep('generating-outline');
-    setIsRegenerating(true);
+    setIsRegenerating(!!userFeedback); // Only true if regenerating with feedback
     
     try {
       analytics.track('outline_generation_started', { topic: fp.topic });
@@ -128,16 +128,14 @@ export default function CourseBuilderSmart({ initialTopic }: { initialTopic?: st
   if (step === 'generating-outline') {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
-        <div className="max-w-md text-center">
-          <div className="mb-8">
-            <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-4 mb-6" style={{ borderTopColor: 'var(--royal-blue)' }}></div>
-            <h2 className="text-3xl font-bold mb-3" style={{ color: 'var(--royal-blue)' }}>
-              {isRegenerating ? 'Updating Outline' : 'Creating Your Outline'}
-            </h2>
-            <p className="text-gray-600 text-lg">
-              {isRegenerating ? 'Incorporating your feedback...' : 'Structuring your perfect course...'}
-            </p>
-          </div>
+        <div className="max-w-md w-full text-center">
+          <div className="inline-block animate-spin rounded-full h-20 w-20 border-4 border-gray-200 border-t-4 mb-8" style={{ borderTopColor: 'var(--royal-blue)' }}></div>
+          <h2 className="text-4xl font-bold mb-4 font-serif" style={{ color: 'var(--royal-blue)' }}>
+            {isRegenerating ? 'Updating Outline' : 'Structuring Your Course'}
+          </h2>
+          <p className="text-gray-600 text-lg leading-relaxed">
+            {isRegenerating ? 'Incorporating your feedback and regenerating outline' : 'Analyzing your profile and constructing optimal curriculum structure'}
+          </p>
         </div>
       </div>
     );
