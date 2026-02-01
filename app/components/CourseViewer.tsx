@@ -378,6 +378,7 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
             {/* Quiz Section */}
             {lesson?.quiz && (
               <div 
+                key={`quiz-${currentModule}-${currentLesson}`}
                 className="p-8 rounded-2xl mb-16"
                 style={{ 
                   backgroundColor: 'rgba(0, 63, 135, 0.05)',
@@ -388,12 +389,12 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
                   <svg className="w-6 h-6 flex-shrink-0 mt-1" style={{ color: 'var(--royal-blue)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <div>
+                  <div className="w-full">
                     <h3 className="text-lg font-bold text-gray-900 mb-2">Quick Check</h3>
                     <p className="text-base text-gray-700 font-medium mb-3">{lesson.quiz.question}</p>
                     {lesson.quiz.answer && (
-                      <details className="mt-4">
-                        <summary className="text-sm font-semibold cursor-pointer" style={{ color: 'var(--royal-blue)' }}>
+                      <details key={`answer-${currentModule}-${currentLesson}`} className="mt-4">
+                        <summary className="text-sm font-semibold cursor-pointer hover:opacity-75 transition-opacity" style={{ color: 'var(--royal-blue)' }}>
                           View Answer
                         </summary>
                         <p className="mt-3 text-sm text-gray-700 pl-4 border-l-2" style={{ borderColor: 'var(--royal-blue)' }}>
