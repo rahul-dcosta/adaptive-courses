@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AuthModal from './AuthModal';
 
 export default function Navbar() {
@@ -8,22 +8,25 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
 
   // Handle scroll effect
-  if (typeof window !== 'undefined') {
-    window.addEventListener('scroll', () => {
+  useEffect(() => {
+    const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
-    });
-  }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <>
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? 'py-3 bg-white/70 backdrop-blur-xl border-b border-[rgba(0,63,135,0.1)] shadow-sm'
-            : 'py-4 bg-transparent'
+            ? 'h-14 bg-white/70 backdrop-blur-xl border-b border-[rgba(0,63,135,0.1)] shadow-sm'
+            : 'h-16 bg-transparent'
         }`}
       >
-        <div className="max-w-6xl mx-auto px-6 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-6 h-full flex items-center justify-between">
           {/* Logo */}
           <a href="/" className="flex items-center gap-3 group">
             {/* Placeholder Logo */}
