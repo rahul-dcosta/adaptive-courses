@@ -172,7 +172,7 @@ export default function SampleCoursePage() {
         <div className="mt-8 bg-white rounded-2xl shadow-xl p-8 text-center">
           <h2 className="text-2xl font-bold mb-4">Like what you see?</h2>
           <p className="text-gray-600 mb-6">
-            Generate your own personalized course in 30 seconds. Just $5.
+            Generate your own personalized course in 30 seconds. First one free, then $3.99.
           </p>
           <a
             href="/"

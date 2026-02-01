@@ -124,7 +124,7 @@ export default function LandingPagePremium() {
               </button>
             </div>
             <p className="text-sm text-gray-500 mt-3">
-              First course free. $3.99 per course after that.
+              First course free. Then $3.99/course or $7.99/mo unlimited.
             </p>
           </form>
         </div>
@@ -193,11 +193,11 @@ export default function LandingPagePremium() {
 
           <div>
             <h3 className="text-3xl font-bold text-gray-900 mb-4">
-              No subscription BS
+              Keep it forever
             </h3>
             <p className="text-lg text-gray-600 leading-relaxed">
-              First course free. Every course after is $3.99. No monthly fees.
-              No premium tiers. No upsells. Just great courses.
+              First course free. Then $3.99 per course or $7.99/mo unlimited.
+              Every course you create is yours forever, even if you cancel.
             </p>
           </div>
         </div>

@@ -1,7 +1,7 @@
 # Adaptive Courses - One-Pager
 
 ## Elevator Pitch (15 seconds)
-AI-powered courses that understand your **situation**, not just your skill level. Going to a factory tomorrow? We teach you exactly what you need. $5 per course.
+AI-powered courses that understand your **situation**, not just your skill level. Going to a factory tomorrow? We teach you exactly what you need. First course free, then $3.99.
 
 ## The Problem (30 seconds)
 You have a factory tour tomorrow. You Google "manufacturing basics" and get:
@@ -28,9 +28,10 @@ Then Claude generates a tailored course with modules, lessons, and quizzes.
 4. Custom course delivered
 
 ## Pricing
-- **$5 per course** (one-time payment)
-- No subscription, no upsells
-- First 100 users: $3 with code HUNTER
+- **Free:** 1 course free forever
+- **Per-Course:** $3.99 (keep forever)
+- **Unlimited:** $7.99/mo (unlimited courses)
+- **Pro:** $14.99/mo (everything + certificates)
 
 ## Market
 **Primary:**
@@ -56,20 +57,20 @@ Then Claude generates a tailored course with modules, lessons, and quizzes.
 | ChatGPT | Free | Low | Fast | None |
 | Udemy | $15-200 | High | Slow (10+ hrs) | None |
 | Coursera | $50-200/mo | High | Very slow | None |
-| **Adaptive Courses** | **$5** | **Medium** | **30 sec** | **High** |
+| **Adaptive Courses** | **$3.99** | **Medium** | **30 sec** | **High** |
 
 **Our edge:** Situation-aware personalization + speed + price.
 
 ## Business Model
-- **Revenue:** $5 per course × courses sold
+- **Revenue:** $3.99/course or $7.99-$14.99/mo subscriptions
 - **Costs:** ~$0.50 per course (Claude API + hosting)
-- **Margin:** ~90% at scale
-- **Break-even:** 11 courses/month
+- **Margin:** ~65-90% depending on tier
+- **Break-even:** ~15 courses/month
 
 **Projections:**
-- Month 1: 200 courses = $1,000 revenue
-- Month 3: 1,000 courses = $5,000 revenue
-- Month 6: 5,000 courses = $25,000 revenue
+- Month 1: 200 courses = $800 revenue
+- Month 3: 1,000 courses + subs = $5,000 revenue
+- Month 6: 5,000 courses + subs = $25,000 revenue
 
 ## Tech Stack
 - **Frontend:** Next.js 14 + Tailwind
@@ -149,7 +150,7 @@ Built by Rahul D'Costa in 72 hours after needing to learn manufacturing basics f
 - **Beta testers** - Need 10 people to try and give feedback
 - **Testimonials** - Will trade free courses for quotes
 - **Product Hunt upvotes** - Launch in 48 hours
-- **Feedback** - What would make you pay $5 for this?
+- **Feedback** - What would make you pay $3.99 for this?
 
 ## Contact
 - **Email:** rdcosta@umich.edu
@@ -158,5 +159,5 @@ Built by Rahul D'Costa in 72 hours after needing to learn manufacturing basics f
 
 ---
 
-**TL;DR:**  
-ChatGPT for learning emergencies. $5 per course. AI-powered. Launches this week.
+**TL;DR:**
+ChatGPT for learning emergencies. First free, then $3.99/course or $7.99/mo unlimited. AI-powered.
