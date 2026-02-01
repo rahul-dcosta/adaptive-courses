@@ -55,10 +55,36 @@ export interface CourseFeedback {
 export interface AnalyticsEvent {
   id: string;
   event_name: string;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   user_agent?: string;
   ip_address?: string;
   created_at: string;
+}
+
+// Error type for catch blocks
+export function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'string') return error;
+  return 'An unexpected error occurred';
+}
+
+// Course outline for preview step
+export interface CourseOutline {
+  title: string;
+  estimated_time: string;
+  modules: Array<{
+    title: string;
+    description: string;
+    lessons: Array<{ title: string }>;
+  }>;
+  next_steps?: string[];
+}
+
+// Context menu action data
+export interface ContextMenuData {
+  lessonTitle?: string;
+  lessonContent?: string;
+  moduleTitle?: string;
 }
 
 export interface Stats {

@@ -7,14 +7,14 @@ import SuccessCelebration from './SuccessCelebration';
 import CourseViewer from './CourseViewer';
 import OnboardingFingerprint from './OnboardingFingerprint';
 import CourseOutlinePreview from './CourseOutlinePreview';
-import { LearnerFingerprint } from '@/lib/types';
+import { LearnerFingerprint, CourseContent, CourseOutline, getErrorMessage } from '@/lib/types';
 
 type Step = 'onboarding' | 'generating-outline' | 'outline-preview' | 'generating-full' | 'celebration' | 'preview';
 
 export default function CourseBuilderSmart({ initialTopic }: { initialTopic?: string }) {
   const [step, setStep] = useState<Step>('onboarding');
-  const [generatedCourse, setGeneratedCourse] = useState<any>(null);
-  const [courseOutline, setCourseOutline] = useState<any>(null);
+  const [generatedCourse, setGeneratedCourse] = useState<CourseContent | null>(null);
+  const [courseOutline, setCourseOutline] = useState<CourseOutline | null>(null);
   const [fingerprint, setFingerprint] = useState<LearnerFingerprint | null>(null);
   const [isRegenerating, setIsRegenerating] = useState(false);
 
@@ -23,7 +23,7 @@ export default function CourseBuilderSmart({ initialTopic }: { initialTopic?: st
     generateOutline(completedFingerprint);
   };
 
-  const generateOutline = async (fp: LearnerFingerprint, previousOutline?: any, userFeedback?: string) => {
+  const generateOutline = async (fp: LearnerFingerprint, previousOutline?: CourseOutline | null, userFeedback?: string) => {
     setStep('generating-outline');
     setIsRegenerating(!!userFeedback); // Only true if regenerating with feedback
     
@@ -61,9 +61,9 @@ export default function CourseBuilderSmart({ initialTopic }: { initialTopic?: st
       setCourseOutline(data.outline);
       setStep('outline-preview');
       setIsRegenerating(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Outline generation failed:', error);
-      alert(`Failed to generate outline: ${error.message}`);
+      alert(`Failed to generate outline: ${getErrorMessage(error)}`);
       setStep('onboarding');
       setIsRegenerating(false);
     }
@@ -108,9 +108,9 @@ export default function CourseBuilderSmart({ initialTopic }: { initialTopic?: st
       setStep('celebration');
       
       setTimeout(() => setStep('preview'), 2000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Course generation failed:', error);
-      alert(`Failed to generate course: ${error.message}`);
+      alert(`Failed to generate course: ${getErrorMessage(error)}`);
       setStep('outline-preview');
     }
   };
