@@ -224,11 +224,12 @@ export default function LandingPagePremium() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div>
             <p className="font-bold text-gray-900 mb-1">Adaptive Courses</p>
-            <p className="text-sm text-gray-500">Built with Claude</p>
+            <p className="text-sm text-gray-500">&copy; {new Date().getFullYear()} Adaptive Courses LLC</p>
           </div>
-          
+
           <div className="flex gap-8 text-sm text-gray-600">
             <a href="/about" className="hover:text-gray-900 transition-colors">About</a>
+            <a href="/pricing" className="hover:text-gray-900 transition-colors">Pricing</a>
             <a href="/faq" className="hover:text-gray-900 transition-colors">FAQ</a>
             <a href="/terms" className="hover:text-gray-900 transition-colors">Terms</a>
             <a href="/privacy" className="hover:text-gray-900 transition-colors">Privacy</a>
