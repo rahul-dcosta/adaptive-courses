@@ -4,13 +4,22 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import AuthModal from './AuthModal';
 
+// Marketing pages where navbar should appear
+const MARKETING_PAGES = ['/', '/pricing', '/about', '/faq', '/terms', '/privacy'];
+
 export default function Navbar() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
 
-  // Only show nav links on homepage
+  // Only show navbar on marketing pages, not in-app (course builder, viewer, etc)
+  const isMarketingPage = MARKETING_PAGES.includes(pathname);
   const isHomepage = pathname === '/';
+
+  // Don't render navbar at all on in-app pages
+  if (!isMarketingPage) {
+    return null;
+  }
 
   // Handle scroll effect
   useEffect(() => {
