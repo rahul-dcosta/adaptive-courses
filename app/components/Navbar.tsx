@@ -10,8 +10,23 @@ const MARKETING_PAGES = ['/', '/pricing', '/about', '/faq', '/terms', '/privacy'
 export default function Navbar() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  // Wait for client-side mount to avoid hydration issues with useSearchParams
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Check if we're in builder mode (even on homepage)
   const isInBuilderMode = searchParams.get('mode') === 'build';
@@ -20,20 +35,10 @@ export default function Navbar() {
   const isMarketingPage = MARKETING_PAGES.includes(pathname) && !isInBuilderMode;
   const isHomepage = pathname === '/' && !isInBuilderMode;
 
-  // Don't render navbar at all on in-app pages or builder mode
-  if (!isMarketingPage) {
+  // Don't render navbar during SSR or on in-app pages or builder mode
+  if (!isMounted || !isMarketingPage) {
     return null;
   }
-
-  // Handle scroll effect
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   return (
     <>
