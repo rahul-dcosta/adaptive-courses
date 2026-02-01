@@ -217,10 +217,10 @@ export default function LandingPagePremium() {
 
           <div className="border-l-2 border-gray-900 pl-6">
             <p className="text-lg text-gray-900 mb-4 leading-relaxed">
-              "Prepped for my interview in an afternoon. Got the job. Best $4 I ever spent."
+              "Finally, learning that fits my schedule. Created a course on behavioral economics during my lunch break."
             </p>
             <p className="text-sm text-gray-500">
-              James K., Software Engineer
+              Marcus R., Product Manager
             </p>
           </div>
         </div>
