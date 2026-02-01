@@ -54,6 +54,38 @@ User learns "Factory Operations for Mercedes Site Visit"
 - Follow-up questions allowed
 - Explanations adapt to confusion signals
 
+**Teaching Nuances & Trade-offs:**
+The AI should teach like a real expert - not just "what it is" but:
+- Why it matters in practice
+- When to use vs not use
+- Trade-offs and tensions (e.g., "WIP is bad BUT also necessary")
+- Real-world context and examples
+- Common misconceptions
+
+Example:
+```
+❌ Bad: "WIP = Work in Progress. Units that aren't finished."
+
+✅ Good:
+"WIP = Work in Progress
+
+Why WIP is bad:
+- Tied-up capital (money sitting idle)
+- Takes floor space
+- Can become obsolete
+- Hides bottlenecks
+
+Why WIP exists:
+- Buffers against variability
+- Keeps downstream stations working during hiccups
+- Trade-off: cost of holding vs. cost of starvation
+
+The art: Find the MINIMUM WIP needed to keep flow stable."
+```
+
+User can ask: "But if WIP is bad, why not zero WIP?"
+AI explains the trade-off in detail.
+
 ### 3. Adaptive Content Delivery
 - "Explain this differently" option
 - "Give me more examples" button
@@ -104,6 +136,16 @@ Progress Tracker
 - Interactive mode = more API calls = higher cost
 - Maybe tier pricing: $2 static, $5 interactive?
 - Or bundle: "5 interactive courses for $20"
+
+**Content Structure Principles:**
+1. **Definition** - What is it?
+2. **Why it matters** - Real-world impact
+3. **Trade-offs** - Pros AND cons, tensions, when to use
+4. **Context** - How it fits in the bigger picture
+5. **Common mistakes** - What people get wrong
+6. **Practical application** - How to actually use this
+
+This mirrors how experts teach - not just definitions, but THINKING.
 
 **Timeline:** After v1 ships and validates demand (March-April 2026)
 
