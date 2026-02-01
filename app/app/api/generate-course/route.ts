@@ -247,7 +247,7 @@ EXACT JSON FORMAT WITH MERMAID EXAMPLE:
 Make it engaging, practical, and worth $5.`;
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
+      model: 'claude-opus-4-5-20251101',
       max_tokens: 4000,
       temperature: 0.5, // Slightly higher to allow mermaid code generation
       system: systemPrompt,
