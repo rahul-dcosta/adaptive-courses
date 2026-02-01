@@ -389,11 +389,15 @@ export default function OnboardingFingerprint({
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
       <div className="max-w-2xl w-full">
-        {/* Show topic at top if they already entered it */}
-        {initialTopic && currentStepIndex === 1 && (
+        {/* Show topic at top */}
+        {(fingerprint.topic || initialTopic) && (
           <div className="mb-6 text-center">
-            <p className="text-gray-600 text-sm mb-2">Building your course on</p>
-            <h2 className="text-3xl font-bold" style={{ color: 'var(--royal-blue)' }}>{initialTopic}</h2>
+            <p className="text-gray-500 text-sm">
+              Building your course on{' '}
+              <span className="font-semibold" style={{ color: 'var(--royal-blue)' }}>
+                "{fingerprint.topic || initialTopic}"
+              </span>
+            </p>
           </div>
         )}
 
@@ -426,67 +430,66 @@ export default function OnboardingFingerprint({
             {currentQuestion.subtitle}
           </p>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             {currentQuestion.options.map((option) => (
               <button
                 key={option.value}
                 onClick={() => handleOptionSelect(step as keyof LearnerFingerprint, option.value)}
                 disabled={selectedOption !== null}
                 className={`
-                  group relative overflow-hidden bg-white rounded-xl p-5
-                  transition-all duration-200 w-full text-left
+                  group relative bg-white rounded-lg py-3 px-4
+                  transition-all duration-150 w-full text-left
                   ${selectedOption === option.value
-                    ? 'shadow-md'
-                    : 'hover:shadow-md'
+                    ? 'shadow-sm'
+                    : 'hover:shadow-sm'
                   }
                   ${selectedOption !== null && selectedOption !== option.value ? 'opacity-40' : ''}
                 `}
                 style={{
                   border: selectedOption === option.value
-                    ? '2px solid var(--royal-blue)'
-                    : '1px solid rgba(0, 63, 135, 0.12)',
-                  borderLeft: selectedOption === option.value
-                    ? '4px solid var(--royal-blue)'
-                    : '1px solid rgba(0, 63, 135, 0.12)'
+                    ? '1.5px solid var(--royal-blue)'
+                    : '1px solid rgba(0, 63, 135, 0.1)',
+                  backgroundColor: selectedOption === option.value
+                    ? 'rgba(0, 63, 135, 0.02)'
+                    : 'white'
                 }}
               >
-                <div className="relative flex items-center gap-4">
-                  {/* Radio-style indicator */}
+                <div className="flex items-center gap-3">
+                  {/* Minimal radio indicator */}
                   <div
-                    className={`
-                      w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center
-                      transition-all duration-200
-                    `}
+                    className="w-4 h-4 rounded-full border-[1.5px] flex-shrink-0 flex items-center justify-center transition-all duration-150"
                     style={{
-                      borderColor: selectedOption === option.value ? 'var(--royal-blue)' : 'rgba(0, 63, 135, 0.3)'
+                      borderColor: selectedOption === option.value ? 'var(--royal-blue)' : 'rgba(0, 63, 135, 0.25)'
                     }}
                   >
                     {selectedOption === option.value && (
                       <div
-                        className="w-2.5 h-2.5 rounded-full"
+                        className="w-2 h-2 rounded-full"
                         style={{ backgroundColor: 'var(--royal-blue)' }}
                       />
                     )}
                   </div>
 
-                  <div className="flex-1">
-                    <h3
-                      className="text-lg font-semibold mb-0.5 transition-colors duration-200"
-                      style={{ color: selectedOption === option.value ? 'var(--royal-blue)' : '#1f2937' }}
+                  <div className="flex-1 min-w-0">
+                    <span
+                      className="text-[15px] font-medium transition-colors duration-150"
+                      style={{ color: selectedOption === option.value ? 'var(--royal-blue)' : '#374151' }}
                     >
                       {option.label}
-                    </h3>
-                    <p className="text-sm text-gray-500 leading-snug">{option.description}</p>
+                    </span>
+                    <span className="text-[13px] text-gray-400 ml-2">
+                      {option.description}
+                    </span>
                   </div>
 
                   {selectedOption === option.value && (
                     <svg
-                      className="w-5 h-5 flex-shrink-0"
+                      className="w-4 h-4 flex-shrink-0"
                       fill="none"
                       stroke="var(--royal-blue)"
                       viewBox="0 0 24 24"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   )}
                 </div>
