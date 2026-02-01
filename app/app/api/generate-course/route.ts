@@ -45,7 +45,35 @@ export async function POST(request: NextRequest) {
 
     // Build FINGERPRINT-aware prompt
     const learningStyleMap: Record<string, string> = {
-      'visual': 'Use lots of concrete examples, analogies to visual concepts, and describe things in spatial/visual terms. Mention when diagrams would be helpful.',
+      'visual': `Use lots of concrete examples, analogies to visual concepts, and describe things in spatial/visual terms. 
+      
+      CRITICAL FOR VISUAL LEARNERS: Include ASCII diagrams, tables, or visual representations directly in the content using plain text.
+      
+      For concepts that benefit from visuals (matrices, flows, hierarchies, comparisons):
+      - Use ASCII art boxes and lines
+      - Create simple tables with | and - characters
+      - Draw flowcharts with arrows (→, ↓, ←, ↑)
+      - Show 2x2 matrices with clear labels
+      
+      Example for pricing matrix:
+      \`\`\`
+      Pricing War Matrix:
+      
+                     Competitor
+                  High  |  Low
+              ┌─────────┼─────────┐
+      You  H  │  Both   │  You    │
+           i  │  profit │  win    │
+           g  │  well   │  share  │
+           h  ├─────────┼─────────┤
+              │  Comp   │  Both   │
+      You  L  │  wins   │  lose   │
+           o  │  share  │  money  │
+           w  └─────────┴─────────┘
+      \`\`\`
+      
+      ALWAYS include visual representations when explaining concepts that have structure, relationships, or comparisons.`,
+      
       'auditory': 'Use conversational tone, explain concepts as if speaking to them. Include discussion prompts and verbal examples.',
       'reading': 'Provide detailed written explanations, definitions, and structured text. Use clear hierarchies and bullet points.',
       'kinesthetic': 'Focus on practical exercises, hands-on examples, and actionable steps. "How to DO this" over "what it IS".',

@@ -59,6 +59,12 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
         lastAccessed: new Date().toISOString()
       }));
     }
+
+    // Update URL with current position
+    const url = new URL(window.location.href);
+    url.searchParams.set('module', String(currentModule + 1));
+    url.searchParams.set('lesson', String(currentLesson + 1));
+    window.history.replaceState({}, '', url.toString());
   }, [completedLessons, currentModule, currentLesson, course.id]);
 
   useEffect(() => {

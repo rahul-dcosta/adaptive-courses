@@ -36,15 +36,14 @@ export default function LandingPagePremium() {
           </div>
 
           {/* Hero headline */}
-          <h1 className="text-6xl md:text-7xl font-black text-gray-900 mb-8 leading-[1.1] tracking-tight">
+          <h1 className="text-6xl md:text-7xl font-black mb-8 leading-[1.1] tracking-tight" style={{ color: 'var(--royal-blue)' }}>
             Learn anything<br />
             in 30 minutes
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-2xl leading-relaxed">
-            AI-powered courses tailored to your situation.
-            Factory tour tomorrow? Job interview next week?
-            Get exactly what you need.
+            Your personalized course — built in under 5 minutes. 
+            AI-powered, tailored to your exact situation.
           </p>
 
           {/* Topic input - direct to course builder */}

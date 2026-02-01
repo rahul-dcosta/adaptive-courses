@@ -129,18 +129,22 @@ body {
 .prose pre {
   margin: 2rem 0;
   padding: 1.5rem;
-  background-color: #1f2937;
-  color: #f3f4f6;
+  background-color: rgba(0, 63, 135, 0.05);
+  color: var(--royal-blue-dark);
   border-radius: 0.75rem;
   overflow-x: auto;
-  border: 2px solid rgba(0, 63, 135, 0.2);
+  border: 2px solid rgba(0, 63, 135, 0.15);
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
 }
 
 .prose pre code {
   background-color: transparent;
   padding: 0;
-  color: #f3f4f6;
+  color: var(--royal-blue-dark);
   border: none;
+  font-weight: 500;
 }
 
 .prose blockquote {
