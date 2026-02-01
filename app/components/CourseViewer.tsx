@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { analytics } from '@/lib/analytics';
 import MermaidDiagram from './MermaidDiagram';
+import ContextMenu, { ContextMenuItem, Icons } from './ContextMenu';
 
 interface Module {
   title: string;
@@ -155,6 +156,14 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
   const [showNav, setShowNav] = useState(true);
 
+  // Context menu state
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    type: 'lesson' | 'diagram' | 'text' | 'quiz';
+    data?: any;
+  } | null>(null);
+
   useEffect(() => {
     // Load progress from localStorage
     if (course.id) {
@@ -244,6 +253,118 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
   const handleDownloadPDF = () => {
     analytics.track('pdf_download', { courseId: course.id });
     alert('PDF download coming soon!');
+  };
+
+  // Context menu handlers
+  const handleContextMenu = useCallback((
+    e: React.MouseEvent,
+    type: 'lesson' | 'diagram' | 'text' | 'quiz',
+    data?: any
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      type,
+      data
+    });
+  }, []);
+
+  const closeContextMenu = useCallback(() => {
+    setContextMenu(null);
+  }, []);
+
+  // Generate context menu items based on type
+  const getContextMenuItems = (): ContextMenuItem[] => {
+    if (!contextMenu) return [];
+
+    const lessonKey = `${currentModule}-${currentLesson}`;
+    const isLessonCompleted = completedLessons.has(lessonKey);
+
+    const baseItems: ContextMenuItem[] = [];
+
+    // Lesson-specific items
+    if (contextMenu.type === 'lesson' || contextMenu.type === 'text') {
+      if (!isLessonCompleted) {
+        baseItems.push({
+          label: 'Mark as Complete',
+          icon: <Icons.Check />,
+          onClick: handleLessonComplete
+        });
+      } else {
+        baseItems.push({
+          label: 'Mark as Incomplete',
+          icon: <Icons.Reset />,
+          onClick: () => {
+            const newCompleted = new Set(completedLessons);
+            newCompleted.delete(lessonKey);
+            setCompletedLessons(newCompleted);
+          }
+        });
+      }
+      baseItems.push({ label: '', onClick: () => {}, divider: true });
+    }
+
+    // Diagram-specific items
+    if (contextMenu.type === 'diagram') {
+      baseItems.push({
+        label: 'Expand Diagram',
+        icon: <Icons.Expand />,
+        onClick: () => {
+          // TODO: Implement diagram modal view
+          alert('Full-screen diagram view coming soon!');
+        }
+      });
+      baseItems.push({ label: '', onClick: () => {}, divider: true });
+    }
+
+    // Universal items
+    baseItems.push({
+      label: 'Ask about this',
+      icon: <Icons.Chat />,
+      onClick: () => {
+        analytics.track('context_menu_ask', { type: contextMenu.type });
+        alert('AI Chat feature coming in v2! You\'ll be able to ask questions about any content.');
+      }
+    });
+
+    baseItems.push({
+      label: 'Copy Content',
+      icon: <Icons.Copy />,
+      onClick: async () => {
+        const lesson = course.modules[currentModule]?.lessons?.[currentLesson];
+        if (lesson) {
+          await navigator.clipboard.writeText(lesson.content);
+          analytics.track('content_copied', { lessonKey });
+        }
+      }
+    });
+
+    baseItems.push({
+      label: 'Bookmark',
+      icon: <Icons.Bookmark />,
+      onClick: () => {
+        analytics.track('content_bookmarked', { lessonKey });
+        alert('Bookmark feature coming soon!');
+      },
+      disabled: true
+    });
+
+    baseItems.push({ label: '', onClick: () => {}, divider: true });
+
+    baseItems.push({
+      label: 'Share Lesson',
+      icon: <Icons.Share />,
+      onClick: async () => {
+        const url = window.location.href;
+        await navigator.clipboard.writeText(url);
+        alert('Lesson URL copied to clipboard!');
+        analytics.track('lesson_shared', { lessonKey });
+      }
+    });
+
+    return baseItems;
   };
 
   const module = course.modules[currentModule];
@@ -485,17 +606,57 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
                   fontSize: '1.125rem',
                   lineHeight: '1.875',
                 }}
+                onContextMenu={(e) => handleContextMenu(e, 'lesson')}
               >
                 {parseContent(lesson.content).map((part, idx) => {
                   if (part.type === 'mermaid') {
-                    return <MermaidDiagram key={idx} chart={part.content} />;
+                    return (
+                      <div
+                        key={idx}
+                        className="group relative my-8 cursor-pointer"
+                        onContextMenu={(e) => handleContextMenu(e, 'diagram', part.content)}
+                      >
+                        {/* Hover overlay for diagrams */}
+                        <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10"
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(0, 63, 135, 0.02) 0%, rgba(0, 63, 135, 0.04) 100%)',
+                            border: '2px solid rgba(0, 63, 135, 0.15)'
+                          }}
+                        />
+                        {/* Interaction hint */}
+                        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
+                          <div
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium"
+                            style={{
+                              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                              color: 'var(--royal-blue)',
+                              border: '1px solid rgba(0, 63, 135, 0.15)',
+                              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
+                            }}
+                          >
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                            </svg>
+                            Right-click for options
+                          </div>
+                        </div>
+                        <MermaidDiagram chart={part.content} />
+                      </div>
+                    );
                   }
                   return (
                     <div
                       key={idx}
-                      className="lesson-content"
-                      dangerouslySetInnerHTML={{ __html: formatTextContent(part.content) }}
-                    />
+                      className="lesson-content group relative"
+                      onContextMenu={(e) => handleContextMenu(e, 'text')}
+                    >
+                      {/* Subtle left border on hover */}
+                      <div
+                        className="absolute -left-6 top-0 bottom-0 w-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        style={{ backgroundColor: 'rgba(0, 63, 135, 0.15)' }}
+                      />
+                      <div dangerouslySetInnerHTML={{ __html: formatTextContent(part.content) }} />
+                    </div>
                   );
                 })}
               </div>
@@ -503,13 +664,14 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
 
             {/* Quiz Section */}
             {lesson?.quiz && (
-              <div 
+              <div
                 key={`quiz-${currentModule}-${currentLesson}`}
-                className="p-8 rounded-xl mb-16"
-                style={{ 
+                className="p-8 rounded-xl mb-16 group relative cursor-pointer transition-all duration-200 hover:shadow-md"
+                style={{
                   backgroundColor: 'rgba(0, 63, 135, 0.04)',
                   border: '1px solid rgba(0, 63, 135, 0.12)'
                 }}
+                onContextMenu={(e) => handleContextMenu(e, 'quiz')}
               >
                 <div className="flex items-start gap-3 mb-4">
                   <svg className="w-6 h-6 flex-shrink-0 mt-1" style={{ color: 'var(--royal-blue)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -657,11 +819,28 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
                   <kbd className="px-3 py-1 bg-white border rounded text-xs font-mono" style={{ borderColor: 'var(--royal-blue)' }}>M</kbd>
                   Menu
                 </span>
+                <span className="flex items-center gap-2 border-l pl-4 ml-2" style={{ borderColor: 'rgba(0, 63, 135, 0.15)' }}>
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                  </svg>
+                  Right-click for options
+                </span>
               </p>
             </div>
           </article>
         </main>
       </div>
+
+      {/* Custom Context Menu */}
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          items={getContextMenuItems()}
+          onClose={closeContextMenu}
+          context={{ type: contextMenu.type, data: contextMenu.data }}
+        />
+      )}
     </div>
   );
 }
