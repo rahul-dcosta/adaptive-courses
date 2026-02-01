@@ -31,9 +31,9 @@ export async function POST(request: NextRequest) {
     const finalGoal = learningGoal || goal || depth || 'understand';
     const finalTimeAvailable = timeCommitment || timeAvailable || timeline || 'flexible';
     const learningContext = context || '';
-    const finalLearningStyle = learningStyle || 'mixed';
-    const finalContentFormat = contentFormat || 'mixed';
-    const finalChallengePreference = challengePreference || 'adaptive';
+    const finalLearningStyle: string = learningStyle || 'mixed';
+    const finalContentFormat: string = contentFormat || 'mixed';
+    const finalChallengePreference: string = challengePreference || 'adaptive';
 
     // Validate inputs
     if (!topic) {
@@ -44,45 +44,50 @@ export async function POST(request: NextRequest) {
     }
 
     // Build FINGERPRINT-aware prompt
-    const learningStyleGuidance = {
+    const learningStyleMap: Record<string, string> = {
       'visual': 'Use lots of concrete examples, analogies to visual concepts, and describe things in spatial/visual terms. Mention when diagrams would be helpful.',
       'auditory': 'Use conversational tone, explain concepts as if speaking to them. Include discussion prompts and verbal examples.',
       'reading': 'Provide detailed written explanations, definitions, and structured text. Use clear hierarchies and bullet points.',
       'kinesthetic': 'Focus on practical exercises, hands-on examples, and actionable steps. "How to DO this" over "what it IS".',
       'mixed': 'Balance all approaches - visuals, detailed text, practical examples, and conversational explanations.'
-    }[finalLearningStyle] || 'Balance different learning approaches.';
+    };
+    const learningStyleGuidance = learningStyleMap[finalLearningStyle] || 'Balance different learning approaches.';
 
-    const contentFormatGuidance = {
+    const contentFormatMap: Record<string, string> = {
       'examples_first': 'Start each concept with a concrete, real-world example, THEN explain the theory behind it.',
       'theory_first': 'Explain the foundational concept first, THEN provide examples to illustrate it.',
       'visual_diagrams': 'Describe visual representations, flowcharts, and diagrams in text. Use spatial language.',
       'text_heavy': 'Provide comprehensive, detailed written explanations with precise terminology.',
       'mixed': 'Mix theory and examples naturally, using both detailed explanations and concrete cases.'
-    }[finalContentFormat] || 'Use a balanced mix of theory and examples.';
+    };
+    const contentFormatGuidance = contentFormatMap[finalContentFormat] || 'Use a balanced mix of theory and examples.';
 
-    const challengeGuidance = {
+    const challengeMap: Record<string, string> = {
       'easy_to_hard': 'Start with the absolute basics and progressively build complexity. Each lesson should be slightly harder than the last.',
       'adaptive': 'Mix difficulty levels. Include easier and harder examples in each lesson to match different comfort levels.',
       'deep_dive': 'Jump into advanced concepts quickly. Assume quick understanding and focus on nuanced details.',
       'practical_only': 'Skip theoretical foundations. Focus entirely on "how to use this" and practical applications.'
-    }[finalChallengePreference] || 'Balance difficulty appropriately.';
+    };
+    const challengeGuidance = challengeMap[finalChallengePreference] || 'Balance difficulty appropriately.';
 
-    const goalGuidance = {
+    const goalMap: Record<string, string> = {
       'job_interview': 'Focus on key talking points, common interview questions, and how to discuss this topic confidently in 5-10 minute conversations.',
       'career': 'Focus on professional applications, industry relevance, and how this skill translates to job performance.',
       'sound_smart': 'Focus on key buzzwords, frameworks, and impressive-sounding insights someone can drop in conversations.',
       'academic': 'Focus on definitions, frameworks, testable knowledge, and academic understanding.',
       'hobby': 'Focus on interesting facts, enjoyment, and personal enrichment. Make it fun and engaging.',
       'teach_others': 'Focus on clarity, analogies, and how to explain concepts simply to someone else.'
-    }[finalGoal] || 'Focus on comprehensive understanding.';
+    };
+    const goalGuidance = goalMap[finalGoal] || 'Focus on comprehensive understanding.';
 
-    const timeGuidance = {
+    const timeMap: Record<string, string> = {
       '30_min': 'VERY concise. 2 modules, 2 lessons each. 100-150 words per lesson max. Hit only the critical essentials.',
       '1_hour': 'Concise. 2-3 modules with 2-3 lessons each. 150-200 words per lesson. Core concepts only.',
       '2_hours': '3-4 modules with 2-3 lessons each. 200-300 words per lesson. Include some depth.',
       '1_week': '4-5 modules with 3-4 lessons each. 250-350 words per lesson. Comprehensive coverage.',
       'no_rush': '5-6 modules with 3-4 lessons each. 300-400 words per lesson. Deep, thorough exploration.'
-    }[finalTimeAvailable] || '4 modules with 2-3 lessons each. 200-300 words per lesson.';
+    };
+    const timeGuidance = timeMap[finalTimeAvailable] || '4 modules with 2-3 lessons each. 200-300 words per lesson.';
 
     const systemPrompt = `You are a course creation AI. You MUST respond with valid JSON only. No markdown, no explanations, just pure JSON.`;
 

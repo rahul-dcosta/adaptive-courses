@@ -185,10 +185,7 @@ export default function OnboardingFingerprint({
                 type="submit"
                 disabled={!topic.trim()}
                 className="w-full text-white font-semibold text-lg py-5 px-8 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
-                style={{ 
-                  backgroundColor: 'var(--royal-blue)',
-                  ':hover': { backgroundColor: 'var(--royal-blue-light)' }
-                }}
+                style={{ backgroundColor: 'var(--royal-blue)' }}
                 onMouseEnter={(e) => !topic.trim() || (e.currentTarget.style.backgroundColor = 'var(--royal-blue-light)')}
                 onMouseLeave={(e) => !topic.trim() || (e.currentTarget.style.backgroundColor = 'var(--royal-blue)')}
               >
