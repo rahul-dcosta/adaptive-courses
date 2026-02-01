@@ -155,6 +155,14 @@ export default function OnboardingFingerprint({
     }
   };
 
+  const handleBack = () => {
+    if (currentStepIndex > 0) {
+      const prevStep = steps[currentStepIndex - 1];
+      setStep(prevStep);
+      setSelectedOption(null);
+    }
+  };
+
   // Topic Input (only shown if no initialTopic provided)
   if (step === 'topic') {
     return (
@@ -324,48 +332,60 @@ export default function OnboardingFingerprint({
     const contentFormatLabel = getDisplayLabel(fingerprint.contentFormat, ONBOARDING_QUESTIONS.contentFormat.options);
     const challengePreferenceLabel = getDisplayLabel(fingerprint.challengePreference, ONBOARDING_QUESTIONS.challengePreference.options);
 
-    const profileItems = [
-      { label: 'Learning Style', value: learningStyleLabel },
-      { label: 'Prior Knowledge', value: priorKnowledgeLabel },
-      { label: 'Learning Goal', value: learningGoalLabel },
-      { label: 'Time Commitment', value: timeCommitmentLabel },
-      { label: 'Content Format', value: contentFormatLabel },
-      { label: 'Challenge Level', value: challengePreferenceLabel },
-    ];
-
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
-        <div className="max-w-xl w-full">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-2 font-serif" style={{ color: 'var(--royal-blue)' }}>
-              Ready to Generate
-            </h2>
-            <p className="text-gray-500 text-sm">
-              Your personalized course on{' '}
-              <span className="font-semibold" style={{ color: 'var(--royal-blue)' }}>
+        <div className="max-w-2xl w-full">
+          <div className="glass rounded-3xl p-10 shadow-2xl">
+            {/* Header with topic */}
+            <div className="text-center mb-8">
+              <p className="text-sm text-gray-500 mb-2">Your personalized course on</p>
+              <h2 className="text-2xl font-bold font-serif" style={{ color: 'var(--royal-blue)' }}>
                 "{fingerprint.topic}"
-              </span>
-            </p>
-          </div>
-
-          {/* Clean card */}
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden" style={{ border: '1px solid rgba(0, 63, 135, 0.08)' }}>
-            {/* Profile list */}
-            <div className="divide-y" style={{ borderColor: 'rgba(0, 63, 135, 0.06)' }}>
-              {profileItems.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between px-6 py-4">
-                  <span className="text-[13px] text-gray-400 uppercase tracking-wider">{item.label}</span>
-                  <span className="text-[15px] font-medium text-gray-800">{item.value}</span>
-                </div>
-              ))}
+              </h2>
             </div>
 
-            {/* CTA */}
-            <div className="p-6 pt-4">
+            {/* Profile grid */}
+            <div className="grid grid-cols-2 gap-3 mb-8">
+              <div className="bg-white rounded-lg p-4" style={{ border: '1px solid rgba(0, 63, 135, 0.08)' }}>
+                <p className="text-xs text-gray-500 mb-1">Learning Style</p>
+                <p className="text-sm font-semibold text-gray-900">{learningStyleLabel}</p>
+              </div>
+              <div className="bg-white rounded-lg p-4" style={{ border: '1px solid rgba(0, 63, 135, 0.08)' }}>
+                <p className="text-xs text-gray-500 mb-1">Prior Knowledge</p>
+                <p className="text-sm font-semibold text-gray-900">{priorKnowledgeLabel}</p>
+              </div>
+              <div className="bg-white rounded-lg p-4" style={{ border: '1px solid rgba(0, 63, 135, 0.08)' }}>
+                <p className="text-xs text-gray-500 mb-1">Learning Goal</p>
+                <p className="text-sm font-semibold text-gray-900">{learningGoalLabel}</p>
+              </div>
+              <div className="bg-white rounded-lg p-4" style={{ border: '1px solid rgba(0, 63, 135, 0.08)' }}>
+                <p className="text-xs text-gray-500 mb-1">Time Available</p>
+                <p className="text-sm font-semibold text-gray-900">{timeCommitmentLabel}</p>
+              </div>
+              <div className="bg-white rounded-lg p-4" style={{ border: '1px solid rgba(0, 63, 135, 0.08)' }}>
+                <p className="text-xs text-gray-500 mb-1">Content Format</p>
+                <p className="text-sm font-semibold text-gray-900">{contentFormatLabel}</p>
+              </div>
+              <div className="bg-white rounded-lg p-4" style={{ border: '1px solid rgba(0, 63, 135, 0.08)' }}>
+                <p className="text-xs text-gray-500 mb-1">Challenge Level</p>
+                <p className="text-sm font-semibold text-gray-900">{challengePreferenceLabel}</p>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setStep('learningStyle')}
+                className="flex-1 py-4 rounded-xl font-medium transition-all border-2"
+                style={{ borderColor: 'var(--royal-blue)', color: 'var(--royal-blue)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(0, 63, 135, 0.05)')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+              >
+                Edit Preferences
+              </button>
               <button
                 onClick={handleComplete}
-                className="w-full text-white font-semibold text-base py-4 rounded-xl transition-all shadow-md hover:shadow-lg"
+                className="flex-[2] text-white font-semibold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl"
                 style={{ backgroundColor: 'var(--royal-blue)' }}
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--royal-blue-light)')}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--royal-blue)')}
@@ -374,18 +394,6 @@ export default function OnboardingFingerprint({
               </button>
             </div>
           </div>
-
-          {/* Edit link */}
-          <p className="text-center mt-4 text-sm text-gray-400">
-            Something wrong?{' '}
-            <button
-              onClick={() => setStep('learningStyle')}
-              className="font-medium hover:underline"
-              style={{ color: 'var(--royal-blue)' }}
-            >
-              Start over
-            </button>
-          </p>
         </div>
       </div>
     );
@@ -411,20 +419,33 @@ export default function OnboardingFingerprint({
           </div>
         )}
 
-        {/* Progress Bar */}
+        {/* Progress Bar with Back Button */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-700">
-              Step {currentStepIndex} of {steps.length - 1}
-            </span>
+            <div className="flex items-center gap-3">
+              {currentStepIndex > 1 && (
+                <button
+                  onClick={handleBack}
+                  className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Back
+                </button>
+              )}
+              <span className="text-sm font-medium text-gray-700">
+                Step {currentStepIndex} of {steps.length - 1}
+              </span>
+            </div>
             <span className="text-sm font-medium" style={{ color: 'var(--royal-blue)' }}>
               {progressPercent}% Complete
             </span>
           </div>
           <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div 
+            <div
               className="h-full transition-all duration-500 rounded-full"
-              style={{ 
+              style={{
                 width: `${progressPercent}%`,
                 backgroundColor: 'var(--royal-blue)'
               }}
