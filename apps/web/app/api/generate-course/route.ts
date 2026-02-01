@@ -20,13 +20,13 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { 
-      topic, 
-      skillLevel, 
-      goal, 
-      timeAvailable, 
-      context, 
-      timeline, 
+    const {
+      topic,
+      skillLevel,
+      goal,
+      timeAvailable,
+      context,
+      timeline,
       depth,
       // NEW: Learner Fingerprint fields
       fingerprint,
@@ -35,7 +35,9 @@ export async function POST(request: NextRequest) {
       learningGoal,
       timeCommitment,
       contentFormat,
-      challengePreference
+      challengePreference,
+      // Approved outline from preview step
+      approvedOutline
     } = body;
 
     // Use fingerprint if provided, otherwise fall back to old format
@@ -209,6 +211,20 @@ The art: Find the MINIMUM WIP to keep flow stable without excessive holding cost
 
 DON'T just say "WIP = work in progress" and move on. Teach the nuances.
 
+${approvedOutline ? `
+📋 APPROVED COURSE STRUCTURE (FOLLOW THIS EXACTLY):
+${JSON.stringify(approvedOutline, null, 2)}
+
+Generate content for EACH lesson in the approved outline above. Keep the exact same:
+- Course title
+- Module titles and order
+- Lesson titles and order
+- Estimated time
+
+For each lesson, add:
+- 100-200 words of rich content WITH embedded \`\`\`mermaid code blocks
+- A quiz question with answer
+` : `
 Generate a SIMPLE structured course with:
 1. A specific, actionable course title (not generic)
 2. EXACTLY 2 modules, each with EXACTLY 2 lessons
@@ -218,7 +234,7 @@ Generate a SIMPLE structured course with:
    - A simple quiz question with short answer
 4. Module descriptions (ONE sentence, simple words)
 5. Estimated time for the entire course
-6. EXACTLY 3 concrete "next steps"
+6. EXACTLY 3 concrete "next steps"`}
 
 ⚠️ CRITICAL: You MUST include \`\`\`mermaid code blocks (not ASCII art). If you write [A]-->[B] instead of a mermaid block, you have FAILED. Use the exact mermaid format shown above.
 
