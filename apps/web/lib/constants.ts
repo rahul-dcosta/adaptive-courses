@@ -2,7 +2,7 @@
 
 export const APP_NAME = 'Adaptive Courses';
 export const APP_DESCRIPTION = 'AI-powered courses that understand your situation, not just your skill level';
-export const APP_URL = 'https://adaptive-courses.vercel.app';
+export const APP_URL = 'https://adaptivecourses.ai';
 export const SUPPORT_EMAIL = 'support@adaptive-courses.com';
 
 export const PRICING = {

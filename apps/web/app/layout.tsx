@@ -12,7 +12,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://adaptive-courses.vercel.app'),
+  metadataBase: new URL('https://adaptivecourses.ai'),
   title: 'Adaptive Courses - Any Topic. Your Course. | AI-Powered Learning',
   description: 'Any topic. Your course. AI-powered courses that understand your situation, not just your skill level. Generate custom courses in 30 seconds.',
   keywords: 'AI learning, personalized courses, fast learning, adaptive learning, custom courses, Claude AI, any topic your course',
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://adaptive-courses.vercel.app',
+    url: 'https://adaptivecourses.ai',
     siteName: 'Adaptive Courses',
     title: 'Adaptive Courses - Any Topic. Your Course.',
     description: 'Any topic. Your course. AI-powered courses tailored to YOUR situation. Generate custom courses in 30 seconds.',
@@ -81,8 +81,8 @@ export default function RootLayout({
               '@type': 'EducationalOrganization',
               name: 'Adaptive Courses',
               description: 'AI-powered learning platform that creates custom 30-minute courses tailored to your situation',
-              url: 'https://adaptive-courses.vercel.app',
-              logo: 'https://adaptive-courses.vercel.app/icon.svg',
+              url: 'https://adaptivecourses.ai',
+              logo: 'https://adaptivecourses.ai/icon.svg',
               sameAs: [
                 'https://twitter.com/AdaptiveCourses',
                 'https://linkedin.com/company/adaptive-courses',

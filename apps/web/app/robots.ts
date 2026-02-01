@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/', '/debug', '/stats'],
     },
-    sitemap: 'https://adaptive-courses.vercel.app/sitemap.xml',
+    sitemap: 'https://adaptivecourses.ai/sitemap.xml',
   };
 }
