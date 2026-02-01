@@ -1,10 +1,62 @@
 # CLAUDE.md - Adaptive Courses Platform Master Reference
 
-**Last Updated:** 2026-02-01  
+**Last Updated:** 2026-02-01 07:15 UTC  
 **Product:** Adaptive personalized course generation platform  
 **Status:** MVP / Early Access
 
 This document is the single source of truth for understanding the entire product - business, design, technical, and operational aspects.
+
+---
+
+## 🆕 Recent Changes (2026-02-01)
+
+### Major Update: Auth System + Tiered Pricing Model
+
+**What Changed:**
+1. ✅ **FIXED: Mermaid diagrams now rendering!**
+   - Root cause: Conflicting prompt instructions about backticks
+   - Fixed: Clarified backticks forbidden for JSON wrapper, but REQUIRED for mermaid blocks
+   - Status: Verified working
+
+2. 🔐 **Full authentication system**
+   - Email OTP verification (6-digit codes)
+   - Magic link authentication (one-click login)
+   - Device fingerprinting for abuse prevention
+   - Session management with JWT
+   - Resend integration for transactional emails
+   - Complete Supabase schema migrations
+
+3. 💰 **New tiered pricing model** (evolved from simple $3.99)
+   - Free: 1 course + 5 AI prompts
+   - Per-Course: $3.99 (coffee price - impulse buy)
+   - Unlimited: $7.99/mo (streaming sweet spot - Netflix pricing)
+   - Pro: $14.99/mo (serious learner signal - price anchor)
+   - "Keep forever" differentiator: courses remain yours after cancellation
+   - Natural upgrade funnel: Free → Per-Course → Unlimited → Pro
+
+4. 📊 **Business strategy documentation**
+   - Complete competitive analysis vs Skillshare, Coursera, Udemy, MasterClass
+   - Unit economics: 50%+ gross margins across all tiers
+   - Financial projections with churn assumptions
+   - Upgrade psychology and pricing anchoring strategy
+   - See `docs/BUSINESS-MODEL.md` for full analysis
+
+5. 🎨 **UI improvements**
+   - Updated landing page with new branding
+   - Refined example courses
+   - New context menu component
+   - Better success celebration flow
+   - Enhanced onboarding experience
+
+**Files Changed:**
+- Added: `lib/services/auth.ts`, `lib/services/email.ts`, `lib/email-templates.ts`
+- Added: `lib/types/auth.ts`, `lib/types/subscription.ts`
+- Added: `supabase/migrations/001_auth_tables.sql`
+- Added: `docs/BUSINESS-MODEL.md`
+- Updated: `CLAUDE.md` (this file)
+- Updated: Course generation prompt, landing page, onboarding
+
+**Credit:** Co-authored by Claude Opus 4.5 via Claude Code
 
 ---
 
@@ -62,27 +114,134 @@ Serious academic subjects, personalized for professionals. Learn game theory, be
 
 ## 💰 Business Model
 
-### Pricing
-- **First course:** Free
-- **Subsequent courses:** $3.99 each
-- **No subscriptions, no tiers, no upsells**
+### Pricing Strategy: "The Netflix of Courses at Spotify Prices"
+
+**Competitive Positioning:**
+- 75% cheaper than Skillshare ($29-32/mo) at $7.99/mo
+- 87% cheaper than Coursera ($59/mo)
+- 5-50x cheaper than Udemy per-course ($20-200)
+- Monthly flexibility vs MasterClass annual-only ($120-240/yr)
+
+**We occupy the impulse-buy territory for learning** - price points that don't exist in the market.
+
+---
+
+### Pricing Tiers
+
+#### **Free Tier**
+- **Cost:** $0
+- **Includes:**
+  - 1 free course (first ever)
+  - Full course content forever
+  - 5 AI prompts total (lifetime)
+  - No PDF export, no email delivery
+- **Purpose:** Get users hooked, reduce friction to first value
+
+#### **Per-Course: $3.99** — The "Coffee Price"
+- **Cost:** $3.99 per course
+- **Includes:**
+  - Course is yours forever (even if you later subscribe and cancel)
+  - 10 AI prompts/day on that topic
+  - PDF export + email delivery
+- **Psychology:**
+  - Below $5 "mental accounting" threshold
+  - Same price as a latte, but you keep it forever
+  - Low enough to buy impulsively, high enough to filter zero-intent users
+  - 65.7% gross margin (highly profitable)
+- **Purpose:** Low commitment, fair value exchange
+
+#### **Unlimited: $7.99/mo** — The "Streaming Sweet Spot"
+- **Cost:** $7.99/month (or $79/year = 2 months free)
+- **Includes:**
+  - Unlimited course generation
+  - 50 AI prompts/day (global)
+  - Priority generation (faster API)
+  - PDF export + email delivery
+  - Early access to features
+  - All courses remain yours if you cancel
+- **Psychology:**
+  - Below Netflix ($15.49), Spotify ($10.99), most subscriptions
+  - The "why not?" price - costs less than a Chipotle bowl
+  - 3 courses/month = break-even vs per-course
+  - Subscription psychology: feels like nothing, compounds to real revenue
+  - 51.4% gross margin
+- **Purpose:** Regular learners, hobbyists, impulse subscribers
+
+#### **Pro: $14.99/mo** — The "Serious Learner" Signal
+- **Cost:** $14.99/month (or $149/year = 2 months free)
+- **Includes:**
+  - Everything in Unlimited, plus:
+  - 200 AI prompts/day (effectively unlimited)
+  - Advanced AI features (deeper explanations, custom paths)
+  - Priority support
+  - Course certificates (AI-personalized, verifiable)
+  - API access (future)
+- **Psychology:**
+  - Still under cost of a single Udemy course
+  - Certificates create perceived value worth 2x Unlimited tier
+  - 200 prompts = unlimited for any human
+  - **This tier exists primarily to make $7.99 look like a bargain** (price anchoring)
+  - Only ~10% of subscribers need Pro - but it drives Unlimited conversions
+  - 53.4% gross margin
+- **Purpose:** Power users, educators, professionals, price anchor
+
+---
+
+### The Upgrade Funnel Math
+
+Natural escalator that creates itself:
+
+```
+Free (1 course) 
+  → "I want more" 
+  → Per-course ($3.99)
+    ↓
+After 2nd purchase: "You've spent $7.98..."
+  → "...for $7.99/mo get unlimited"
+    ↓
+Power users → Pro ($14.99)
+```
+
+**At 3 courses/month, per-course costs $11.97 vs $7.99 subscription.**  
+**The economics force the upgrade.**
+
+---
+
+### The "Keep It Forever" Differentiator
+
+**Every competitor's problem:** "What happens when I cancel?"
+
+**Our answer:** You keep every course you generated.
+
+**Why this matters:**
+- ✅ Builds trust (no hostage-taking)
+- ✅ Reduces churn anxiety (people subscribe longer when not afraid)
+- ✅ Creates word-of-mouth ("I canceled but still have all my courses")
+- ✅ Doesn't hurt us - value is in generation + AI chat, not storage
+
+---
+
+### Annual Pricing: The LTV Multiplier
+
+Annual plans give 2 months free but provide massive benefits:
+- **Zero churn risk for 12 months** (5%/month → 0%)
+- **Cash upfront** for reinvestment
+- **At 60% renewal rate, annual LTV exceeds monthly LTV**
+
+Pricing:
+- Unlimited: $79/year (vs $95.88 monthly)
+- Pro: $149/year (vs $179.88 monthly)
+
+---
 
 ### Revenue Strategy
-- Simple pay-per-course model
-- Stripe integration for payments
-- Email capture for free course (marketing funnel)
 
-### Why This Model?
-1. **Low friction:** No subscription commitment
-2. **Fair value:** $3.99 feels cheap for personalized academic content
-3. **Repeat purchases:** Users buy multiple courses over time
-4. **Trust building:** Free first course proves value
+1. **Free → Per-Course funnel** (lead gen + revenue)
+2. **Per-Course → Unlimited** (natural upgrade at 3 courses)
+3. **Unlimited → Pro** (10% of power users)
+4. **Annual conversion** (20-30% of subscribers)
 
-### Future Monetization Ideas
-- Premium features (PDF export, team access)
-- Bulk course packs
-- API access for enterprises
-- White-label for educational institutions
+**See `docs/BUSINESS-MODEL.md` for complete financial projections, unit economics, and competitive analysis.**
 
 ---
 
@@ -145,12 +304,24 @@ User Input → Onboarding → Fingerprint → Outline Generation → Review → 
 6. **Example Courses** (`ExampleCourses.tsx`) - showcase section
 
 ### API Layer
+
+**Course Generation:**
 - `/api/generate-onboarding-questions` - Dynamic question generation
 - `/api/generate-outline` - Course structure creation
 - `/api/generate-course` - Full course content generation
+
+**Authentication:**
+- `/api/auth/send-otp` - Email OTP verification
+- `/api/auth/verify-otp` - Verify OTP code
+- `/api/auth/send-magic-link` - Send magic link email
+- `/api/auth/verify` - Verify magic link token
+
+**User & Analytics:**
 - `/api/email-capture` - Lead capture
 - `/api/feedback` - User feedback collection
 - `/api/track` - Analytics events
+
+**Payments:**
 - `/api/stripe-webhook` - Payment processing
 
 ### AI Generation
@@ -261,6 +432,14 @@ User reviews AI-generated outline before full course generation:
 - Touch-friendly navigation
 - Readable typography at all sizes
 
+### 8. Email Authentication System
+- **OTP verification** - 6-digit code sent via email
+- **Magic link** - One-click login links
+- **Device fingerprinting** - Abuse prevention
+- **Session management** - Secure JWT tokens
+- **Email service** - Resend integration for transactional emails
+- **Email templates** - Branded OTP and magic link emails
+
 ---
 
 ## 🛠️ Tech Stack
@@ -276,6 +455,8 @@ User reviews AI-generated outline before full course generation:
 - **Runtime:** Next.js API Routes (serverless)
 - **AI:** Anthropic Claude API (Sonnet 4.5)
 - **Database:** Supabase (PostgreSQL)
+- **Authentication:** Custom email auth (OTP + magic links)
+- **Email:** Resend (transactional emails)
 - **Payments:** Stripe
 - **Analytics:** Custom implementation (Supabase events)
 
@@ -300,17 +481,22 @@ User reviews AI-generated outline before full course generation:
 app/
 ├── app/
 │   ├── api/
-│   │   ├── generate-course/route.ts          # Full course generation
-│   │   ├── generate-outline/route.ts         # Outline generation
-│   │   ├── generate-onboarding-questions/    # Dynamic questions
-│   │   ├── email-capture/route.ts            # Lead capture
-│   │   ├── feedback/route.ts                 # User feedback
-│   │   ├── track/route.ts                    # Analytics
-│   │   ├── stripe-webhook/route.ts           # Payment webhook
-│   │   └── health/route.ts                   # Healthcheck
-│   ├── page.tsx                              # Homepage
-│   ├── globals.css                           # Global styles + theme
-│   └── layout.tsx                            # Root layout
+│   │   ├── auth/
+│   │   │   ├── send-otp/route.ts            # Send OTP email
+│   │   │   ├── verify-otp/route.ts          # Verify OTP code
+│   │   │   ├── send-magic-link/route.ts     # Send magic link
+│   │   │   └── verify/route.ts              # Verify magic link
+│   │   ├── generate-course/route.ts         # Full course generation
+│   │   ├── generate-outline/route.ts        # Outline generation
+│   │   ├── generate-onboarding-questions/   # Dynamic questions
+│   │   ├── email-capture/route.ts           # Lead capture
+│   │   ├── feedback/route.ts                # User feedback
+│   │   ├── track/route.ts                   # Analytics
+│   │   ├── stripe-webhook/route.ts          # Payment webhook
+│   │   └── health/route.ts                  # Healthcheck
+│   ├── page.tsx                             # Homepage
+│   ├── globals.css                          # Global styles + theme
+│   └── layout.tsx                           # Root layout
 ├── components/
 │   ├── LandingPagePremium.tsx               # Main landing page
 │   ├── CourseBuilderSmart.tsx               # Flow orchestrator
@@ -319,14 +505,26 @@ app/
 │   ├── CourseViewer.tsx                     # Course reading UI
 │   ├── ExampleCourses.tsx                   # Example showcase
 │   ├── MermaidDiagram.tsx                   # Diagram renderer
+│   ├── ContextMenu.tsx                      # Right-click menu
 │   ├── LoadingSpinner.tsx                   # Loading states
 │   └── SuccessCelebration.tsx               # Completion animation
 ├── lib/
+│   ├── services/
+│   │   ├── auth.ts                          # Auth service (OTP, sessions)
+│   │   └── email.ts                         # Email service (Resend)
+│   ├── types/
+│   │   ├── auth.ts                          # Auth types
+│   │   └── subscription.ts                  # Subscription types
 │   ├── analytics.ts                         # Analytics helpers
 │   ├── supabase.ts                          # Supabase client
-│   ├── types.ts                             # TypeScript types
+│   ├── email-templates.ts                   # Email HTML templates
 │   ├── validation.ts                        # Input validation
 │   └── helpers.ts                           # Utility functions
+├── supabase/
+│   └── migrations/
+│       └── 001_auth_tables.sql              # Auth schema
+├── docs/
+│   └── BUSINESS-MODEL.md                    # Pricing & projections
 ├── DESIGN.md                                # Design system
 ├── MERMAID.md                               # Mermaid usage guide
 ├── CLAUDE.md                                # This file
