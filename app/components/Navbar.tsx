@@ -49,27 +49,51 @@ export default function Navbar() {
             : 'h-16 bg-transparent'
         }`}
       >
-        <div className="max-w-6xl mx-auto px-6 h-full grid grid-cols-3 items-center">
-          {/* Logo - Left */}
-          <a href="/" className="flex items-center gap-3 group h-full">
-            <div
-              className="w-9 h-9 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105"
-              style={{
-                background: 'linear-gradient(135deg, var(--royal-blue) 0%, var(--royal-blue-light) 100%)',
-                boxShadow: '0 4px 12px rgba(0, 63, 135, 0.25)',
-              }}
-            >
-              <span className="text-white font-bold text-lg font-serif">A</span>
-            </div>
-            <div className="hidden sm:block">
-              <span className="font-bold text-gray-900 text-lg">Adaptive</span>
-              <span className="font-medium text-gray-500 text-lg ml-1">Courses</span>
-            </div>
-          </a>
+        <div className="max-w-6xl mx-auto px-6 h-full relative">
+          {/* Flex container for logo and auth - they sit at the edges */}
+          <div className="h-full flex items-center justify-between">
+            {/* Logo - Left */}
+            <a href="/" className="flex items-center gap-3 group">
+              <div
+                className="w-9 h-9 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105"
+                style={{
+                  background: 'linear-gradient(135deg, var(--royal-blue) 0%, var(--royal-blue-light) 100%)',
+                  boxShadow: '0 4px 12px rgba(0, 63, 135, 0.25)',
+                }}
+              >
+                <span className="text-white font-bold text-lg font-serif">A</span>
+              </div>
+              <div className="hidden sm:block">
+                <span className="font-bold text-gray-900 text-lg">Adaptive</span>
+                <span className="font-medium text-gray-500 text-lg ml-1">Courses</span>
+              </div>
+            </a>
 
-          {/* Nav Links - Center (only on homepage) */}
-          {isHomepage ? (
-            <div className="hidden md:flex items-center justify-center gap-8 h-full">
+            {/* Auth Buttons - Right */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-3 py-2"
+              >
+                Sign in
+              </button>
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="text-sm font-medium text-white px-4 py-2 rounded-lg transition-all hover:shadow-lg"
+                style={{
+                  background: 'var(--royal-blue)',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--royal-blue-light)')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--royal-blue)')}
+              >
+                Get started
+              </button>
+            </div>
+          </div>
+
+          {/* Nav Links - Absolutely centered (only on homepage) */}
+          {isHomepage && (
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-8">
               <a
                 href="#how-it-works"
                 className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
@@ -89,30 +113,7 @@ export default function Navbar() {
                 Pricing
               </a>
             </div>
-          ) : (
-            <div />
           )}
-
-          {/* Auth Buttons - Right */}
-          <div className="flex items-center gap-3 h-full justify-self-end">
-            <button
-              onClick={() => setShowAuthModal(true)}
-              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-3 py-2"
-            >
-              Sign in
-            </button>
-            <button
-              onClick={() => setShowAuthModal(true)}
-              className="text-sm font-medium text-white px-4 py-2 rounded-lg transition-all hover:shadow-lg"
-              style={{
-                background: 'var(--royal-blue)',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--royal-blue-light)')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--royal-blue)')}
-            >
-              Get started
-            </button>
-          </div>
         </div>
       </nav>
 
