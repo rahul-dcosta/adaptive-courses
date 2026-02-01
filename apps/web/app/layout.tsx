@@ -89,10 +89,10 @@ export default function RootLayout({
               ],
               offers: {
                 '@type': 'Offer',
-                price: '5.00',
+                price: '3.99',
                 priceCurrency: 'USD',
                 availability: 'https://schema.org/InStock',
-                description: 'Custom AI-generated course',
+                description: 'Custom AI-generated course (first course free)',
               },
             }),
           }}
