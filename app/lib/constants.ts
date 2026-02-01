@@ -6,7 +6,7 @@ export const APP_URL = 'https://adaptive-courses.vercel.app';
 export const SUPPORT_EMAIL = 'support@adaptive-courses.com';
 
 export const PRICING = {
-  COURSE_PRICE: 2, // $2 per course after first free one
+  COURSE_PRICE: 3.99, // $3.99 per course after first free one
   FIRST_COURSE_FREE: true,
   CURRENCY: 'USD',
   STRIPE_FEE_PERCENT: 0.029,
@@ -81,7 +81,7 @@ export const SOCIAL_LINKS = {
 
 export const SEO = {
   DEFAULT_TITLE: 'Adaptive Courses - Learn Anything in 30 Minutes',
-  DEFAULT_DESCRIPTION: 'AI-powered courses that understand your situation. First course FREE, then just $2 per course. No subscription.',
+  DEFAULT_DESCRIPTION: 'AI-powered courses that understand your situation. First course FREE, then just $3.99 per course. No subscription.',
   KEYWORDS: [
     'AI learning',
     'custom courses',
