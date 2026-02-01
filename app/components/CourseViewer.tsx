@@ -5,20 +5,25 @@ import { analytics } from '@/lib/analytics';
 
 interface Module {
   title: string;
-  content: string;
-  quiz?: {
-    question: string;
-    options: string[];
-    correctAnswer: number;
-    explanation?: string;
-  }[];
+  description?: string;
+  lessons?: Array<{
+    title: string;
+    content: string;
+    quiz?: {
+      question: string;
+      answer?: string;
+    };
+  }>;
+  content?: string;
 }
 
 interface Course {
   id?: string;
   title: string;
-  description: string;
+  description?: string;
+  estimated_time?: string;
   modules: Module[];
+  next_steps?: string[];
   topic?: string;
 }
 
@@ -29,7 +34,8 @@ interface CourseViewerProps {
 
 export default function CourseViewer({ course, onExit }: CourseViewerProps) {
   const [currentModule, setCurrentModule] = useState(0);
-  const [completedModules, setCompletedModules] = useState<Set<number>>(new Set());
+  const [currentLesson, setCurrentLesson] = useState(0);
+  const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
   const [showNav, setShowNav] = useState(true);
 
   useEffect(() => {
@@ -38,7 +44,7 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
       const saved = localStorage.getItem(`course_${course.id}`);
       if (saved) {
         const { completed } = JSON.parse(saved);
-        setCompletedModules(new Set(completed));
+        setCompletedLessons(new Set(completed));
       }
     }
   }, [course.id]);
@@ -47,19 +53,20 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
     // Save progress
     if (course.id) {
       localStorage.setItem(`course_${course.id}`, JSON.stringify({
-        completed: Array.from(completedModules),
+        completed: Array.from(completedLessons),
         lastModule: currentModule,
+        lastLesson: currentLesson,
         lastAccessed: new Date().toISOString()
       }));
     }
-  }, [completedModules, currentModule, course.id]);
+  }, [completedLessons, currentModule, currentLesson, course.id]);
 
   useEffect(() => {
     // Keyboard shortcuts
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight' && currentModule < course.modules.length - 1) {
+      if (e.key === 'ArrowRight') {
         handleNext();
-      } else if (e.key === 'ArrowLeft' && currentModule > 0) {
+      } else if (e.key === 'ArrowLeft') {
         handlePrevious();
       } else if (e.key === 'm') {
         setShowNav(!showNav);
@@ -68,61 +75,78 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [currentModule, showNav]);
+  }, [currentModule, currentLesson, showNav]);
 
-  const handleModuleComplete = () => {
-    const newCompleted = new Set(completedModules);
-    newCompleted.add(currentModule);
-    setCompletedModules(newCompleted);
+  const handleLessonComplete = () => {
+    const lessonKey = `${currentModule}-${currentLesson}`;
+    const newCompleted = new Set(completedLessons);
+    newCompleted.add(lessonKey);
+    setCompletedLessons(newCompleted);
 
-    analytics.track('module_completed', {
+    analytics.track('lesson_completed', {
       courseId: course.id,
       moduleIndex: currentModule,
-      moduleTitle: course.modules[currentModule].title
+      lessonIndex: currentLesson
     });
 
-    // Auto-advance if not last module
-    if (currentModule < course.modules.length - 1) {
-      setTimeout(() => setCurrentModule(currentModule + 1), 500);
-    }
+    // Auto-advance
+    setTimeout(() => handleNext(), 500);
   };
 
   const handleNext = () => {
-    if (currentModule < course.modules.length - 1) {
+    const module = course.modules[currentModule];
+    const lessons = module.lessons || [];
+    
+    if (currentLesson < lessons.length - 1) {
+      setCurrentLesson(currentLesson + 1);
+    } else if (currentModule < course.modules.length - 1) {
       setCurrentModule(currentModule + 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setCurrentLesson(0);
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handlePrevious = () => {
-    if (currentModule > 0) {
+    if (currentLesson > 0) {
+      setCurrentLesson(currentLesson - 1);
+    } else if (currentModule > 0) {
+      const prevModule = course.modules[currentModule - 1];
+      const prevLessons = prevModule.lessons || [];
       setCurrentModule(currentModule - 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setCurrentLesson(Math.max(0, prevLessons.length - 1));
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDownloadPDF = () => {
     analytics.track('pdf_download', { courseId: course.id });
-    // TODO: Implement actual PDF generation
     alert('PDF download coming soon!');
   };
 
   const module = course.modules[currentModule];
-  const isCompleted = completedModules.has(currentModule);
-  const totalCompleted = completedModules.size;
-  const progress = (totalCompleted / course.modules.length) * 100;
+  const lesson = module.lessons?.[currentLesson];
+  const lessonKey = `${currentModule}-${currentLesson}`;
+  const isCompleted = completedLessons.has(lessonKey);
+
+  // Calculate total progress
+  const totalLessons = course.modules.reduce((sum, m) => sum + (m.lessons?.length || 0), 0);
+  const completedCount = completedLessons.size;
+  const progress = totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0;
+
+  const isLastLesson = currentModule === course.modules.length - 1 && 
+                       currentLesson === (module.lessons?.length || 1) - 1;
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
-        <div className="max-w-5xl mx-auto px-6 py-4">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #ffffff 100%)' }}>
+      {/* Premium Header */}
+      <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b shadow-sm" style={{ borderColor: 'rgba(0, 63, 135, 0.1)' }}>
+        <div className="max-w-6xl mx-auto px-6 py-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               {onExit && (
                 <button
                   onClick={onExit}
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                  className="text-gray-500 hover:text-gray-900 transition-colors p-1"
                   title="Exit course"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,159 +156,245 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
               )}
               
               <div>
-                <h1 className="text-lg font-bold text-gray-900">{course.title}</h1>
-                <p className="text-sm text-gray-500">
-                  Module {currentModule + 1} of {course.modules.length}
-                </p>
+                <h1 className="text-xl font-bold text-gray-900 font-serif">{course.title}</h1>
+                <div className="flex items-center gap-3 mt-1">
+                  <p className="text-sm text-gray-600">
+                    Module {currentModule + 1} of {course.modules.length}
+                  </p>
+                  {course.estimated_time && (
+                    <>
+                      <span className="text-gray-300">•</span>
+                      <p className="text-sm text-gray-600">{course.estimated_time}</p>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              {/* Progress */}
-              <div className="hidden md:flex items-center gap-2">
-                <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div className="flex items-center gap-4">
+              {/* Progress bar */}
+              <div className="hidden md:flex items-center gap-3">
+                <div className="w-40 h-2 bg-gray-100 rounded-full overflow-hidden">
                   <div 
-                    className="h-2 bg-gray-900 transition-all duration-300"
-                    style={{ width: `${progress}%` }}
+                    className="h-2 transition-all duration-500 rounded-full"
+                    style={{ 
+                      width: `${progress}%`,
+                      backgroundColor: 'var(--royal-blue)'
+                    }}
                   />
                 </div>
-                <span className="text-sm text-gray-600 font-medium">
-                  {totalCompleted}/{course.modules.length}
+                <span className="text-sm font-medium" style={{ color: 'var(--royal-blue)' }}>
+                  {Math.round(progress)}%
                 </span>
               </div>
 
               {/* Download PDF */}
               <button
                 onClick={handleDownloadPDF}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all hover:bg-gray-50"
+                style={{ color: 'var(--royal-blue)' }}
                 title="Download PDF"
               >
-                Download PDF
-              </button>
-
-              {/* Menu toggle */}
-              <button
-                onClick={() => setShowNav(!showNav)}
-                className="p-2 text-gray-600 hover:text-gray-900 transition-colors md:hidden"
-                title="Toggle navigation (M)"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
+                Download
               </button>
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="flex">
-        {/* Sidebar navigation */}
+      <div className="flex max-w-7xl mx-auto">
+        {/* Elegant Sidebar */}
         {showNav && (
-          <div className="w-64 border-r border-gray-200 min-h-screen sticky top-[73px] hidden md:block">
-            <div className="p-6">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
-                Modules
-              </h3>
-              <nav className="space-y-1">
-                {course.modules.map((mod, idx) => {
-                  const isActive = idx === currentModule;
-                  const isDone = completedModules.has(idx);
-
+          <aside className="w-80 min-h-screen sticky top-[89px] hidden lg:block">
+            <div className="p-8">
+              <div className="mb-6">
+                <h3 className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--royal-blue)' }}>
+                  Course Outline
+                </h3>
+                <p className="text-xs text-gray-500">
+                  {completedCount} of {totalLessons} lessons complete
+                </p>
+              </div>
+              
+              <nav className="space-y-6">
+                {course.modules.map((mod, modIdx) => {
+                  const lessons = mod.lessons || [];
                   return (
-                    <button
-                      key={idx}
-                      onClick={() => setCurrentModule(idx)}
-                      className={`
-                        w-full text-left px-3 py-2 rounded-lg text-sm transition-colors
-                        ${isActive 
-                          ? 'bg-gray-900 text-white font-medium' 
-                          : isDone
-                          ? 'text-gray-900 hover:bg-gray-100'
-                          : 'text-gray-600 hover:bg-gray-100'
-                        }
-                      `}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className={`
-                          w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs
-                          ${isActive 
-                            ? 'bg-white text-gray-900' 
-                            : isDone 
-                            ? 'bg-gray-900 text-white'
-                            : 'bg-gray-200 text-gray-600'
-                          }
-                        `}>
-                          {isDone ? '✓' : idx + 1}
-                        </div>
-                        <span className="line-clamp-2">{mod.title}</span>
+                    <div key={modIdx}>
+                      <h4 className="text-sm font-bold text-gray-900 mb-3 font-serif">
+                        {modIdx + 1}. {mod.title}
+                      </h4>
+                      <div className="space-y-1 ml-3 border-l-2 border-gray-100">
+                        {lessons.map((les, lesIdx) => {
+                          const key = `${modIdx}-${lesIdx}`;
+                          const isActive = modIdx === currentModule && lesIdx === currentLesson;
+                          const isDone = completedLessons.has(key);
+
+                          return (
+                            <button
+                              key={lesIdx}
+                              onClick={() => {
+                                setCurrentModule(modIdx);
+                                setCurrentLesson(lesIdx);
+                              }}
+                              className={`
+                                w-full text-left px-4 py-2 text-sm transition-all rounded-r-lg -ml-px
+                                ${isActive 
+                                  ? 'font-medium' 
+                                  : 'text-gray-600 hover:text-gray-900'
+                                }
+                              `}
+                              style={{
+                                color: isActive ? 'var(--royal-blue)' : undefined,
+                                backgroundColor: isActive ? 'rgba(0, 63, 135, 0.08)' : undefined,
+                                borderLeft: isActive ? '2px solid var(--royal-blue)' : undefined
+                              }}
+                            >
+                              <div className="flex items-center gap-2">
+                                {isDone && (
+                                  <svg className="w-4 h-4 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                  </svg>
+                                )}
+                                <span className="line-clamp-2">{les.title}</span>
+                              </div>
+                            </button>
+                          );
+                        })}
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
               </nav>
             </div>
-          </div>
+          </aside>
         )}
 
-        {/* Main content */}
-        <div className="flex-1">
-          <article className="max-w-3xl mx-auto px-6 py-12">
-            {/* Module header */}
-            <div className="mb-12">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded">
-                  Module {currentModule + 1}
-                </span>
-                {isCompleted && (
-                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded flex items-center gap-1">
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    Completed
-                  </span>
-                )}
-              </div>
-              
-              <h2 className="text-4xl font-black text-gray-900 mb-4 leading-tight">
-                {module.title}
-              </h2>
+        {/* Premium Main Content */}
+        <main className="flex-1 min-h-screen">
+          <article className="max-w-3xl mx-auto px-8 py-16">
+            {/* Module badge */}
+            <div className="mb-6">
+              <span 
+                className="inline-block px-3 py-1 text-xs font-semibold rounded-full"
+                style={{ 
+                  backgroundColor: 'rgba(0, 63, 135, 0.1)',
+                  color: 'var(--royal-blue)'
+                }}
+              >
+                Module {currentModule + 1}: {module.title}
+              </span>
             </div>
 
-            {/* Module content */}
-            <div 
-              className="prose prose-lg prose-gray max-w-none mb-12"
-              dangerouslySetInnerHTML={{ __html: module.content }}
-            />
+            {/* Lesson Title */}
+            {lesson && (
+              <h2 className="text-5xl font-bold text-gray-900 mb-8 leading-tight font-serif">
+                {lesson.title}
+              </h2>
+            )}
 
-            {/* Quiz (if exists) */}
-            {module.quiz && module.quiz.length > 0 && (
-              <div className="border-t border-gray-200 pt-12 mb-12">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                  Quick Check
-                </h3>
-                {/* Quiz component would go here */}
-                <p className="text-gray-600">Quiz functionality coming soon...</p>
+            {/* Lesson Content */}
+            {lesson && (
+              <div 
+                className="prose prose-lg prose-gray max-w-none mb-16"
+                style={{
+                  fontSize: '1.125rem',
+                  lineHeight: '1.875rem',
+                  color: '#374151'
+                }}
+              >
+                <div 
+                  dangerouslySetInnerHTML={{ __html: lesson.content.replace(/\n/g, '<br />') }}
+                  style={{
+                    whiteSpace: 'pre-wrap'
+                  }}
+                />
               </div>
             )}
 
-            {/* Actions */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-8 border-t border-gray-200">
+            {/* Quiz Section */}
+            {lesson?.quiz && (
+              <div 
+                className="p-8 rounded-2xl mb-16"
+                style={{ 
+                  backgroundColor: 'rgba(0, 63, 135, 0.05)',
+                  border: '2px solid rgba(0, 63, 135, 0.1)'
+                }}
+              >
+                <div className="flex items-start gap-3 mb-4">
+                  <svg className="w-6 h-6 flex-shrink-0 mt-1" style={{ color: 'var(--royal-blue)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">Quick Check</h3>
+                    <p className="text-base text-gray-700 font-medium mb-3">{lesson.quiz.question}</p>
+                    {lesson.quiz.answer && (
+                      <details className="mt-4">
+                        <summary className="text-sm font-semibold cursor-pointer" style={{ color: 'var(--royal-blue)' }}>
+                          View Answer
+                        </summary>
+                        <p className="mt-3 text-sm text-gray-700 pl-4 border-l-2" style={{ borderColor: 'var(--royal-blue)' }}>
+                          {lesson.quiz.answer}
+                        </p>
+                      </details>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Completion Status */}
+            {isCompleted && (
+              <div 
+                className="flex items-center gap-3 p-4 rounded-xl mb-8"
+                style={{ 
+                  backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                  border: '1px solid rgba(34, 197, 94, 0.2)'
+                }}
+              >
+                <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm font-medium text-green-700">
+                  Lesson completed
+                </span>
+              </div>
+            )}
+
+            {/* Navigation Actions */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-12 border-t-2" style={{ borderColor: 'rgba(0, 63, 135, 0.1)' }}>
               <div>
                 {!isCompleted && (
                   <button
-                    onClick={handleModuleComplete}
-                    className="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+                    onClick={handleLessonComplete}
+                    className="px-6 py-3 rounded-xl font-semibold text-white transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+                    style={{ backgroundColor: 'var(--royal-blue)' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--royal-blue-light)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--royal-blue)')}
                   >
-                    Mark as Complete
+                    Mark Complete
                   </button>
                 )}
               </div>
 
               <div className="flex gap-3">
-                {currentModule > 0 && (
+                {(currentModule > 0 || currentLesson > 0) && (
                   <button
                     onClick={handlePrevious}
-                    className="flex items-center gap-2 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:border-gray-900 hover:text-gray-900 transition-colors"
+                    className="flex items-center gap-2 px-5 py-3 border-2 rounded-xl font-medium transition-all hover:shadow-md"
+                    style={{ 
+                      borderColor: 'var(--royal-blue)',
+                      color: 'var(--royal-blue)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(0, 63, 135, 0.05)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -293,41 +403,77 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
                   </button>
                 )}
                 
-                {currentModule < course.modules.length - 1 && (
+                {!isLastLesson && (
                   <button
                     onClick={handleNext}
-                    className="flex items-center gap-2 px-4 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+                    className="flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-white transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+                    style={{ backgroundColor: 'var(--royal-blue)' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--royal-blue-light)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--royal-blue)')}
                   >
-                    Next Module
+                    Next Lesson
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
                 )}
 
-                {currentModule === course.modules.length - 1 && isCompleted && (
-                  <div className="px-6 py-3 bg-green-50 border border-green-200 rounded-lg">
-                    <p className="text-green-700 font-medium">
-                      🎉 Course completed!
+                {isLastLesson && isCompleted && (
+                  <div 
+                    className="px-6 py-3 rounded-xl border-2"
+                    style={{ 
+                      backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                      borderColor: 'rgba(34, 197, 94, 0.3)'
+                    }}
+                  >
+                    <p className="text-green-700 font-semibold flex items-center gap-2">
+                      <span className="text-xl">🎉</span>
+                      Course Completed!
                     </p>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Keyboard shortcuts hint */}
-            <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-              <p className="text-xs text-gray-500 text-center">
-                <kbd className="px-2 py-1 bg-white border border-gray-300 rounded text-xs font-mono">←</kbd>
-                {' '}Previous{' '}
-                <kbd className="px-2 py-1 bg-white border border-gray-300 rounded text-xs font-mono">→</kbd>
-                {' '}Next{' '}
-                <kbd className="px-2 py-1 bg-white border border-gray-300 rounded text-xs font-mono">M</kbd>
-                {' '}Toggle menu
+            {/* Next Steps Section */}
+            {isLastLesson && course.next_steps && course.next_steps.length > 0 && (
+              <div className="mt-16 p-8 rounded-2xl" style={{ backgroundColor: 'rgba(0, 63, 135, 0.05)' }}>
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 font-serif">Next Steps</h3>
+                <ul className="space-y-4">
+                  {course.next_steps.map((step, idx) => (
+                    <li key={idx} className="flex gap-4">
+                      <span 
+                        className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold text-white"
+                        style={{ backgroundColor: 'var(--royal-blue)' }}
+                      >
+                        {idx + 1}
+                      </span>
+                      <span className="text-gray-700 text-lg">{step}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Keyboard shortcuts */}
+            <div className="mt-12 p-6 bg-white/70 backdrop-blur-sm rounded-xl border" style={{ borderColor: 'rgba(0, 63, 135, 0.1)' }}>
+              <p className="text-xs text-gray-500 text-center flex items-center justify-center gap-4 flex-wrap">
+                <span className="flex items-center gap-2">
+                  <kbd className="px-3 py-1 bg-white border rounded text-xs font-mono" style={{ borderColor: 'var(--royal-blue)' }}>←</kbd>
+                  Previous
+                </span>
+                <span className="flex items-center gap-2">
+                  <kbd className="px-3 py-1 bg-white border rounded text-xs font-mono" style={{ borderColor: 'var(--royal-blue)' }}>→</kbd>
+                  Next
+                </span>
+                <span className="flex items-center gap-2">
+                  <kbd className="px-3 py-1 bg-white border rounded text-xs font-mono" style={{ borderColor: 'var(--royal-blue)' }}>M</kbd>
+                  Menu
+                </span>
               </p>
             </div>
           </article>
-        </div>
+        </main>
       </div>
     </div>
   );
