@@ -43,7 +43,7 @@
 
 ## Pricing Psychology
 
-### $5 vs $7 vs $10 Analysis
+### $5 vs $3.99 vs $10 Analysis
 
 **$5 Price Point:**
 - **Pros:**
@@ -63,7 +63,7 @@
 
 ---
 
-**$7 Price Point:**
+**$3.99 Price Point:**
 - **Pros:**
   - Still impulse buy range
   - Slightly more premium than $5
@@ -84,7 +84,7 @@
   - Round number, easy to remember
   - Premium positioning without being expensive
   - Comparable to Blinkist, MasterClass monthly
-  - Room for discounts (launch at $7, "normally $10")
+  - Room for discounts (launch at $3.99, "normally $10")
   
 - **Cons:**
   - Requires more conviction from buyer
@@ -152,7 +152,7 @@
 
 ## Recommended Pricing Model
 
-### MVP Launch Pricing: **$7 per course**
+### MVP Launch Pricing: **$3.99 per course**
 
 **Rationale:**
 1. **Above $5:** Signals quality, not a throwaway product
@@ -167,7 +167,7 @@
 
 **Positioning:**
 - "Premium crash course for less than a Chipotle burrito"
-- "One course, one problem, $7"
+- "One course, one problem, $3.99"
 
 ---
 
@@ -219,7 +219,7 @@
 - Get feedback
 
 ### Standard Pricing (Post-Launch)
-- **$7 per course**
+- **$3.99 per course**
 - No artificial "sales" (avoid Udemy fatigue)
 
 ### Bundles (Future)
@@ -242,9 +242,9 @@
 ## Pricing Experiments to Run
 
 ### A/B Test Ideas (Post-Launch)
-1. **$7 vs $10** - Does higher price reduce conversions?
+1. **$3.99 vs $10** - Does higher price reduce conversions?
 2. **Pay-per-course vs $20/month unlimited** - Which has better LTV?
-3. **"$7" vs "Less than a burrito"** - Does comparison anchor help?
+3. **"$3.99" vs "Less than a burrito"** - Does comparison anchor help?
 4. **Bundling:** Offer 3-pack at checkout vs single purchase only
 
 ### Price Sensitivity Testing
@@ -257,11 +257,11 @@
 ## Psychological Pricing Tactics
 
 ### Anchoring
-- "Typical Coursera course: $49. Our AI crash course: $7."
-- "40-hour Udemy course: $14.99. Our 1-hour course: $7."
+- "Typical Coursera course: $49. Our AI crash course: $3.99."
+- "40-hour Udemy course: $14.99. Our 1-hour course: $3.99."
 
 ### Value Framing
-- "$7 to walk into your meeting confident"
+- "$3.99 to walk into your meeting confident"
 - "Less than a lunch, more valuable than a day of Googling"
 
 ### Scarcity (Use Sparingly)
@@ -279,17 +279,17 @@
 
 ## Revenue Model Scenarios
 
-### Conservative (100 sales/month @ $7)
+### Conservative (100 sales/month @ $3.99)
 - **Monthly Revenue:** $700
 - **Annual Revenue:** $8,400
 - **Assumptions:** Organic + word of mouth
 
-### Moderate (500 sales/month @ $7)
+### Moderate (500 sales/month @ $3.99)
 - **Monthly Revenue:** $3,500
 - **Annual Revenue:** $42,000
 - **Assumptions:** SEO + Product Hunt + Reddit presence
 
-### Optimistic (2,000 sales/month @ $7)
+### Optimistic (2,000 sales/month @ $3.99)
 - **Monthly Revenue:** $14,000
 - **Annual Revenue:** $168,000
 - **Assumptions:** Viral growth + affiliates + paid ads
@@ -310,12 +310,12 @@
 4. **Introduce Pro subscription** ($20/month) once you have 500+ happy customers
 
 ### Long-Term Pricing
-- **Core product:** $7 per course (sweet spot)
+- **Core product:** $3.99 per course (sweet spot)
 - **Pro tier:** $20/month unlimited (for power users)
 - **Bundles:** 3-pack ($18), 10-pack ($50)
 - **Enterprise:** Custom pricing (teams of 10+)
 
-### Why $7 Wins
+### Why $3.99 Wins
 - **Low enough:** Impulse buy, minimal hesitation
 - **High enough:** Signals quality, sustainable margins
 - **Differentiated:** Not trying to compete with Udemy sales

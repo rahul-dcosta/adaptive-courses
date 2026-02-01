@@ -196,7 +196,7 @@ Hook: Framework/methodology, shareable
 ### A/B Test Ideas
 - Headline: "Learn [Topic] in 1 Hour" vs. "Generate a Crash Course in 60 Seconds"
 - CTA: "Generate Course" vs. "Start Learning" vs. "Get Prepared"
-- Pricing: $5 vs. $7 vs. $10
+- Pricing: $5 vs. $3.99 vs. $10
 - Positioning: "AI Course Generator" vs. "Crash Course Platform" vs. "Just-in-Time Learning"
 
 ---
