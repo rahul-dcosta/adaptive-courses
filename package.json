@@ -1,0 +1,21 @@
+{
+  "name": "adaptive-courses-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@adaptive-courses/web",
+    "dev:web": "npm run dev --workspace=@adaptive-courses/web",
+    "dev:mobile": "npm run start --workspace=@adaptive-courses/mobile",
+    "build": "npm run build --workspace=@adaptive-courses/web",
+    "build:web": "npm run build --workspace=@adaptive-courses/web",
+    "build:mobile": "npm run build --workspace=@adaptive-courses/mobile",
+    "lint": "npm run lint --workspace=@adaptive-courses/web"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
