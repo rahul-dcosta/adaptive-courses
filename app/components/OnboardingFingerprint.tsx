@@ -308,8 +308,22 @@ export default function OnboardingFingerprint({
     );
   }
 
+  // Helper function to get display labels
+  const getDisplayLabel = (value: string | undefined, options: any[]) => {
+    if (!value) return '';
+    const option = options.find(opt => opt.value === value);
+    return option?.label || value;
+  };
+
   // Review Step
   if (step === 'review') {
+    const learningStyleLabel = getDisplayLabel(fingerprint.learningStyle, ONBOARDING_QUESTIONS.learningStyle.options);
+    const priorKnowledgeLabel = getDisplayLabel(fingerprint.priorKnowledge, ONBOARDING_QUESTIONS.priorKnowledge.options);
+    const learningGoalLabel = getDisplayLabel(fingerprint.learningGoal, ONBOARDING_QUESTIONS.learningGoal.options);
+    const timeCommitmentLabel = getDisplayLabel(fingerprint.timeCommitment, ONBOARDING_QUESTIONS.timeCommitment.options);
+    const contentFormatLabel = getDisplayLabel(fingerprint.contentFormat, ONBOARDING_QUESTIONS.contentFormat.options);
+    const challengePreferenceLabel = getDisplayLabel(fingerprint.challengePreference, ONBOARDING_QUESTIONS.challengePreference.options);
+
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
         <div className="max-w-2xl w-full glass rounded-3xl p-12 shadow-2xl">
@@ -322,37 +336,45 @@ export default function OnboardingFingerprint({
 
           <div className="space-y-4 mb-8">
             <div className="glass-dark p-4 rounded-xl">
-              <p className="text-sm text-gray-600 font-medium">Topic</p>
+              <p className="text-sm text-gray-600 font-medium uppercase tracking-wide">Subject</p>
               <p className="text-lg font-semibold" style={{ color: 'var(--royal-blue)' }}>{fingerprint.topic}</p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="glass-dark p-4 rounded-xl">
-                <p className="text-sm text-gray-600 font-medium">Learning Style</p>
-                <p className="text-base font-semibold text-gray-900">{fingerprint.learningStyle}</p>
+                <p className="text-sm text-gray-600 font-medium uppercase tracking-wide">Learning Style</p>
+                <p className="text-base font-semibold text-gray-900">{learningStyleLabel}</p>
               </div>
               <div className="glass-dark p-4 rounded-xl">
-                <p className="text-sm text-gray-600 font-medium">Current Level</p>
-                <p className="text-base font-semibold text-gray-900">{fingerprint.priorKnowledge}</p>
+                <p className="text-sm text-gray-600 font-medium uppercase tracking-wide">Prior Knowledge</p>
+                <p className="text-base font-semibold text-gray-900">{priorKnowledgeLabel}</p>
               </div>
               <div className="glass-dark p-4 rounded-xl">
-                <p className="text-sm text-gray-600 font-medium">Goal</p>
-                <p className="text-base font-semibold text-gray-900">{fingerprint.learningGoal}</p>
+                <p className="text-sm text-gray-600 font-medium uppercase tracking-wide">Learning Goal</p>
+                <p className="text-base font-semibold text-gray-900">{learningGoalLabel}</p>
               </div>
               <div className="glass-dark p-4 rounded-xl">
-                <p className="text-sm text-gray-600 font-medium">Time</p>
-                <p className="text-base font-semibold text-gray-900">{fingerprint.timeCommitment}</p>
+                <p className="text-sm text-gray-600 font-medium uppercase tracking-wide">Time Commitment</p>
+                <p className="text-base font-semibold text-gray-900">{timeCommitmentLabel}</p>
+              </div>
+              <div className="glass-dark p-4 rounded-xl">
+                <p className="text-sm text-gray-600 font-medium uppercase tracking-wide">Content Format</p>
+                <p className="text-base font-semibold text-gray-900">{contentFormatLabel}</p>
+              </div>
+              <div className="glass-dark p-4 rounded-xl">
+                <p className="text-sm text-gray-600 font-medium uppercase tracking-wide">Challenge Level</p>
+                <p className="text-base font-semibold text-gray-900">{challengePreferenceLabel}</p>
               </div>
             </div>
           </div>
 
           <button
             onClick={handleComplete}
-            className="w-full text-white font-semibold text-lg py-5 px-8 rounded-xl transition-all shadow-lg hover:shadow-xl"
+            className="w-full text-white font-bold text-lg py-5 px-8 rounded-xl transition-all shadow-lg hover:shadow-xl"
             style={{ backgroundColor: 'var(--royal-blue)' }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--royal-blue-light)')}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--royal-blue)')}
           >
-            Generate My Course 🚀
+            Generate Course Outline
           </button>
         </div>
       </div>
