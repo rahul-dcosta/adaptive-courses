@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { analytics } from '@/lib/analytics';
+import MermaidDiagram from './MermaidDiagram';
 
 interface Module {
   title: string;
@@ -30,6 +31,43 @@ interface Course {
 interface CourseViewerProps {
   course: Course;
   onExit?: () => void;
+}
+
+// Helper function to parse content and extract mermaid diagrams
+function parseContent(content: string) {
+  const parts: Array<{ type: 'text' | 'mermaid'; content: string }> = [];
+  const mermaidRegex = /```mermaid\n([\s\S]*?)```/g;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = mermaidRegex.exec(content)) !== null) {
+    // Add text before mermaid block
+    if (match.index > lastIndex) {
+      const textContent = content.substring(lastIndex, match.index);
+      if (textContent.trim()) {
+        parts.push({ type: 'text', content: textContent });
+      }
+    }
+    
+    // Add mermaid block
+    parts.push({ type: 'mermaid', content: match[1].trim() });
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Add remaining text
+  if (lastIndex < content.length) {
+    const remaining = content.substring(lastIndex);
+    if (remaining.trim()) {
+      parts.push({ type: 'text', content: remaining });
+    }
+  }
+
+  // If no mermaid blocks found, return the whole content as text
+  if (parts.length === 0) {
+    parts.push({ type: 'text', content });
+  }
+
+  return parts;
 }
 
 export default function CourseViewer({ course, onExit }: CourseViewerProps) {
@@ -214,10 +252,10 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
       <div className="flex max-w-7xl mx-auto">
         {/* Elegant Sidebar */}
         {showNav && (
-          <aside className="w-80 min-h-screen sticky top-[89px] hidden lg:block">
+          <aside className="w-80 min-h-screen sticky top-[89px] hidden lg:block border-r" style={{ borderColor: 'rgba(0, 63, 135, 0.08)' }}>
             <div className="p-8">
               {/* Progress Summary */}
-              <div className="mb-8 p-6 rounded-2xl" style={{ backgroundColor: 'rgba(0, 63, 135, 0.05)', border: '2px solid rgba(0, 63, 135, 0.1)' }}>
+              <div className="mb-8 p-6 rounded-xl bg-white/50" style={{ border: '1px solid rgba(0, 63, 135, 0.1)' }}>
                 <h3 className="text-xs font-bold uppercase tracking-wider mb-4" style={{ color: 'var(--royal-blue)' }}>
                   Course Progress
                 </h3>
@@ -272,6 +310,9 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
                 )}
               </div>
 
+              {/* Divider */}
+              <div className="mb-8 border-t" style={{ borderColor: 'rgba(0, 63, 135, 0.08)' }}></div>
+
               {/* Module outline header */}
               <div className="mb-6">
                 <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--royal-blue)' }}>
@@ -287,7 +328,7 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
                       <h4 className="text-sm font-bold text-gray-900 mb-3 font-serif">
                         {modIdx + 1}. {mod.title}
                       </h4>
-                      <div className="space-y-1 ml-3 border-l-2 border-gray-100">
+                      <div className="space-y-1 ml-3 border-l" style={{ borderColor: 'rgba(0, 63, 135, 0.12)' }}>
                         {lessons.map((les, lesIdx) => {
                           const key = `${modIdx}-${lesIdx}`;
                           const isActive = modIdx === currentModule && lesIdx === currentLesson;
@@ -339,9 +380,10 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
             {/* Module badge */}
             <div className="mb-6">
               <span 
-                className="inline-block px-3 py-1 text-xs font-semibold rounded-full"
+                className="inline-block px-3 py-1 text-xs font-semibold rounded-full border"
                 style={{ 
-                  backgroundColor: 'rgba(0, 63, 135, 0.1)',
+                  backgroundColor: 'rgba(0, 63, 135, 0.05)',
+                  borderColor: 'rgba(0, 63, 135, 0.15)',
                   color: 'var(--royal-blue)'
                 }}
               >
@@ -366,12 +408,20 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
                   color: '#374151'
                 }}
               >
-                <div 
-                  dangerouslySetInnerHTML={{ __html: lesson.content.replace(/\n/g, '<br />') }}
-                  style={{
-                    whiteSpace: 'pre-wrap'
-                  }}
-                />
+                {parseContent(lesson.content).map((part, idx) => {
+                  if (part.type === 'mermaid') {
+                    return <MermaidDiagram key={idx} chart={part.content} />;
+                  }
+                  return (
+                    <div 
+                      key={idx}
+                      dangerouslySetInnerHTML={{ __html: part.content.replace(/\n/g, '<br />') }}
+                      style={{
+                        whiteSpace: 'pre-wrap'
+                      }}
+                    />
+                  );
+                })}
               </div>
             )}
 
@@ -379,10 +429,10 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
             {lesson?.quiz && (
               <div 
                 key={`quiz-${currentModule}-${currentLesson}`}
-                className="p-8 rounded-2xl mb-16"
+                className="p-8 rounded-xl mb-16"
                 style={{ 
-                  backgroundColor: 'rgba(0, 63, 135, 0.05)',
-                  border: '2px solid rgba(0, 63, 135, 0.1)'
+                  backgroundColor: 'rgba(0, 63, 135, 0.04)',
+                  border: '1px solid rgba(0, 63, 135, 0.12)'
                 }}
               >
                 <div className="flex items-start gap-3 mb-4">
@@ -412,7 +462,7 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
               <div 
                 className="flex items-center gap-3 p-4 rounded-xl mb-8"
                 style={{ 
-                  backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                  backgroundColor: 'rgba(34, 197, 94, 0.08)',
                   border: '1px solid rgba(34, 197, 94, 0.2)'
                 }}
               >
@@ -426,7 +476,7 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
             )}
 
             {/* Navigation Actions */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-12 border-t-2" style={{ borderColor: 'rgba(0, 63, 135, 0.1)' }}>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-12 border-t" style={{ borderColor: 'rgba(0, 63, 135, 0.1)' }}>
               <div>
                 {!isCompleted && (
                   <button
@@ -498,7 +548,7 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
 
             {/* Next Steps Section */}
             {isLastLesson && course.next_steps && course.next_steps.length > 0 && (
-              <div className="mt-16 p-8 rounded-2xl" style={{ backgroundColor: 'rgba(0, 63, 135, 0.05)' }}>
+              <div className="mt-16 p-8 rounded-xl" style={{ backgroundColor: 'rgba(0, 63, 135, 0.04)', border: '1px solid rgba(0, 63, 135, 0.12)' }}>
                 <h3 className="text-2xl font-bold text-gray-900 mb-6 font-serif">Next Steps</h3>
                 <ul className="space-y-4">
                   {course.next_steps.map((step, idx) => (
@@ -517,7 +567,7 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
             )}
 
             {/* Keyboard shortcuts */}
-            <div className="mt-12 p-6 bg-white/70 backdrop-blur-sm rounded-xl border" style={{ borderColor: 'rgba(0, 63, 135, 0.1)' }}>
+            <div className="mt-12 p-6 rounded-xl border" style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(0, 63, 135, 0.08)' }}>
               <p className="text-xs text-gray-500 text-center flex items-center justify-center gap-4 flex-wrap">
                 <span className="flex items-center gap-2">
                   <kbd className="px-3 py-1 bg-white border rounded text-xs font-mono" style={{ borderColor: 'var(--royal-blue)' }}>←</kbd>

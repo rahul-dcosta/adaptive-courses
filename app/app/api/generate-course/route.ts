@@ -47,32 +47,25 @@ export async function POST(request: NextRequest) {
     const learningStyleMap: Record<string, string> = {
       'visual': `Use lots of concrete examples, analogies to visual concepts, and describe things in spatial/visual terms. 
       
-      CRITICAL FOR VISUAL LEARNERS: Include ASCII diagrams, tables, or visual representations directly in the content using plain text.
+      CRITICAL FOR VISUAL LEARNERS: Include diagrams using Mermaid.js syntax for flowcharts, sequences, and visual concepts.
       
-      For concepts that benefit from visuals (matrices, flows, hierarchies, comparisons):
-      - Use ASCII art boxes and lines
-      - Create simple tables with | and - characters
-      - Draw flowcharts with arrows (→, ↓, ←, ↑)
-      - Show 2x2 matrices with clear labels
+      For concepts that benefit from visuals (processes, flows, hierarchies, relationships, timelines):
+      - Use Mermaid flowcharts for processes and decision trees
+      - Use sequence diagrams for interactions and flows  
+      - Use state diagrams for lifecycle and transitions
+      - Use ER diagrams for data relationships
+      - Use Gantt charts for timelines and schedules
       
-      Example for pricing matrix:
-      \`\`\`
-      Pricing War Matrix:
+      ALWAYS wrap mermaid diagrams in code blocks with the mermaid language tag:
       
-                     Competitor
-                  High  |  Low
-              ┌─────────┼─────────┐
-      You  H  │  Both   │  You    │
-           i  │  profit │  win    │
-           g  │  well   │  share  │
-           h  ├─────────┼─────────┤
-              │  Comp   │  Both   │
-      You  L  │  wins   │  lose   │
-           o  │  share  │  money  │
-           w  └─────────┴─────────┘
+      \`\`\`mermaid
+      graph TD
+          A[Start] --> B{Decision}
+          B -->|Yes| C[Action]
+          B -->|No| D[Alternative]
       \`\`\`
       
-      ALWAYS include visual representations when explaining concepts that have structure, relationships, or comparisons.`,
+      ALWAYS include mermaid diagrams when explaining concepts with structure, relationships, processes, or comparisons.`,
       
       'auditory': 'Use conversational tone, explain concepts as if speaking to them. Include discussion prompts and verbal examples.',
       'reading': 'Provide detailed written explanations, definitions, and structured text. Use clear hierarchies and bullet points.',
@@ -145,6 +138,25 @@ ${timeGuidance}
 
 🎚️ DIFFICULTY PROGRESSION:
 ${challengeGuidance}
+
+📊 VISUAL DIAGRAMS (AVAILABLE FOR ALL TOPICS):
+When explaining processes, relationships, hierarchies, or flows, use Mermaid.js diagrams:
+
+\`\`\`mermaid
+graph LR
+    A[Concept A] --> B[Concept B]
+    B --> C[Outcome]
+\`\`\`
+
+Diagram types available:
+- graph/flowchart: Processes, decision trees, flows
+- sequenceDiagram: Interactions, API calls, request flows
+- stateDiagram-v2: State machines, lifecycles
+- erDiagram: Database relationships, data models
+- gantt: Timelines, project schedules
+- pie: Distributions, proportions
+
+Use diagrams when they add clarity - especially for system design, processes, workflows, data relationships, or timelines.
 
 💡 TEACH LIKE AN EXPERT (CRITICAL):
 Don't just define concepts. Teach the THINKING:

@@ -1,0 +1,62 @@
+{
+  "title": "Understanding System Design with Visual Diagrams",
+  "description": "Learn system design concepts through interactive visual diagrams",
+  "estimated_time": "45 minutes",
+  "topic": "System Design",
+  "modules": [
+    {
+      "title": "Introduction to System Architecture",
+      "lessons": [
+        {
+          "title": "What is System Design?",
+          "content": "System design is the process of defining the architecture, modules, interfaces, and data for a system to satisfy specified requirements.\n\nLet's visualize a simple client-server architecture:\n\n```mermaid\ngraph LR\n    A[Client] -->|HTTP Request| B[Load Balancer]\n    B --> C[Web Server 1]\n    B --> D[Web Server 2]\n    C --> E[Database]\n    D --> E\n```\n\nThis diagram shows how client requests are distributed across multiple servers for better performance and reliability."
+        },
+        {
+          "title": "Request Flow in Web Applications",
+          "content": "Understanding how requests flow through a system is crucial. Here's a typical sequence:\n\n```mermaid\nsequenceDiagram\n    participant User\n    participant Browser\n    participant Server\n    participant Database\n    \n    User->>Browser: Click Button\n    Browser->>Server: HTTP POST /api/data\n    Server->>Database: Query Data\n    Database-->>Server: Return Results\n    Server-->>Browser: JSON Response\n    Browser-->>User: Update UI\n```\n\nEach step in this sequence represents a critical part of the user experience.",
+          "quiz": {
+            "question": "Why is it important to use a load balancer in a multi-server architecture?",
+            "answer": "A load balancer distributes incoming traffic across multiple servers, preventing any single server from becoming overloaded. This improves reliability, performance, and allows for better scaling."
+          }
+        }
+      ]
+    },
+    {
+      "title": "State Management",
+      "lessons": [
+        {
+          "title": "Application State Flow",
+          "content": "State management is critical in modern applications. Here's how state typically flows:\n\n```mermaid\nstateDiagram-v2\n    [*] --> Idle\n    Idle --> Loading: User Action\n    Loading --> Success: Data Received\n    Loading --> Error: Request Failed\n    Success --> Idle: Reset\n    Error --> Idle: Retry\n    Error --> [*]: Give Up\n```\n\nThis state diagram shows the lifecycle of a typical data-fetching operation in an application."
+        }
+      ]
+    },
+    {
+      "title": "Database Relationships",
+      "lessons": [
+        {
+          "title": "Entity Relationships",
+          "content": "Understanding how data relates is fundamental to database design:\n\n```mermaid\nerDiagram\n    USER ||--o{ POST : creates\n    USER ||--o{ COMMENT : writes\n    POST ||--o{ COMMENT : has\n    POST }o--|| CATEGORY : belongs_to\n    \n    USER {\n        int id\n        string username\n        string email\n    }\n    POST {\n        int id\n        string title\n        string content\n        int author_id\n    }\n    COMMENT {\n        int id\n        string text\n        int user_id\n        int post_id\n    }\n```\n\nThis entity-relationship diagram shows how users, posts, and comments connect in a blogging system.",
+          "quiz": {
+            "question": "What does the ||--o{ notation mean in an ER diagram?",
+            "answer": "The ||--o{ notation represents a one-to-many relationship. The || side indicates 'one' and the o{ side indicates 'many'. For example, one user can create many posts."
+          }
+        }
+      ]
+    },
+    {
+      "title": "Project Planning",
+      "lessons": [
+        {
+          "title": "Timeline and Milestones",
+          "content": "Visualizing project timelines helps with planning and tracking:\n\n```mermaid\ngantt\n    title Development Timeline\n    dateFormat  YYYY-MM-DD\n    section Design\n    Requirements Gathering :a1, 2024-01-01, 7d\n    UI/UX Design          :a2, after a1, 10d\n    section Development\n    Backend API           :a3, after a2, 14d\n    Frontend              :a4, after a2, 14d\n    section Testing\n    Integration Testing   :a5, after a3, 7d\n    User Acceptance      :a6, after a5, 5d\n    section Deployment\n    Production Deploy    :a7, after a6, 2d\n```\n\nGantt charts like this help teams visualize dependencies and critical paths in projects."
+        }
+      ]
+    }
+  ],
+  "next_steps": [
+    "Practice creating your own system diagrams",
+    "Explore the Mermaid.js documentation for more diagram types",
+    "Design a system architecture for a real-world application",
+    "Share your diagrams with your team for feedback"
+  ]
+}
