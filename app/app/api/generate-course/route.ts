@@ -47,25 +47,30 @@ export async function POST(request: NextRequest) {
     const learningStyleMap: Record<string, string> = {
       'visual': `Use lots of concrete examples, analogies to visual concepts, and describe things in spatial/visual terms. 
       
-      CRITICAL FOR VISUAL LEARNERS: Include diagrams using Mermaid.js syntax for flowcharts, sequences, and visual concepts.
+      CRITICAL FOR VISUAL LEARNERS: You MUST include multiple Mermaid.js diagrams throughout the course.
       
-      For concepts that benefit from visuals (processes, flows, hierarchies, relationships, timelines):
-      - Use Mermaid flowcharts for processes and decision trees
-      - Use sequence diagrams for interactions and flows  
-      - Use state diagrams for lifecycle and transitions
-      - Use ER diagrams for data relationships
-      - Use Gantt charts for timelines and schedules
+      REQUIRED: Include at least 2-3 diagrams across the lessons. Embed them directly in the content field.
       
-      ALWAYS wrap mermaid diagrams in code blocks with the mermaid language tag:
+      Example of content with embedded diagram:
+      "Here's how the process works:
+
+\`\`\`mermaid
+graph TD
+    A[Input] --> B[Process]
+    B --> C{Quality Check}
+    C -->|Pass| D[Output]
+    C -->|Fail| A
+\`\`\`
+
+This feedback loop ensures quality..."
+
+      Use these diagram types as appropriate:
+      - graph TD / graph LR: Processes, flows, hierarchies
+      - sequenceDiagram: Interactions, timelines
+      - stateDiagram-v2: State machines
+      - erDiagram: Data relationships
       
-      \`\`\`mermaid
-      graph TD
-          A[Start] --> B{Decision}
-          B -->|Yes| C[Action]
-          B -->|No| D[Alternative]
-      \`\`\`
-      
-      ALWAYS include mermaid diagrams when explaining concepts with structure, relationships, processes, or comparisons.`,
+      ALWAYS wrap in \`\`\`mermaid code blocks and place WITHIN the lesson content text.`,
       
       'auditory': 'Use conversational tone, explain concepts as if speaking to them. Include discussion prompts and verbal examples.',
       'reading': 'Provide detailed written explanations, definitions, and structured text. Use clear hierarchies and bullet points.',
@@ -139,24 +144,53 @@ ${timeGuidance}
 🎚️ DIFFICULTY PROGRESSION:
 ${challengeGuidance}
 
-📊 VISUAL DIAGRAMS (AVAILABLE FOR ALL TOPICS):
-When explaining processes, relationships, hierarchies, or flows, use Mermaid.js diagrams:
+📊 VISUAL DIAGRAMS (MANDATORY FOR MOST TOPICS):
+You MUST include at least ONE Mermaid diagram in the course content when the topic involves:
+- Processes, workflows, or sequences
+- Hierarchies or organizational structures  
+- Relationships between concepts or entities
+- Decision trees or conditional logic
+- Timelines or project phases
+- Comparisons or trade-offs
+- Data models or system architecture
+
+DIAGRAM SYNTAX (copy this format exactly):
+
+Process/Flow example:
+\`\`\`mermaid
+graph TD
+    A[Start Point] --> B{Decision?}
+    B -->|Option 1| C[Outcome A]
+    B -->|Option 2| D[Outcome B]
+    C --> E[End]
+    D --> E
+\`\`\`
+
+Sequence example:
+\`\`\`mermaid
+sequenceDiagram
+    Actor->>System: Request
+    System->>Database: Query
+    Database-->>System: Results
+    System-->>Actor: Response
+\`\`\`
+
+CRITICAL: Place the diagram WITHIN the lesson content field, embedded in the text naturally.
+
+Example lesson content with diagram:
+"Game theory studies strategic interactions. Here's how a simple negotiation flows:
 
 \`\`\`mermaid
 graph LR
-    A[Concept A] --> B[Concept B]
-    B --> C[Outcome]
+    A[Your Offer] --> B{Counterparty}
+    B -->|Accept| C[Deal Done]
+    B -->|Reject| D[Negotiate]
+    D --> A
 \`\`\`
 
-Diagram types available:
-- graph/flowchart: Processes, decision trees, flows
-- sequenceDiagram: Interactions, API calls, request flows
-- stateDiagram-v2: State machines, lifecycles
-- erDiagram: Database relationships, data models
-- gantt: Timelines, project schedules
-- pie: Distributions, proportions
+This cycle continues until both parties find a Nash equilibrium..."
 
-Use diagrams when they add clarity - especially for system design, processes, workflows, data relationships, or timelines.
+Include diagrams naturally in the lesson text, NOT as separate fields.
 
 💡 TEACH LIKE AN EXPERT (CRITICAL):
 Don't just define concepts. Teach the THINKING:
@@ -184,11 +218,14 @@ Generate a SIMPLE structured course with:
 3. Each lesson:
    - Clear, specific title
    - 100-150 words of actionable content (SHORT!)
-   - Use ONLY simple punctuation (periods, commas). NO quotes, apostrophes, or special characters in content
+   - **INCLUDE MERMAID DIAGRAMS in the content when relevant** (see examples above)
+   - Use ONLY simple punctuation (periods, commas). NO quotes, apostrophes, or special characters in content (except backticks for mermaid blocks)
    - A simple quiz question (include short answer)
 4. Module descriptions (ONE sentence, simple words)
 5. Estimated time for the entire course
 6. EXACTLY 3 concrete "next steps"
+
+⚠️ MERMAID REMINDER: If the topic involves processes, relationships, hierarchies, or flows, you MUST include at least one \`\`\`mermaid diagram in the lesson content. Embed it naturally within the text.
 
 KEEP IT SHORT AND SIMPLE TO ENSURE VALID JSON.
 
