@@ -6,46 +6,92 @@ import LoadingSpinner from './LoadingSpinner';
 import SuccessCelebration from './SuccessCelebration';
 import CourseViewer from './CourseViewer';
 import OnboardingFingerprint from './OnboardingFingerprint';
+import CourseOutlinePreview from './CourseOutlinePreview';
 import { LearnerFingerprint } from '@/lib/types';
 
-type Step = 'onboarding' | 'generating' | 'celebration' | 'preview';
+type Step = 'onboarding' | 'generating-outline' | 'outline-preview' | 'generating-full' | 'celebration' | 'preview';
 
 export default function CourseBuilderSmart({ initialTopic }: { initialTopic?: string }) {
   const [step, setStep] = useState<Step>('onboarding');
   const [generatedCourse, setGeneratedCourse] = useState<any>(null);
+  const [courseOutline, setCourseOutline] = useState<any>(null);
   const [fingerprint, setFingerprint] = useState<LearnerFingerprint | null>(null);
+  const [isRegenerating, setIsRegenerating] = useState(false);
 
   const handleFingerprintComplete = async (completedFingerprint: LearnerFingerprint) => {
     setFingerprint(completedFingerprint);
-    setStep('generating');
+    generateOutline(completedFingerprint);
+  };
+
+  const generateOutline = async (fp: LearnerFingerprint, previousOutline?: any, userFeedback?: string) => {
+    setStep('generating-outline');
+    setIsRegenerating(true);
     
+    try {
+      analytics.track('outline_generation_started', { topic: fp.topic });
+      
+      const response = await fetch('/api/generate-outline', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic: fp.topic,
+          learningStyle: fp.learningStyle,
+          priorKnowledge: fp.priorKnowledge,
+          learningGoal: fp.learningGoal,
+          timeCommitment: fp.timeCommitment,
+          contentFormat: fp.contentFormat,
+          challengePreference: fp.challengePreference,
+          context: fp.context || '',
+          previousOutline: previousOutline || null,
+          feedback: userFeedback || null
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || `API error: ${response.status}`);
+      }
+      
+      analytics.track('outline_generated', { 
+        topic: fp.topic,
+        isRevision: !!userFeedback
+      });
+      
+      setCourseOutline(data.outline);
+      setStep('outline-preview');
+      setIsRegenerating(false);
+    } catch (error: any) {
+      console.error('Outline generation failed:', error);
+      alert(`Failed to generate outline: ${error.message}`);
+      setStep('onboarding');
+      setIsRegenerating(false);
+    }
+  };
+
+  const handleOutlineApproved = async () => {
+    if (!fingerprint || !courseOutline) return;
+    
+    setStep('generating-full');
     const startTime = Date.now();
     
     try {
-      analytics.track('fingerprint_completed', { 
-        topic: completedFingerprint.topic,
-        learningStyle: completedFingerprint.learningStyle,
-        priorKnowledge: completedFingerprint.priorKnowledge,
-        learningGoal: completedFingerprint.learningGoal,
-        timeCommitment: completedFingerprint.timeCommitment,
-        contentFormat: completedFingerprint.contentFormat,
-        challengePreference: completedFingerprint.challengePreference
-      });
-      
-      analytics.courseStarted(completedFingerprint.topic);
+      analytics.track('outline_approved', { topic: fingerprint.topic });
+      analytics.courseStarted(fingerprint.topic);
       
       const response = await fetch('/api/generate-course', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          topic: completedFingerprint.topic,
-          learningStyle: completedFingerprint.learningStyle,
-          priorKnowledge: completedFingerprint.priorKnowledge,
-          learningGoal: completedFingerprint.learningGoal,
-          timeCommitment: completedFingerprint.timeCommitment,
-          contentFormat: completedFingerprint.contentFormat,
-          challengePreference: completedFingerprint.challengePreference,
-          context: completedFingerprint.context || ''
+          topic: fingerprint.topic,
+          learningStyle: fingerprint.learningStyle,
+          priorKnowledge: fingerprint.priorKnowledge,
+          learningGoal: fingerprint.learningGoal,
+          timeCommitment: fingerprint.timeCommitment,
+          contentFormat: fingerprint.contentFormat,
+          challengePreference: fingerprint.challengePreference,
+          context: fingerprint.context || '',
+          approvedOutline: courseOutline // Pass approved outline to guide generation
         })
       });
       
@@ -56,7 +102,7 @@ export default function CourseBuilderSmart({ initialTopic }: { initialTopic?: st
       }
       
       const duration = Date.now() - startTime;
-      analytics.courseGenerated(completedFingerprint.topic, duration);
+      analytics.courseGenerated(fingerprint.topic, duration);
       
       setGeneratedCourse(data.course);
       setStep('celebration');
@@ -65,12 +111,52 @@ export default function CourseBuilderSmart({ initialTopic }: { initialTopic?: st
     } catch (error: any) {
       console.error('Course generation failed:', error);
       alert(`Failed to generate course: ${error.message}`);
-      setStep('onboarding');
+      setStep('outline-preview');
     }
   };
 
-  // Loading state
-  if (step === 'generating') {
+  const handleRequestChanges = async (feedback: string) => {
+    if (!fingerprint) return;
+    analytics.track('outline_revision_requested', { 
+      topic: fingerprint.topic,
+      feedback 
+    });
+    generateOutline(fingerprint, courseOutline, feedback);
+  };
+
+  // Outline generation loading
+  if (step === 'generating-outline') {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
+        <div className="max-w-md text-center">
+          <div className="mb-8">
+            <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-4 mb-6" style={{ borderTopColor: 'var(--royal-blue)' }}></div>
+            <h2 className="text-3xl font-bold mb-3" style={{ color: 'var(--royal-blue)' }}>
+              {isRegenerating ? 'Updating Outline' : 'Creating Your Outline'}
+            </h2>
+            <p className="text-gray-600 text-lg">
+              {isRegenerating ? 'Incorporating your feedback...' : 'Structuring your perfect course...'}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Outline preview
+  if (step === 'outline-preview' && courseOutline) {
+    return (
+      <CourseOutlinePreview 
+        outline={courseOutline}
+        onApprove={handleOutlineApproved}
+        onRequestChanges={handleRequestChanges}
+        isRegenerating={isRegenerating}
+      />
+    );
+  }
+
+  // Full course generation loading
+  if (step === 'generating-full') {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
         <LoadingSpinner topic={fingerprint?.topic} />
