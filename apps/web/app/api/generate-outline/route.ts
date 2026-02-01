@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { getErrorMessage } from '@/lib/types';
 
 // Maintenance mode - blocks API usage on production
 const MAINTENANCE_MODE = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true';
@@ -141,11 +142,12 @@ Keep it SHORT - this is just an outline for the user to approve before we genera
         throw new Error('Invalid outline structure');
       }
       
-    } catch (parseError: any) {
-      console.error('Outline parse error:', parseError.message);
+    } catch (parseError: unknown) {
+      const errorMsg = getErrorMessage(parseError);
+      console.error('Outline parse error:', errorMsg);
       return NextResponse.json(
-        { 
-          error: `Failed to parse outline: ${parseError.message}`,
+        {
+          error: `Failed to parse outline: ${errorMsg}`,
           hint: 'The AI generated malformed JSON. Please try again.'
         },
         { status: 500 }
@@ -157,10 +159,10 @@ Keep it SHORT - this is just an outline for the user to approve before we genera
       outline: outlineData
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Outline generation error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to generate outline' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     );
   }

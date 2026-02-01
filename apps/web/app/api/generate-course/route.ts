@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { getErrorMessage } from '@/lib/types';
 
 // Maintenance mode - blocks API usage on production
 const MAINTENANCE_MODE = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true';
@@ -255,7 +256,7 @@ EXACT JSON FORMAT WITH MERMAID EXAMPLE:
   "next_steps": ["Step 1", "Step 2", "Step 3"]
 }
 
-Make it engaging, practical, and worth $5.`;
+Make it engaging, practical, and worth paying for.`;
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-5-20250929',
@@ -315,23 +316,24 @@ Make it engaging, practical, and worth $5.`;
         }
       }
       
-    } catch (parseError: any) {
+    } catch (parseError: unknown) {
+      const errorMsg = getErrorMessage(parseError);
       console.error('=== JSON PARSE ERROR ===');
-      console.error('Error:', parseError.message);
+      console.error('Error:', errorMsg);
       console.error('Response length:', responseText.length);
       console.error('First 500 chars:', responseText.substring(0, 500));
       console.error('Last 500 chars:', responseText.substring(responseText.length - 500));
-      
+
       // Try to identify the problem area from error message
-      const posMatch = parseError.message.match(/position (\d+)/);
+      const posMatch = errorMsg.match(/position (\d+)/);
       if (posMatch) {
         const pos = parseInt(posMatch[1]);
         console.error(`Problem area (pos ${pos}):`, responseText.substring(Math.max(0, pos - 100), pos + 100));
       }
-      
+
       return NextResponse.json(
-        { 
-          error: `Failed to parse course: ${parseError.message}`,
+        {
+          error: `Failed to parse course: ${errorMsg}`,
           hint: 'The AI generated malformed JSON. Please try again or try a different topic.'
         },
         { status: 500 }
@@ -369,10 +371,10 @@ Make it engaging, practical, and worth $5.`;
       courseId: courseRecord?.id
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Course generation error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to generate course' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     );
   }
