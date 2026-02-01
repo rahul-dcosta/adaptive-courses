@@ -205,7 +205,6 @@ export default function LandingPagePremium() {
                 placeholder="What do you want to learn?"
                 className="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-900 transition-colors"
                 required
-                autoFocus
               />
               <button
                 type="submit"
