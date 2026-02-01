@@ -71,10 +71,10 @@ export default function LoadingSpinner({ topic }: LoadingSpinnerProps) {
           </h2>
           {topic && (
             <p className="text-gray-600 text-lg mb-2 leading-relaxed">
-              Subject: <span className="font-semibold">{topic}</span>
+              Subject: <span className="font-semibold" style={{ textTransform: 'capitalize' }}>{topic}</span>
             </p>
           )}
-          <p className="text-gray-500 text-sm">Processing time: approximately 30-60 seconds</p>
+          <p className="text-gray-500 text-sm">Processing time: approximately 30–60 seconds</p>
         </div>
         
         {/* Progress bar */}
@@ -105,18 +105,22 @@ export default function LoadingSpinner({ topic }: LoadingSpinnerProps) {
                   'opacity-20 translate-x-2'}
               `}
             >
-              <div className={`
-                w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
-                ${idx < messageIndex ? 'text-white' : 
-                  idx === messageIndex ? 'text-white' : 
-                  'bg-gray-200 text-gray-500'}
-                transition-all duration-500
-              `}
-              style={{
-                backgroundColor: idx < messageIndex ? '#10b981' : 
-                  idx === messageIndex ? 'var(--royal-blue)' : undefined
-              }}>
-                {idx < messageIndex ? '✓' : msg.emoji}
+              <div 
+                className={`
+                  w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0
+                  ${idx < messageIndex ? 'text-white' : 
+                    idx === messageIndex ? 'text-white' : 
+                    'bg-gray-200 text-gray-500'}
+                  transition-all duration-500
+                `}
+                style={{
+                  backgroundColor: idx < messageIndex ? '#10b981' : 
+                    idx === messageIndex ? 'var(--royal-blue)' : undefined
+                }}
+              >
+                <span className="flex items-center justify-center w-full h-full">
+                  {idx < messageIndex ? '✓' : msg.emoji}
+                </span>
               </div>
               <span className={`
                 ${idx === messageIndex ? 'text-gray-900 font-medium' : 'text-gray-400'}
