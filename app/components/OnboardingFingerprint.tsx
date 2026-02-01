@@ -426,49 +426,68 @@ export default function OnboardingFingerprint({
             {currentQuestion.subtitle}
           </p>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {currentQuestion.options.map((option) => (
               <button
                 key={option.value}
                 onClick={() => handleOptionSelect(step as keyof LearnerFingerprint, option.value)}
                 disabled={selectedOption !== null}
                 className={`
-                  group relative overflow-hidden glass rounded-2xl p-6
-                  transition-all duration-300 transform w-full text-left shadow-lg
-                  ${selectedOption === option.value 
-                    ? 'ring-2 scale-95 shadow-2xl' 
-                    : 'hover:ring-2 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]'
+                  group relative overflow-hidden bg-white rounded-xl p-5
+                  transition-all duration-200 w-full text-left
+                  ${selectedOption === option.value
+                    ? 'shadow-md'
+                    : 'hover:shadow-md'
                   }
-                  ${selectedOption !== null ? 'opacity-50 cursor-not-allowed' : ''}
+                  ${selectedOption !== null && selectedOption !== option.value ? 'opacity-40' : ''}
                 `}
                 style={{
-                  borderColor: selectedOption === option.value ? 'var(--royal-blue)' : 'transparent',
-                  '--tw-ring-color': 'var(--royal-blue)'
-                } as any}
+                  border: selectedOption === option.value
+                    ? '2px solid var(--royal-blue)'
+                    : '1px solid rgba(0, 63, 135, 0.12)',
+                  borderLeft: selectedOption === option.value
+                    ? '4px solid var(--royal-blue)'
+                    : '1px solid rgba(0, 63, 135, 0.12)'
+                }}
               >
-                <div className="relative flex items-start gap-4">
-                  <span className={`
-                    text-5xl transition-transform duration-300
-                    ${selectedOption === option.value ? 'scale-110' : 'group-hover:scale-110'}
-                  `}>
-                    {option.emoji}
-                  </span>
+                <div className="relative flex items-center gap-4">
+                  {/* Radio-style indicator */}
+                  <div
+                    className={`
+                      w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center
+                      transition-all duration-200
+                    `}
+                    style={{
+                      borderColor: selectedOption === option.value ? 'var(--royal-blue)' : 'rgba(0, 63, 135, 0.3)'
+                    }}
+                  >
+                    {selectedOption === option.value && (
+                      <div
+                        className="w-2.5 h-2.5 rounded-full"
+                        style={{ backgroundColor: 'var(--royal-blue)' }}
+                      />
+                    )}
+                  </div>
+
                   <div className="flex-1">
-                    <h3 className="text-xl font-semibold mb-1" style={{ color: 'var(--royal-blue)' }}>
+                    <h3
+                      className="text-lg font-semibold mb-0.5 transition-colors duration-200"
+                      style={{ color: selectedOption === option.value ? 'var(--royal-blue)' : '#1f2937' }}
+                    >
                       {option.label}
                     </h3>
-                    <p className="text-sm text-gray-600">{option.description}</p>
+                    <p className="text-sm text-gray-500 leading-snug">{option.description}</p>
                   </div>
-                  
+
                   {selectedOption === option.value && (
-                    <div 
-                      className="absolute top-4 right-4 w-6 h-6 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: 'var(--royal-blue)' }}
+                    <svg
+                      className="w-5 h-5 flex-shrink-0"
+                      fill="none"
+                      stroke="var(--royal-blue)"
+                      viewBox="0 0 24 24"
                     >
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
                   )}
                 </div>
               </button>
