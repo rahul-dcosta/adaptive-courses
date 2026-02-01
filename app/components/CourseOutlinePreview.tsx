@@ -51,14 +51,11 @@ export default function CourseOutlinePreview({
         <div className="glass rounded-3xl p-12 shadow-2xl">
           {/* Header */}
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6" style={{ backgroundColor: 'rgba(0, 63, 135, 0.1)' }}>
-              <span className="text-2xl">📋</span>
-              <span className="text-sm font-semibold" style={{ color: 'var(--royal-blue)' }}>
-                Course Preview
-              </span>
-            </div>
+            <p className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">
+              Course Outline
+            </p>
 
-            <h1 className="text-4xl md:text-5xl font-black mb-4 font-serif" style={{ color: 'var(--royal-blue)' }}>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4 font-serif" style={{ color: 'var(--royal-blue)' }}>
               {outline.title}
             </h1>
             
@@ -160,24 +157,15 @@ export default function CourseOutlinePreview({
                     setShowFeedback(false);
                     setFeedback('');
                   }}
-                  className="flex-1 px-6 py-3 border-2 rounded-xl font-semibold transition-all"
-                  style={{ 
-                    borderColor: 'var(--royal-blue)',
-                    color: 'var(--royal-blue)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(0, 63, 135, 0.05)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }}
+                  className="flex-1 px-6 py-3 rounded-xl font-medium transition-all text-gray-600 hover:text-gray-900"
+                  style={{ backgroundColor: 'rgba(0, 63, 135, 0.05)' }}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSubmitFeedback}
                   disabled={!feedback.trim() || isRegenerating}
-                  className="flex-1 text-white font-semibold px-6 py-3 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                  className="flex-[2] text-white font-semibold px-6 py-3 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
                   style={{ backgroundColor: 'var(--royal-blue)' }}
                   onMouseEnter={(e) => !feedback.trim() || (e.currentTarget.style.backgroundColor = 'var(--royal-blue-light)')}
                   onMouseLeave={(e) => !feedback.trim() || (e.currentTarget.style.backgroundColor = 'var(--royal-blue)')}
@@ -188,21 +176,12 @@ export default function CourseOutlinePreview({
             </div>
           ) : (
             /* Action Buttons */
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex gap-3">
               <button
                 onClick={() => setShowFeedback(true)}
                 disabled={isRegenerating}
-                className="flex-1 px-8 py-4 border-2 rounded-xl font-semibold text-lg transition-all disabled:opacity-40"
-                style={{ 
-                  borderColor: 'var(--royal-blue)',
-                  color: 'var(--royal-blue)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(0, 63, 135, 0.05)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
+                className="flex-1 py-4 rounded-xl font-medium transition-all disabled:opacity-40 text-gray-700 hover:text-gray-900"
+                style={{ backgroundColor: 'rgba(0, 63, 135, 0.06)' }}
               >
                 Request Changes
               </button>
@@ -210,22 +189,20 @@ export default function CourseOutlinePreview({
               <button
                 onClick={onApprove}
                 disabled={isRegenerating}
-                className="flex-1 text-white font-bold text-lg px-8 py-4 rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex-[2] text-white font-semibold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{ backgroundColor: 'var(--royal-blue)' }}
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--royal-blue-light)')}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--royal-blue)')}
               >
-                Looks Perfect! Generate Full Course →
+                Generate Full Course
               </button>
             </div>
           )}
 
           {/* Info */}
-          <div className="mt-8 p-4 rounded-xl" style={{ backgroundColor: 'rgba(0, 63, 135, 0.05)' }}>
-            <p className="text-sm text-gray-600 text-center">
-              💡 This is a preview. The full course will have detailed content, examples, and quizzes.
-            </p>
-          </div>
+          <p className="mt-6 text-sm text-gray-500 text-center">
+            This is a preview. The full course includes detailed explanations, examples, and quizzes.
+          </p>
         </div>
       </div>
     </div>
