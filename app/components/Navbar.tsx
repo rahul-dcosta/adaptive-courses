@@ -1,21 +1,32 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import AuthModal from './AuthModal';
 
 // Marketing pages where navbar should appear
 const MARKETING_PAGES = ['/', '/pricing', '/about', '/faq', '/terms', '/privacy'];
 
+// Helper to check for auth cookie
+function getAuthCookie(): boolean {
+  if (typeof document === 'undefined') return false;
+  return document.cookie.split(';').some((c) => c.trim().startsWith('auth_token='));
+}
+
 export default function Navbar() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     setIsMounted(true);
+    setIsLoggedIn(getAuthCookie());
   }, []);
 
   useEffect(() => {
@@ -25,6 +36,30 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setShowUserMenu(false);
+    if (showUserMenu) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [showUserMenu]);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      setIsLoggedIn(false);
+      setShowUserMenu(false);
+      router.push('/');
+      router.refresh();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   const isInBuilderMode = searchParams.get('mode') === 'build';
   const isMarketingPage = MARKETING_PAGES.includes(pathname) && !isInBuilderMode;
@@ -62,21 +97,86 @@ export default function Navbar() {
 
           {/* Auth Buttons */}
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowAuthModal(true)}
-              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-3 py-2"
-            >
-              Sign in
-            </button>
-            <button
-              onClick={() => setShowAuthModal(true)}
-              className="text-sm font-medium text-white px-4 py-2 rounded-lg transition-all hover:shadow-lg"
-              style={{ background: 'var(--royal-blue)' }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--royal-blue-light)')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--royal-blue)')}
-            >
-              Get started
-            </button>
+            {isLoggedIn ? (
+              <>
+                <a
+                  href="/dashboard"
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-3 py-2"
+                >
+                  My Courses
+                </a>
+                <div className="relative">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowUserMenu(!showUserMenu);
+                    }}
+                    className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:ring-2 hover:ring-gray-200"
+                    style={{ background: 'rgba(0, 63, 135, 0.1)' }}
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      style={{ color: 'var(--royal-blue)' }}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                  </button>
+                  {showUserMenu && (
+                    <div
+                      className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <a
+                        href="/dashboard"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      >
+                        My Courses
+                      </a>
+                      <a
+                        href="/account"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      >
+                        Account Settings
+                      </a>
+                      <hr className="my-2 border-gray-100" />
+                      <button
+                        onClick={handleLogout}
+                        disabled={isLoggingOut}
+                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+                      >
+                        {isLoggingOut ? 'Signing out...' : 'Sign out'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => setShowAuthModal(true)}
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-3 py-2"
+                >
+                  Sign in
+                </button>
+                <button
+                  onClick={() => setShowAuthModal(true)}
+                  className="text-sm font-medium text-white px-4 py-2 rounded-lg transition-all hover:shadow-lg"
+                  style={{ background: 'var(--royal-blue)' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--royal-blue-light)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--royal-blue)')}
+                >
+                  Get started
+                </button>
+              </>
+            )}
           </div>
         </div>
       </nav>

@@ -1,9 +1,18 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Suspense } from 'react';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#003F87',
+};
+
 export const metadata: Metadata = {
+  metadataBase: new URL('https://adaptive-courses.vercel.app'),
   title: 'Adaptive Courses - Any Topic. Your Course. | AI-Powered Learning',
   description: 'Any topic. Your course. AI-powered courses that understand your situation, not just your skill level. Generate custom courses in 30 seconds.',
   keywords: 'AI learning, personalized courses, fast learning, adaptive learning, custom courses, Claude AI, any topic your course',
@@ -34,8 +43,6 @@ export const metadata: Metadata = {
     images: ['/og-image.png'],
     creator: '@AdaptiveCourses',
   },
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
-  themeColor: '#003F87',
   manifest: '/manifest.json',
   icons: {
     icon: '/icon.svg',
