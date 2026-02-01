@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import CourseBuilderSmart from './CourseBuilderSmart';
+import ExampleCourses from './ExampleCourses';
 import { analytics } from '@/lib/analytics';
 
 export default function LandingPagePremium() {
@@ -18,6 +19,12 @@ export default function LandingPagePremium() {
       analytics.track('topic_entered_landing', { topic });
       setShowBuilder(true);
     }
+  };
+
+  const handleSelectExample = (exampleTopic: string) => {
+    analytics.track('example_course_selected', { topic: exampleTopic });
+    setTopic(exampleTopic);
+    setShowBuilder(true);
   };
 
   if (showBuilder) {
@@ -37,13 +44,13 @@ export default function LandingPagePremium() {
 
           {/* Hero headline */}
           <h1 className="text-6xl md:text-7xl font-black mb-8 leading-[1.1] tracking-tight" style={{ color: 'var(--royal-blue)' }}>
-            Learn anything<br />
-            in 30 minutes
+            Master Complex Topics,<br />
+            Adapted to Your Goals
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-2xl leading-relaxed">
-            Your personalized course — built in under 5 minutes. 
-            AI-powered, tailored to your exact situation.
+            Personalized academic courses for professionals. Game theory, behavioral economics, supply chain—serious subjects, 
+            built for your specific context in minutes.
           </p>
 
           {/* Topic input - direct to course builder */}
@@ -75,6 +82,9 @@ export default function LandingPagePremium() {
           </form>
         </div>
       </div>
+
+      {/* Example Courses */}
+      <ExampleCourses onSelectTopic={handleSelectExample} />
 
       {/* How it works */}
       <div className="max-w-6xl mx-auto px-6 py-24">
