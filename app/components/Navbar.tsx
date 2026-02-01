@@ -51,7 +51,7 @@ export default function Navbar() {
       >
         <div className="max-w-6xl mx-auto px-6 h-full grid grid-cols-3 items-center">
           {/* Logo - Left */}
-          <a href="/" className="flex items-center gap-3 group justify-self-start">
+          <a href="/" className="flex items-center gap-3 group h-full">
             <div
               className="w-9 h-9 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105"
               style={{
@@ -68,33 +68,33 @@ export default function Navbar() {
           </a>
 
           {/* Nav Links - Center (only on homepage) */}
-          <div className="justify-self-center">
-            {isHomepage && (
-              <div className="hidden md:flex items-center gap-8">
-                <a
-                  href="#how-it-works"
-                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  How it works
-                </a>
-                <a
-                  href="#examples"
-                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Examples
-                </a>
-                <a
-                  href="/pricing"
-                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Pricing
-                </a>
-              </div>
-            )}
-          </div>
+          {isHomepage ? (
+            <div className="hidden md:flex items-center justify-center gap-8 h-full">
+              <a
+                href="#how-it-works"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                How it works
+              </a>
+              <a
+                href="#examples"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Examples
+              </a>
+              <a
+                href="/pricing"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Pricing
+              </a>
+            </div>
+          ) : (
+            <div />
+          )}
 
           {/* Auth Buttons - Right */}
-          <div className="flex items-center gap-3 justify-self-end">
+          <div className="flex items-center gap-3 h-full justify-self-end">
             <button
               onClick={() => setShowAuthModal(true)}
               className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-3 py-2"
