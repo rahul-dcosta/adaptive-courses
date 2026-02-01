@@ -5,6 +5,8 @@ import { analytics } from '@/lib/analytics';
 import { generateCoursePDF } from '@/lib/generateCoursePDF';
 import MermaidDiagram from './MermaidDiagram';
 import ContextMenu, { ContextMenuItem, Icons } from './ContextMenu';
+import { ProgressTable } from './ProgressTable';
+import { useProgressTracking, loadProgressFromStorage, saveProgressToStorage } from '@/hooks/useProgressTracking';
 
 interface Module {
   title: string;
@@ -151,11 +153,156 @@ function escapeHtml(text: string): string {
     .replace(/'/g, '&#039;');
 }
 
+// Interactive Quiz Section with answer tracking
+interface QuizSectionProps {
+  quiz: { question: string; answer?: string };
+  lessonKey: string;
+  previousAttempt?: boolean;
+  onAttempt: (passed: boolean) => void;
+  onContextMenu: (e: React.MouseEvent) => void;
+}
+
+function QuizSection({ quiz, lessonKey, previousAttempt, onAttempt, onContextMenu }: QuizSectionProps) {
+  const [showAnswer, setShowAnswer] = useState(false);
+  const [hasAnswered, setHasAnswered] = useState(previousAttempt !== undefined);
+
+  // Reset state when lesson changes
+  useEffect(() => {
+    setShowAnswer(previousAttempt !== undefined);
+    setHasAnswered(previousAttempt !== undefined);
+  }, [lessonKey, previousAttempt]);
+
+  const handleRevealAnswer = () => {
+    setShowAnswer(true);
+  };
+
+  const handleSelfAssess = (gotItRight: boolean) => {
+    setHasAnswered(true);
+    onAttempt(gotItRight);
+  };
+
+  return (
+    <div
+      key={`quiz-${lessonKey}`}
+      className="p-8 rounded-xl mb-16 group relative transition-all duration-200 hover:shadow-md"
+      style={{
+        backgroundColor: previousAttempt === true
+          ? 'rgba(34, 197, 94, 0.06)'
+          : previousAttempt === false
+            ? 'rgba(239, 68, 68, 0.06)'
+            : 'rgba(0, 63, 135, 0.04)',
+        border: previousAttempt === true
+          ? '1px solid rgba(34, 197, 94, 0.2)'
+          : previousAttempt === false
+            ? '1px solid rgba(239, 68, 68, 0.2)'
+            : '1px solid rgba(0, 63, 135, 0.12)'
+      }}
+      onContextMenu={onContextMenu}
+    >
+      <div className="flex items-start gap-3">
+        <svg
+          className="w-6 h-6 flex-shrink-0 mt-1"
+          style={{
+            color: previousAttempt === true
+              ? 'rgb(34, 197, 94)'
+              : previousAttempt === false
+                ? 'rgb(239, 68, 68)'
+                : 'var(--royal-blue)'
+          }}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          {previousAttempt === true ? (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          ) : previousAttempt === false ? (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          ) : (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          )}
+        </svg>
+        <div className="w-full">
+          <div className="flex items-center gap-2 mb-2">
+            <h3 className="text-lg font-bold text-gray-900">Quick Check</h3>
+            {previousAttempt !== undefined && (
+              <span
+                className="text-xs font-medium px-2 py-0.5 rounded-full"
+                style={{
+                  backgroundColor: previousAttempt ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                  color: previousAttempt ? 'rgb(22, 163, 74)' : 'rgb(220, 38, 38)'
+                }}
+              >
+                {previousAttempt ? 'Mastered' : 'Review needed'}
+              </span>
+            )}
+          </div>
+          <p className="text-base text-gray-700 font-medium mb-4">{quiz.question}</p>
+
+          {!showAnswer && !hasAnswered && (
+            <button
+              onClick={handleRevealAnswer}
+              className="text-sm font-semibold px-4 py-2 rounded-lg transition-all hover:shadow-sm"
+              style={{
+                backgroundColor: 'rgba(0, 63, 135, 0.08)',
+                color: 'var(--royal-blue)'
+              }}
+            >
+              Think about it, then reveal answer
+            </button>
+          )}
+
+          {showAnswer && quiz.answer && (
+            <div className="mt-4">
+              <p className="text-sm text-gray-700 pl-4 border-l-2 mb-4" style={{ borderColor: 'var(--royal-blue)' }}>
+                {quiz.answer}
+              </p>
+
+              {!hasAnswered && (
+                <div className="flex gap-3 mt-4">
+                  <p className="text-sm text-gray-600 mr-2">Did you get it right?</p>
+                  <button
+                    onClick={() => handleSelfAssess(true)}
+                    className="text-sm font-medium px-4 py-1.5 rounded-lg transition-all"
+                    style={{
+                      backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                      color: 'rgb(22, 163, 74)'
+                    }}
+                  >
+                    Yes, got it!
+                  </button>
+                  <button
+                    onClick={() => handleSelfAssess(false)}
+                    className="text-sm font-medium px-4 py-1.5 rounded-lg transition-all"
+                    style={{
+                      backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                      color: 'rgb(220, 38, 38)'
+                    }}
+                  >
+                    Not quite
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function CourseViewer({ course, onExit }: CourseViewerProps) {
   const [currentModule, setCurrentModule] = useState(0);
   const [currentLesson, setCurrentLesson] = useState(0);
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
+  const [quizAttempts, setQuizAttempts] = useState<Map<string, boolean>>(new Map());
   const [showNav, setShowNav] = useState(true);
+
+  // Progress tracking hook - pass course content directly
+  const { moduleProgress, overallProgress, lessonsMastered, totalLessons } = useProgressTracking(
+    { content: { modules: course.modules } },
+    completedLessons,
+    quizAttempts
+  );
 
   // Context menu state
   const [contextMenu, setContextMenu] = useState<{
@@ -169,13 +316,11 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   useEffect(() => {
-    // Load progress from localStorage
+    // Load progress from localStorage (including quiz attempts)
     if (course.id) {
-      const saved = localStorage.getItem(`course_${course.id}`);
-      if (saved) {
-        const { completed } = JSON.parse(saved);
-        setCompletedLessons(new Set(completed));
-      }
+      const savedProgress = loadProgressFromStorage(course.id);
+      setCompletedLessons(savedProgress.completed);
+      setQuizAttempts(savedProgress.quizAttempts);
     }
 
     // Read URL params for deep linking
@@ -203,14 +348,9 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
   }, [course.id, course.modules]);
 
   useEffect(() => {
-    // Save progress
+    // Save progress (including quiz attempts)
     if (course.id) {
-      localStorage.setItem(`course_${course.id}`, JSON.stringify({
-        completed: Array.from(completedLessons),
-        lastModule: currentModule,
-        lastLesson: currentLesson,
-        lastAccessed: new Date().toISOString()
-      }));
+      saveProgressToStorage(course.id, completedLessons, quizAttempts, currentModule, currentLesson);
     }
 
     // Update URL with current position
@@ -218,7 +358,7 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
     url.searchParams.set('module', String(currentModule + 1));
     url.searchParams.set('lesson', String(currentLesson + 1));
     window.history.replaceState({}, '', url.toString());
-  }, [completedLessons, currentModule, currentLesson, course.id]);
+  }, [completedLessons, quizAttempts, currentModule, currentLesson, course.id]);
 
   useEffect(() => {
     // Keyboard shortcuts
@@ -293,6 +433,19 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
     } finally {
       setIsGeneratingPDF(false);
     }
+  };
+
+  // Handle quiz answer submission
+  const handleQuizAnswer = (lessonKey: string, isCorrect: boolean) => {
+    const newAttempts = new Map(quizAttempts);
+    newAttempts.set(lessonKey, isCorrect);
+    setQuizAttempts(newAttempts);
+
+    analytics.track('quiz_attempted', {
+      courseId: course.id,
+      lessonKey,
+      isCorrect
+    });
   };
 
   // Context menu handlers
@@ -412,12 +565,11 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
   const lessonKey = `${currentModule}-${currentLesson}`;
   const isCompleted = completedLessons.has(lessonKey);
 
-  // Calculate total progress
-  const totalLessons = course.modules.reduce((sum, m) => sum + (m.lessons?.length || 0), 0);
+  // Progress comes from the hook (hybrid: viewing + quiz mastery)
   const completedCount = completedLessons.size;
-  const progress = totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0;
+  const progress = overallProgress;
 
-  const isLastLesson = currentModule === course.modules.length - 1 && 
+  const isLastLesson = currentModule === course.modules.length - 1 &&
                        currentLesson === (module.lessons?.length || 1) - 1;
 
   return (
@@ -567,6 +719,16 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
                   </p>
                 )}
               </div>
+
+              {/* Module Progress Breakdown */}
+              {moduleProgress.length > 0 && (
+                <ProgressTable
+                  moduleProgress={moduleProgress}
+                  overallProgress={overallProgress}
+                  lessonsMastered={lessonsMastered}
+                  totalLessons={totalLessons}
+                />
+              )}
 
               {/* Divider */}
               <div className="mb-8 border-t" style={{ borderColor: 'rgba(0, 63, 135, 0.08)' }}></div>
@@ -722,35 +884,13 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
 
             {/* Quiz Section */}
             {lesson?.quiz && (
-              <div
-                key={`quiz-${currentModule}-${currentLesson}`}
-                className="p-8 rounded-xl mb-16 group relative cursor-pointer transition-all duration-200 hover:shadow-md"
-                style={{
-                  backgroundColor: 'rgba(0, 63, 135, 0.04)',
-                  border: '1px solid rgba(0, 63, 135, 0.12)'
-                }}
+              <QuizSection
+                quiz={lesson.quiz}
+                lessonKey={lessonKey}
+                previousAttempt={quizAttempts.get(lessonKey)}
+                onAttempt={(passed) => handleQuizAnswer(lessonKey, passed)}
                 onContextMenu={(e) => handleContextMenu(e, 'quiz')}
-              >
-                <div className="flex items-start gap-3 mb-4">
-                  <svg className="w-6 h-6 flex-shrink-0 mt-1" style={{ color: 'var(--royal-blue)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <div className="w-full">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">Quick Check</h3>
-                    <p className="text-base text-gray-700 font-medium mb-3">{lesson.quiz.question}</p>
-                    {lesson.quiz.answer && (
-                      <details key={`answer-${currentModule}-${currentLesson}`} className="mt-4">
-                        <summary className="text-sm font-semibold cursor-pointer hover:opacity-75 transition-opacity" style={{ color: 'var(--royal-blue)' }}>
-                          View Answer
-                        </summary>
-                        <p className="mt-3 text-sm text-gray-700 pl-4 border-l-2" style={{ borderColor: 'var(--royal-blue)' }}>
-                          {lesson.quiz.answer}
-                        </p>
-                      </details>
-                    )}
-                  </div>
-                </div>
-              </div>
+              />
             )}
 
             {/* Completion Status */}

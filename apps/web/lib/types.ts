@@ -36,6 +36,29 @@ export interface Quiz {
   answer?: string;
 }
 
+// Progress tracking types
+export interface QuizAttempt {
+  lessonKey: string;      // "moduleIdx-lessonIdx"
+  passed: boolean;
+  attemptedAt: string;
+}
+
+export interface CourseProgress {
+  completed: string[];           // Viewed lessons (lessonKey format)
+  quizAttempts: QuizAttempt[];   // Quiz results
+  lastModule: number;
+  lastLesson: number;
+  lastAccessed: string;
+}
+
+export interface ModuleProgress {
+  title: string;
+  progress: number;              // 0-100
+  status: 'empty' | 'started' | 'complete';
+  lessonsComplete: number;
+  totalLessons: number;
+}
+
 export interface EmailSignup {
   id: string;
   email: string;
