@@ -44,13 +44,12 @@ export default function LandingPagePremium() {
 
           {/* Hero headline */}
           <h1 className="text-6xl md:text-7xl font-black mb-8 leading-[1.1] tracking-tight" style={{ color: 'var(--royal-blue)' }}>
-            Master Complex Topics,<br />
-            Adapted to Your Goals
+            Learn Anything,<br />
+            Your Way
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-2xl leading-relaxed">
-            Personalized academic courses for professionals. Game theory, behavioral economics, supply chain—serious subjects, 
-            built for your specific context in minutes.
+            AI-powered courses built around you. From game theory to cats in ancient Egypt—whether it's for work, curiosity, or just for fun.
           </p>
 
           {/* Topic input - direct to course builder */}
@@ -98,10 +97,10 @@ export default function LandingPagePremium() {
               <span className="text-white font-bold">1</span>
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-3">
-              Describe your situation
+              Tell us why you're learning
             </h3>
             <p className="text-gray-600 leading-relaxed">
-              Factory visit? Job interview? Career switch? We ask what you need and when you need it.
+              Job interview? Dinner party trivia? Pure curiosity? We shape the course around your goal.
             </p>
           </div>
 
@@ -113,7 +112,7 @@ export default function LandingPagePremium() {
               AI builds your course
             </h3>
             <p className="text-gray-600 leading-relaxed">
-              Claude generates a custom curriculum in 30 seconds. No fluff. Just what you need.
+              Claude generates a custom curriculum in seconds. No fluff. Just what matters to you.
             </p>
           </div>
 
@@ -125,7 +124,7 @@ export default function LandingPagePremium() {
               Start learning
             </h3>
             <p className="text-gray-600 leading-relaxed">
-              Read online, download PDF, or get it via email. Learn on your schedule.
+              Read online, download PDF, or get it via email. Learn whenever inspiration strikes.
             </p>
           </div>
         </div>
@@ -136,11 +135,11 @@ export default function LandingPagePremium() {
         <div className="grid md:grid-cols-2 gap-16">
           <div>
             <h3 className="text-3xl font-bold text-gray-900 mb-4">
-              Situation-aware learning
+              Built around your "why"
             </h3>
             <p className="text-lg text-gray-600 leading-relaxed">
-              Traditional courses ask "What's your skill level?" We ask "What's the situation?"
-              Because learning for a factory tour is different than learning for fun.
+              Most courses ask "What's your level?" We ask "Why are you learning?"
+              A course for fun hits different than one for a job interview.
             </p>
           </div>
 
@@ -161,19 +160,19 @@ export default function LandingPagePremium() {
         <div className="grid md:grid-cols-2 gap-12">
           <div className="border-l-2 border-gray-900 pl-6">
             <p className="text-lg text-gray-900 mb-4 leading-relaxed">
-              "Saved me 8 hours of research before my factory visit. Worth way more than $5."
+              "Made a course on Renaissance art before my Italy trip. Saw the paintings completely differently."
             </p>
             <p className="text-sm text-gray-500">
-              Sarah M., Operations Manager
+              Emily T., Teacher
             </p>
           </div>
 
           <div className="border-l-2 border-gray-900 pl-6">
             <p className="text-lg text-gray-900 mb-4 leading-relaxed">
-              "Better than a $2000 course. No fluff, just what I needed for my interview."
+              "Prepped for my interview in an afternoon. Got the job. Best $4 I ever spent."
             </p>
             <p className="text-sm text-gray-500">
-              Mike R., Product Manager
+              James K., Software Engineer
             </p>
           </div>
         </div>

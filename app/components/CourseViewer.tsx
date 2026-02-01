@@ -173,7 +173,30 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
         setCompletedLessons(new Set(completed));
       }
     }
-  }, [course.id]);
+
+    // Read URL params for deep linking
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const moduleParam = params.get('module');
+      const lessonParam = params.get('lesson');
+
+      if (moduleParam) {
+        const moduleIndex = parseInt(moduleParam, 10) - 1;
+        if (moduleIndex >= 0 && moduleIndex < course.modules.length) {
+          setCurrentModule(moduleIndex);
+        }
+      }
+
+      if (lessonParam) {
+        const lessonIndex = parseInt(lessonParam, 10) - 1;
+        const moduleIndex = moduleParam ? parseInt(moduleParam, 10) - 1 : 0;
+        const moduleToCheck = course.modules[moduleIndex];
+        if (lessonIndex >= 0 && moduleToCheck?.lessons && lessonIndex < moduleToCheck.lessons.length) {
+          setCurrentLesson(lessonIndex);
+        }
+      }
+    }
+  }, [course.id, course.modules]);
 
   useEffect(() => {
     // Save progress

@@ -12,37 +12,37 @@ const examples: ExampleCourse[] = [
     icon: '🎯',
     title: 'Game Theory for Workplace Negotiations',
     description: 'Master Nash equilibrium, prisoner\'s dilemma, and strategic thinking for salary negotiations, team conflicts, and office politics.',
-    tags: ['Strategy', 'Management', 'Career']
+    tags: ['Strategy', 'Career']
   },
   {
-    icon: '🧠',
-    title: 'Behavioral Economics for Product Managers',
-    description: 'Understand cognitive biases, nudge theory, and loss aversion to design products users actually want and use.',
-    tags: ['Psychology', 'Product', 'UX']
+    icon: '🐱',
+    title: 'Cats in Ancient Egypt',
+    description: 'Explore why Egyptians worshipped cats, the goddess Bastet, mummified felines, and how cats shaped one of history\'s greatest civilizations.',
+    tags: ['History', 'Culture', 'Fun']
   },
   {
     icon: '⚙️',
-    title: 'Supply Chain Optimization for Factory Engineers',
+    title: 'Supply Chain Optimization',
     description: 'Learn WIP management, bottleneck analysis, and lean principles adapted to your specific manufacturing context.',
-    tags: ['Operations', 'Engineering', 'Manufacturing']
+    tags: ['Operations', 'Engineering']
   },
   {
-    icon: '🧬',
-    title: 'Network Theory for Social Media Growth',
-    description: 'Apply graph theory, centrality measures, and network effects to build influence and viral content strategies.',
-    tags: ['Marketing', 'Analytics', 'Growth']
+    icon: '🍷',
+    title: 'Wine Tasting for Beginners',
+    description: 'Understand terroir, grape varieties, and tasting notes. Impress at dinner parties or just enjoy your next bottle more.',
+    tags: ['Lifestyle', 'Food', 'Fun']
   },
   {
-    icon: '📊',
-    title: 'Bayesian Statistics for Data Scientists',
-    description: 'Move beyond frequentist stats with prior distributions, likelihood functions, and posterior probability in real-world ML scenarios.',
-    tags: ['Data Science', 'Statistics', 'ML']
+    icon: '🧠',
+    title: 'Behavioral Economics',
+    description: 'Understand cognitive biases, nudge theory, and loss aversion—whether for product design or understanding your own decisions.',
+    tags: ['Psychology', 'Science']
   },
   {
-    icon: '⚖️',
-    title: 'Constitutional Law for Tech Founders',
-    description: 'Understand First Amendment, Section 230, and privacy rights without law school—tailored to startup challenges.',
-    tags: ['Legal', 'Startups', 'Policy']
+    icon: '🌌',
+    title: 'The Science of Black Holes',
+    description: 'From event horizons to Hawking radiation—explore the universe\'s most mysterious objects without the PhD.',
+    tags: ['Space', 'Physics', 'Curiosity']
   }
 ];
 
@@ -59,11 +59,11 @@ export default function ExampleCourses({ onSelectTopic }: ExampleCoursesProps) {
           Example Courses
         </h2>
         <h3 className="text-4xl font-bold text-gray-900 font-serif mb-4">
-          Complex Topics, Adapted to Your Context
+          From PhD-Level to Just-for-Fun
         </h3>
         <p className="text-lg text-gray-600 max-w-3xl">
-          We don't just teach textbook concepts. We adapt advanced academic subjects to your specific goals, 
-          situation, and timeline. Here's what's possible.
+          Complex theory or pure curiosity rabbit holes. Each course adapts to why you're learning
+          and how much time you have.
         </p>
       </div>
 
