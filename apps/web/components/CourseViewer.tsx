@@ -6,6 +6,7 @@ import { generateCoursePDF } from '@/lib/generateCoursePDF';
 import MermaidDiagram from './MermaidDiagram';
 import ContextMenu, { ContextMenuItem, Icons } from './ContextMenu';
 import { ProgressTable } from './ProgressTable';
+import { KnowledgeGraph } from './KnowledgeGraph';
 import { useProgressTracking, loadProgressFromStorage, saveProgressToStorage } from '@/hooks/useProgressTracking';
 
 interface Module {
@@ -296,6 +297,7 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
   const [quizAttempts, setQuizAttempts] = useState<Map<string, boolean>>(new Map());
   const [showNav, setShowNav] = useState(true);
+  const [viewMode, setViewMode] = useState<'outline' | 'graph'>('outline');
 
   // Progress tracking hook - pass course content directly
   const { moduleProgress, overallProgress, lessonsMastered, totalLessons } = useProgressTracking(
@@ -731,65 +733,104 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
               )}
 
               {/* Divider */}
-              <div className="mb-8 border-t" style={{ borderColor: 'rgba(0, 63, 135, 0.08)' }}></div>
+              <div className="mb-6 border-t" style={{ borderColor: 'rgba(0, 63, 135, 0.08)' }}></div>
 
-              {/* Module outline header */}
-              <div className="mb-6">
-                <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--royal-blue)' }}>
-                  Course Outline
-                </h3>
+              {/* View Toggle */}
+              <div className="flex gap-2 mb-6">
+                <button
+                  onClick={() => setViewMode('outline')}
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg transition-all ${
+                    viewMode === 'outline' ? 'text-white' : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                  style={{
+                    backgroundColor: viewMode === 'outline' ? 'var(--royal-blue)' : 'rgba(0, 63, 135, 0.05)',
+                  }}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                  </svg>
+                  Outline
+                </button>
+                <button
+                  onClick={() => setViewMode('graph')}
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg transition-all ${
+                    viewMode === 'graph' ? 'text-white' : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                  style={{
+                    backgroundColor: viewMode === 'graph' ? 'var(--royal-blue)' : 'rgba(0, 63, 135, 0.05)',
+                  }}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                  Graph
+                </button>
               </div>
-              
-              <nav className="space-y-6">
-                {course.modules.map((mod, modIdx) => {
-                  const lessons = mod.lessons || [];
-                  return (
-                    <div key={modIdx}>
-                      <h4 className="text-sm font-bold text-gray-900 mb-3 font-serif">
-                        {modIdx + 1}. {mod.title}
-                      </h4>
-                      <div className="space-y-1 ml-3 border-l" style={{ borderColor: 'rgba(0, 63, 135, 0.12)' }}>
-                        {lessons.map((les, lesIdx) => {
-                          const key = `${modIdx}-${lesIdx}`;
-                          const isActive = modIdx === currentModule && lesIdx === currentLesson;
-                          const isDone = completedLessons.has(key);
 
-                          return (
-                            <button
-                              key={lesIdx}
-                              onClick={() => {
-                                setCurrentModule(modIdx);
-                                setCurrentLesson(lesIdx);
-                              }}
-                              className={`
-                                w-full text-left px-4 py-2 text-sm transition-all rounded-r-lg -ml-px
-                                ${isActive 
-                                  ? 'font-medium' 
-                                  : 'text-gray-600 hover:text-gray-900'
-                                }
-                              `}
-                              style={{
-                                color: isActive ? 'var(--royal-blue)' : undefined,
-                                backgroundColor: isActive ? 'rgba(0, 63, 135, 0.08)' : undefined,
-                                borderLeft: isActive ? '2px solid var(--royal-blue)' : undefined
-                              }}
-                            >
-                              <div className="flex items-center gap-2">
-                                {isDone && (
-                                  <svg className="w-4 h-4 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                  </svg>
-                                )}
-                                <span className="line-clamp-2">{les.title}</span>
-                              </div>
-                            </button>
-                          );
-                        })}
+              {/* Conditional View: Outline or Graph */}
+              {viewMode === 'outline' ? (
+                <nav className="space-y-6">
+                  {course.modules.map((mod, modIdx) => {
+                    const lessons = mod.lessons || [];
+                    return (
+                      <div key={modIdx}>
+                        <h4 className="text-sm font-bold text-gray-900 mb-3 font-serif">
+                          {modIdx + 1}. {mod.title}
+                        </h4>
+                        <div className="space-y-1 ml-3 border-l" style={{ borderColor: 'rgba(0, 63, 135, 0.12)' }}>
+                          {lessons.map((les, lesIdx) => {
+                            const key = `${modIdx}-${lesIdx}`;
+                            const isActive = modIdx === currentModule && lesIdx === currentLesson;
+                            const isDone = completedLessons.has(key);
+
+                            return (
+                              <button
+                                key={lesIdx}
+                                onClick={() => {
+                                  setCurrentModule(modIdx);
+                                  setCurrentLesson(lesIdx);
+                                }}
+                                className={`
+                                  w-full text-left px-4 py-2 text-sm transition-all rounded-r-lg -ml-px
+                                  ${isActive
+                                    ? 'font-medium'
+                                    : 'text-gray-600 hover:text-gray-900'
+                                  }
+                                `}
+                                style={{
+                                  color: isActive ? 'var(--royal-blue)' : undefined,
+                                  backgroundColor: isActive ? 'rgba(0, 63, 135, 0.08)' : undefined,
+                                  borderLeft: isActive ? '2px solid var(--royal-blue)' : undefined
+                                }}
+                              >
+                                <div className="flex items-center gap-2">
+                                  {isDone && (
+                                    <svg className="w-4 h-4 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                    </svg>
+                                  )}
+                                  <span className="line-clamp-2">{les.title}</span>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </nav>
+                    );
+                  })}
+                </nav>
+              ) : (
+                <KnowledgeGraph
+                  course={course}
+                  completedLessons={completedLessons}
+                  quizAttempts={quizAttempts}
+                  currentLesson={lessonKey}
+                  onLessonClick={(modIdx, lesIdx) => {
+                    setCurrentModule(modIdx);
+                    setCurrentLesson(lesIdx);
+                  }}
+                />
+              )}
             </div>
           </aside>
         )}
