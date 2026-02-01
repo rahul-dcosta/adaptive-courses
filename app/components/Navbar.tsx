@@ -91,27 +91,32 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Nav Links - Absolutely centered (only on homepage) */}
+          {/* Nav Links - Absolutely centered using inset-0 + flex (only on homepage) */}
           {isHomepage && (
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-8">
-              <a
-                href="#how-it-works"
-                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                How it works
-              </a>
-              <a
-                href="#examples"
-                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                Examples
-              </a>
-              <a
-                href="/pricing"
-                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                Pricing
-              </a>
+            <div
+              className="absolute inset-0 hidden md:flex items-center justify-center pointer-events-none"
+              style={{ zIndex: 1 }}
+            >
+              <div className="flex items-center gap-8 pointer-events-auto">
+                <a
+                  href="#how-it-works"
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  How it works
+                </a>
+                <a
+                  href="#examples"
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Examples
+                </a>
+                <a
+                  href="/pricing"
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Pricing
+                </a>
+              </div>
             </div>
           )}
         </div>
