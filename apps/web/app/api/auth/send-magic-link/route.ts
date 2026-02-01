@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendMagicLink } from '@/lib/services/auth';
+import { getErrorMessage } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,10 +28,10 @@ export async function POST(request: NextRequest) {
       message: 'Check your email for a sign-in link',
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Send magic link error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to send sign-in link' },
+      { error: getErrorMessage(error) || 'Failed to send sign-in link' },
       { status: 500 }
     );
   }

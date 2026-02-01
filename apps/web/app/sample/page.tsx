@@ -184,10 +184,7 @@ export default function SampleCoursePage() {
           </p>
           <a
             href="/"
-            className="inline-block text-white font-semibold px-8 py-4 rounded-xl transition-all text-lg shadow-lg hover:shadow-xl"
-            style={{ background: 'var(--royal-blue)' }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--royal-blue-light)')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--royal-blue)')}
+            className="inline-block text-white font-semibold px-8 py-4 rounded-xl transition-all text-lg shadow-lg hover:shadow-xl bg-[var(--royal-blue)] hover:bg-[var(--royal-blue-light)]"
           >
             Create My Course →
           </a>

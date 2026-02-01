@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyOTP } from '@/lib/services/auth';
+import { getErrorMessage } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,10 +50,10 @@ export async function POST(request: NextRequest) {
 
     return response;
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Verify OTP error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to verify code' },
+      { error: getErrorMessage(error) || 'Failed to verify code' },
       { status: 500 }
     );
   }

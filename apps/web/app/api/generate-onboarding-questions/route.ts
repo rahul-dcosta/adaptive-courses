@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
+import { getErrorMessage } from '@/lib/types';
 
 // Maintenance mode - blocks API usage on production
 const MAINTENANCE_MODE = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true';
@@ -8,12 +9,24 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+// Type for onboarding question response
+interface OnboardingQuestion {
+  question: string;
+  subtitle: string;
+  options: Array<{
+    label: string;
+    value: string;
+    emoji: string;
+    description: string;
+  }>;
+}
+
 // Simple in-memory cache for common topics (context step only)
-const questionCache = new Map<string, any>();
+const questionCache = new Map<string, CacheEntry>();
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
 interface CacheEntry {
-  data: any;
+  data: OnboardingQuestion;
   timestamp: number;
 }
 
@@ -21,22 +34,22 @@ function getCacheKey(topic: string, step: string): string {
   return `${topic.toLowerCase().trim()}-${step}`;
 }
 
-function getCachedQuestion(topic: string, step: string): any | null {
+function getCachedQuestion(topic: string, step: string): OnboardingQuestion | null {
   const key = getCacheKey(topic, step);
-  const entry = questionCache.get(key) as CacheEntry | undefined;
-  
+  const entry = questionCache.get(key);
+
   if (!entry) return null;
-  
+
   // Check if expired
   if (Date.now() - entry.timestamp > CACHE_TTL) {
     questionCache.delete(key);
     return null;
   }
-  
+
   return entry.data;
 }
 
-function setCachedQuestion(topic: string, step: string, data: any): void {
+function setCachedQuestion(topic: string, step: string, data: OnboardingQuestion): void {
   const key = getCacheKey(topic, step);
   questionCache.set(key, {
     data,
@@ -170,10 +183,10 @@ Generate 4 depth options.`;
     }
 
     return NextResponse.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Generate onboarding error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to generate questions' },
+      { error: getErrorMessage(error) || 'Failed to generate questions' },
       { status: 500 }
     );
   }

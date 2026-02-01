@@ -279,16 +279,21 @@ export default function LandingPagePremium() {
       {/* Waitlist Modal (Maintenance Mode) */}
       {showWaitlistModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="waitlist-modal-title"
+            className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl"
+          >
             {!waitlistSubmitted ? (
               <>
                 <div className="text-center mb-6">
                   <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Launching Soon!</h3>
+                  <h3 id="waitlist-modal-title" className="text-2xl font-bold text-gray-900 mb-2">Launching Soon!</h3>
                   <p className="text-gray-600">
                     We're putting the finishing touches on Adaptive Courses. Join the waitlist to be first in line.
                   </p>
@@ -302,13 +307,16 @@ export default function LandingPagePremium() {
                 )}
 
                 <form onSubmit={handleWaitlistSubmit}>
+                  <label htmlFor="waitlist-email" className="sr-only">Email address</label>
                   <input
+                    id="waitlist-email"
                     type="email"
                     value={waitlistEmail}
                     onChange={(e) => setWaitlistEmail(e.target.value)}
                     placeholder="Enter your email"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
+                    aria-label="Email address for waitlist"
                   />
                   <button
                     type="submit"
@@ -326,9 +334,9 @@ export default function LandingPagePremium() {
                 </button>
               </>
             ) : (
-              <div className="text-center py-4">
+              <div className="text-center py-4" role="status" aria-live="polite">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>

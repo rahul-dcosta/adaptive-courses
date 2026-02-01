@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
 
     return redirectResponse;
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Magic link verification error:', error);
     return NextResponse.redirect(
       new URL('/auth/error?reason=server_error', request.url)

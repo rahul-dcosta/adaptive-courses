@@ -1,23 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-
-interface Lesson {
-  title: string;
-}
-
-interface Module {
-  title: string;
-  description: string;
-  lessons: Lesson[];
-}
-
-interface CourseOutline {
-  title: string;
-  estimated_time: string;
-  modules: Module[];
-  next_steps: string[];
-}
+import { CourseOutline } from '@/lib/types';
 
 interface CourseOutlinePreviewProps {
   outline: CourseOutline;
