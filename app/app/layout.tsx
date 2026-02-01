@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import Navbar from '@/components/Navbar';
 
 export const metadata: Metadata = {
-  title: 'Adaptive Courses - Learn Anything in 30 Minutes | AI-Powered Learning',
-  description: 'AI-powered courses that understand your situation, not just your skill level. Perfect for factory tours, job interviews, career switches. Generate custom courses in 30 seconds.',
-  keywords: 'AI learning, personalized courses, fast learning, adaptive learning, custom courses, Claude AI, 30 minute courses',
+  title: 'Adaptive Courses - Any Topic. Your Course. | AI-Powered Learning',
+  description: 'Any topic. Your course. AI-powered courses that understand your situation, not just your skill level. Generate custom courses in 30 seconds.',
+  keywords: 'AI learning, personalized courses, fast learning, adaptive learning, custom courses, Claude AI, any topic your course',
   authors: [{ name: 'Adaptive Courses' }],
   creator: 'Adaptive Courses',
   publisher: 'Adaptive Courses',
@@ -14,8 +15,8 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://adaptive-courses.vercel.app',
     siteName: 'Adaptive Courses',
-    title: 'Adaptive Courses - Learn Anything in 30 Minutes',
-    description: 'AI-powered courses tailored to YOUR situation. Factory visit tomorrow? Job interview next week? We teach exactly what you need.',
+    title: 'Adaptive Courses - Any Topic. Your Course.',
+    description: 'Any topic. Your course. AI-powered courses tailored to YOUR situation. Generate custom courses in 30 seconds.',
     images: [
       {
         url: '/og-image.png',
@@ -27,13 +28,13 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Adaptive Courses - Learn Anything in 30 Minutes',
-    description: 'AI-powered courses tailored to YOUR situation. First course FREE!',
+    title: 'Adaptive Courses - Any Topic. Your Course.',
+    description: 'Any topic. Your course. AI-powered courses tailored to YOUR situation. First course FREE!',
     images: ['/og-image.png'],
     creator: '@AdaptiveCourses',
   },
   viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
-  themeColor: '#4F46E5',
+  themeColor: '#003F87',
   manifest: '/manifest.json',
   icons: {
     icon: '/icon.svg',
@@ -90,6 +91,7 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
+        <Navbar />
         <MobileOptimized>
           {children}
         </MobileOptimized>
