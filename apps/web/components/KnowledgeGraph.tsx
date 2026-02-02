@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { Network, Options, Data } from 'vis-network';
 import type { ViewerCourse } from '@/lib/types';
 

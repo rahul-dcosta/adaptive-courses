@@ -722,9 +722,9 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
               {/* Progress bar - responsive width */}
-              <div className="flex items-center gap-2 sm:gap-3">
+              <div className="hidden sm:flex items-center gap-2 sm:gap-3">
                 <div className="w-16 sm:w-24 md:w-40 h-2 bg-gray-100 rounded-full overflow-hidden">
                   <div
                     className="h-2 transition-all duration-500 rounded-full"
@@ -742,7 +742,7 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
               {/* Mobile Knowledge Graph button */}
               <button
                 onClick={() => setShowMobileGraph(true)}
-                className="lg:hidden flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg transition-all"
+                className="lg:hidden flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 text-xs font-medium rounded-lg transition-all"
                 style={{
                   backgroundColor: 'rgba(0, 63, 135, 0.08)',
                   color: 'var(--royal-blue)'
@@ -759,7 +759,7 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
               <button
                 onClick={handleDownloadPDF}
                 disabled={isGeneratingPDF}
-                className="flex items-center gap-2 px-2 sm:px-4 py-2 text-sm font-medium rounded-lg transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-wait"
+                className="flex items-center gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-sm font-medium rounded-lg transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-wait"
                 style={{ color: 'var(--royal-blue)' }}
                 title={isGeneratingPDF ? 'Generating PDF...' : 'Download PDF'}
               >
@@ -1162,8 +1162,8 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
               </div>
             )}
 
-            {/* Keyboard shortcuts */}
-            <div className="mt-12 p-6 rounded-xl border" style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(0, 63, 135, 0.08)' }}>
+            {/* Keyboard shortcuts - hidden on mobile */}
+            <div className="hidden sm:block mt-12 p-6 rounded-xl border" style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(0, 63, 135, 0.08)' }}>
               <p className="text-xs text-gray-500 text-center flex items-center justify-center gap-4 flex-wrap">
                 <span className="flex items-center gap-2">
                   <kbd className="px-3 py-1 bg-white border rounded text-xs font-mono" style={{ borderColor: 'var(--royal-blue)' }}>←</kbd>
