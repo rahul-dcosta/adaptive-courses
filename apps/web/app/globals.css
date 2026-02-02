@@ -8,6 +8,15 @@
   --royal-blue-dark: #002D5F;
 }
 
+/* Hide Mermaid's global error elements that appear outside containers */
+#d[id^="dmermaid"],
+[id^="dmermaid"],
+.mermaid-error,
+svg[id^="mermaid"] ~ .error-icon,
+body > svg[aria-roledescription="error"] {
+  display: none !important;
+}
+
 /* Typography */
 .font-serif {
   font-family: 'Merriweather', Georgia, serif;
