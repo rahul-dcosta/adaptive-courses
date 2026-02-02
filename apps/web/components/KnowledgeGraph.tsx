@@ -178,6 +178,8 @@ export function KnowledgeGraph({
 }: KnowledgeGraphProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const networkRef = useRef<Network | null>(null);
+  const prevLessonRef = useRef<string>(currentLesson);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const handleClick = useCallback(
     (params: { nodes: string[] }) => {
@@ -189,6 +191,31 @@ export function KnowledgeGraph({
     },
     [onLessonClick]
   );
+
+  // Handle smooth focus transition when currentLesson changes
+  useEffect(() => {
+    if (networkRef.current && currentLesson !== prevLessonRef.current) {
+      setIsTransitioning(true);
+
+      // Animate focus to new lesson with smooth easing
+      networkRef.current.focus(currentLesson, {
+        scale: 1.3,
+        animation: {
+          duration: 600,
+          easingFunction: 'easeInOutCubic',
+        },
+      });
+
+      // Select the new node to highlight it
+      networkRef.current.selectNodes([currentLesson]);
+
+      // Reset transition state after animation
+      setTimeout(() => {
+        setIsTransitioning(false);
+        prevLessonRef.current = currentLesson;
+      }, 650);
+    }
+  }, [currentLesson]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -225,6 +252,14 @@ export function KnowledgeGraph({
           x: 2,
           y: 2,
         },
+        chosen: {
+          node: (values: { shadow: boolean; shadowSize: number; shadowColor: string }) => {
+            values.shadow = true;
+            values.shadowSize = 15;
+            values.shadowColor = 'rgba(0, 63, 135, 0.3)';
+          },
+          label: false,
+        } as const,
       },
       edges: {
         arrows: {
@@ -260,6 +295,8 @@ export function KnowledgeGraph({
         zoomView: true,
         dragView: true,
         dragNodes: true,
+        hoverConnectedEdges: true,
+        selectConnectedEdges: true,
       },
       layout: {
         improvedLayout: true,
@@ -277,51 +314,79 @@ export function KnowledgeGraph({
 
     network.on('click', handleClick);
 
-    // Focus on current lesson after stabilization
+    // Add hover effects for better feedback
+    network.on('hoverNode', () => {
+      if (containerRef.current) {
+        containerRef.current.style.cursor = 'pointer';
+      }
+    });
+
+    network.on('blurNode', () => {
+      if (containerRef.current) {
+        containerRef.current.style.cursor = 'default';
+      }
+    });
+
+    // Focus on current lesson after stabilization with enhanced animation
     network.once('stabilizationIterationsDone', () => {
       if (currentLesson) {
-        network.focus(currentLesson, {
-          scale: 1.2,
-          animation: {
-            duration: 500,
-            easingFunction: 'easeInOutQuad',
-          },
-        });
+        // Brief delay for smoother initial appearance
+        setTimeout(() => {
+          network.focus(currentLesson, {
+            scale: 1.2,
+            animation: {
+              duration: 800,
+              easingFunction: 'easeOutCubic',
+            },
+          });
+          network.selectNodes([currentLesson]);
+        }, 100);
       }
     });
 
     networkRef.current = network;
+    prevLessonRef.current = currentLesson;
 
     return () => {
       network.destroy();
     };
-  }, [course, completedLessons, quizAttempts, currentLesson, handleClick]);
+  }, [course, completedLessons, quizAttempts, handleClick]);
 
   return (
     <div className={`relative ${fullHeight ? 'h-full' : ''}`}>
+      {/* Transition overlay indicator */}
+      <div
+        className={`absolute inset-0 z-20 pointer-events-none rounded-xl transition-opacity duration-300 ${
+          isTransitioning ? 'opacity-100' : 'opacity-0'
+        }`}
+        style={{
+          background: 'radial-gradient(circle at center, rgba(0, 63, 135, 0.08) 0%, transparent 70%)',
+        }}
+      />
+
       {/* Legend */}
       <div
-        className="absolute top-3 left-3 z-10 p-2 sm:p-3 rounded-lg text-xs space-y-1.5 sm:space-y-2"
+        className="absolute top-3 left-3 z-10 p-2 sm:p-3 rounded-lg text-xs space-y-1.5 sm:space-y-2 transition-all duration-200 hover:shadow-md"
         style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', border: '1px solid rgba(0, 63, 135, 0.1)' }}
       >
         <div className="font-semibold text-gray-700 mb-1.5 sm:mb-2">Progress</div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 transition-transform duration-200 hover:translate-x-0.5">
           <div
-            className="w-3 h-3 sm:w-4 sm:h-4 rounded"
+            className="w-3 h-3 sm:w-4 sm:h-4 rounded transition-transform duration-200"
             style={{ backgroundColor: COLORS.notStarted.background, border: `2px solid ${COLORS.notStarted.border}` }}
           />
           <span className="text-gray-600">Not started</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 transition-transform duration-200 hover:translate-x-0.5">
           <div
-            className="w-3 h-3 sm:w-4 sm:h-4 rounded"
+            className="w-3 h-3 sm:w-4 sm:h-4 rounded transition-transform duration-200"
             style={{ backgroundColor: COLORS.inProgress.background, border: `2px solid ${COLORS.inProgress.border}` }}
           />
           <span className="text-gray-600">In progress</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 transition-transform duration-200 hover:translate-x-0.5">
           <div
-            className="w-3 h-3 sm:w-4 sm:h-4 rounded"
+            className="w-3 h-3 sm:w-4 sm:h-4 rounded transition-transform duration-200"
             style={{ backgroundColor: COLORS.mastered.background, border: `2px solid ${COLORS.mastered.border}` }}
           />
           <span className="text-gray-600">Mastered</span>
@@ -330,7 +395,7 @@ export function KnowledgeGraph({
 
       {/* Instructions */}
       <div
-        className="absolute bottom-3 left-3 z-10 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs text-gray-500"
+        className="absolute bottom-3 left-3 z-10 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs text-gray-500 transition-all duration-200 hover:bg-white"
         style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)' }}
       >
         <span className="hidden sm:inline">Click a lesson to navigate</span>
@@ -341,7 +406,7 @@ export function KnowledgeGraph({
       {/* Graph container */}
       <div
         ref={containerRef}
-        className={`w-full rounded-xl ${fullHeight ? 'h-full' : ''}`}
+        className={`w-full rounded-xl transition-all duration-300 ${fullHeight ? 'h-full' : ''}`}
         style={{
           height: fullHeight ? '100%' : '450px',
           backgroundColor: 'rgba(0, 63, 135, 0.02)',

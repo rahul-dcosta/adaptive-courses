@@ -147,8 +147,9 @@ Keep it SHORT - this is just an outline for the user to approve before we genera
       console.error('Outline parse error:', errorMsg);
       return NextResponse.json(
         {
-          error: `Failed to parse outline: ${errorMsg}`,
-          hint: 'The AI generated malformed JSON. Please try again.'
+          error: 'We had trouble creating your course outline. Please try again.',
+          userMessage: 'Outline generation encountered an issue. This can happen occasionally - please try again.',
+          ...(process.env.NODE_ENV === 'development' && { technicalDetails: errorMsg })
         },
         { status: 500 }
       );
@@ -161,9 +162,33 @@ Keep it SHORT - this is just an outline for the user to approve before we genera
 
   } catch (error: unknown) {
     console.error('Outline generation error:', error);
+
+    // Provide user-friendly error messages based on error type
+    const errorMessage = getErrorMessage(error);
+    let userMessage = 'Something went wrong while creating your outline. Please try again.';
+    let statusCode = 500;
+
+    // Check for specific error types
+    if (errorMessage.includes('rate') || errorMessage.includes('limit')) {
+      userMessage = 'We are experiencing high demand. Please wait a moment and try again.';
+      statusCode = 429;
+    } else if (errorMessage.includes('timeout') || errorMessage.includes('ETIMEDOUT')) {
+      userMessage = 'The request took too long. Please try again.';
+      statusCode = 408;
+    } else if (errorMessage.includes('network') || errorMessage.includes('ECONNREFUSED')) {
+      userMessage = 'We are having trouble connecting to our servers. Please check your connection and try again.';
+      statusCode = 503;
+    } else if (errorMessage.includes('API key') || errorMessage.includes('authentication')) {
+      userMessage = 'There is a configuration issue on our end. We are working on it.';
+      statusCode = 500;
+    }
+
     return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 }
+      {
+        error: userMessage,
+        ...(process.env.NODE_ENV === 'development' && { technicalDetails: errorMessage })
+      },
+      { status: statusCode }
     );
   }
 }

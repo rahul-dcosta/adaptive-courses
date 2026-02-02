@@ -236,11 +236,13 @@ interface QuizSectionProps {
 function QuizSection({ quiz, lessonKey, previousAttempt, onAttempt, onContextMenu }: QuizSectionProps) {
   const [showAnswer, setShowAnswer] = useState(false);
   const [hasAnswered, setHasAnswered] = useState(previousAttempt !== undefined);
+  const [justMastered, setJustMastered] = useState(false);
 
   // Reset state when lesson changes
   useEffect(() => {
     setShowAnswer(previousAttempt !== undefined);
     setHasAnswered(previousAttempt !== undefined);
+    setJustMastered(false);
   }, [lessonKey, previousAttempt]);
 
   const handleRevealAnswer = () => {
@@ -249,13 +251,20 @@ function QuizSection({ quiz, lessonKey, previousAttempt, onAttempt, onContextMen
 
   const handleSelfAssess = (gotItRight: boolean) => {
     setHasAnswered(true);
+    if (gotItRight) {
+      setJustMastered(true);
+      // Reset celebration after animation completes
+      setTimeout(() => setJustMastered(false), 2000);
+    }
     onAttempt(gotItRight);
   };
 
   return (
     <div
       key={`quiz-${lessonKey}`}
-      className="p-8 rounded-xl mb-16 group relative transition-all duration-200 hover:shadow-md"
+      className={`p-8 rounded-xl mb-16 group relative transition-all duration-300 hover:shadow-md ${
+        justMastered ? 'animate-celebrate-pulse' : ''
+      }`}
       style={{
         backgroundColor: previousAttempt === true
           ? 'rgba(34, 197, 94, 0.06)'
@@ -270,9 +279,29 @@ function QuizSection({ quiz, lessonKey, previousAttempt, onAttempt, onContextMen
       }}
       onContextMenu={onContextMenu}
     >
+      {/* Celebration overlay with confetti-like sparkles */}
+      {justMastered && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl">
+          {[...Array(8)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 rounded-full"
+              style={{
+                backgroundColor: i % 3 === 0 ? 'rgb(34, 197, 94)' : i % 3 === 1 ? 'rgb(250, 204, 21)' : 'rgb(96, 165, 250)',
+                left: `${10 + i * 11}%`,
+                top: '50%',
+                animation: `confetti 0.8s ease-out ${i * 0.08}s forwards`,
+              }}
+            />
+          ))}
+        </div>
+      )}
+
       <div className="flex items-start gap-3">
         <svg
-          className="w-6 h-6 flex-shrink-0 mt-1"
+          className={`w-6 h-6 flex-shrink-0 mt-1 transition-transform duration-300 ${
+            justMastered ? 'scale-125' : ''
+          }`}
           style={{
             color: previousAttempt === true
               ? 'rgb(34, 197, 94)'
@@ -297,7 +326,9 @@ function QuizSection({ quiz, lessonKey, previousAttempt, onAttempt, onContextMen
             <h3 className="text-lg font-bold text-gray-900">Quick Check</h3>
             {previousAttempt !== undefined && (
               <span
-                className="text-xs font-medium px-2 py-0.5 rounded-full"
+                className={`text-xs font-medium px-2 py-0.5 rounded-full transition-all duration-300 ${
+                  justMastered ? 'animate-celebrate-pop mastery-badge' : ''
+                }`}
                 style={{
                   backgroundColor: previousAttempt ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
                   color: previousAttempt ? 'rgb(22, 163, 74)' : 'rgb(220, 38, 38)'
@@ -312,7 +343,7 @@ function QuizSection({ quiz, lessonKey, previousAttempt, onAttempt, onContextMen
           {!showAnswer && !hasAnswered && (
             <button
               onClick={handleRevealAnswer}
-              className="text-sm font-semibold px-4 py-2 rounded-lg transition-all hover:shadow-sm"
+              className="text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 hover:shadow-sm hover-lift btn-press"
               style={{
                 backgroundColor: 'rgba(0, 63, 135, 0.08)',
                 color: 'var(--royal-blue)'
@@ -323,31 +354,35 @@ function QuizSection({ quiz, lessonKey, previousAttempt, onAttempt, onContextMen
           )}
 
           {showAnswer && quiz.answer && (
-            <div className="mt-4">
-              <p className="text-sm text-gray-700 pl-4 border-l-2 mb-4" style={{ borderColor: 'var(--royal-blue)' }}>
+            <div className="mt-4 animate-fade-in">
+              <p className="text-sm text-gray-700 pl-4 border-l-2 mb-4 transition-all duration-300" style={{ borderColor: 'var(--royal-blue)' }}>
                 {quiz.answer}
               </p>
 
               {!hasAnswered && (
-                <div className="flex gap-3 mt-4">
+                <div className="flex flex-wrap gap-3 mt-4 animate-fade-in-up">
                   <p className="text-sm text-gray-600 mr-2">Did you get it right?</p>
                   <button
                     onClick={() => handleSelfAssess(true)}
-                    className="text-sm font-medium px-4 py-1.5 rounded-lg transition-all"
+                    className="text-sm font-medium px-4 py-1.5 rounded-lg transition-all duration-200 hover-lift btn-press"
                     style={{
                       backgroundColor: 'rgba(34, 197, 94, 0.1)',
                       color: 'rgb(22, 163, 74)'
                     }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(34, 197, 94, 0.2)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(34, 197, 94, 0.1)'}
                   >
                     Yes, got it!
                   </button>
                   <button
                     onClick={() => handleSelfAssess(false)}
-                    className="text-sm font-medium px-4 py-1.5 rounded-lg transition-all"
+                    className="text-sm font-medium px-4 py-1.5 rounded-lg transition-all duration-200 hover-lift btn-press"
                     style={{
                       backgroundColor: 'rgba(239, 68, 68, 0.1)',
                       color: 'rgb(220, 38, 38)'
                     }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.2)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)'}
                   >
                     Not quite
                   </button>
@@ -956,12 +991,21 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
 
         {/* Premium Main Content */}
         <main className="flex-1 min-h-screen">
-          <article className="max-w-3xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12 md:py-16">
+          <article
+            className={`max-w-3xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12 md:py-16 transition-all duration-300 ${
+              lessonTransition === 'slide-left'
+                ? 'opacity-0 translate-x-4'
+                : lessonTransition === 'slide-right'
+                  ? 'opacity-0 -translate-x-4'
+                  : 'opacity-100 translate-x-0'
+            }`}
+            key={lessonKey}
+          >
             {/* Module badge */}
-            <div className="mb-6">
-              <span 
-                className="inline-block px-3 py-1 text-xs font-semibold rounded-full border"
-                style={{ 
+            <div className="mb-6 animate-fade-in">
+              <span
+                className="inline-block px-3 py-1 text-xs font-semibold rounded-full border transition-all duration-200 hover:shadow-sm"
+                style={{
                   backgroundColor: 'rgba(0, 63, 135, 0.05)',
                   borderColor: 'rgba(0, 63, 135, 0.15)',
                   color: 'var(--royal-blue)'
@@ -973,7 +1017,7 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
 
             {/* Lesson Title */}
             {lesson && (
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 sm:mb-8 leading-tight font-serif">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 sm:mb-8 leading-tight font-serif animate-fade-in-up">
                 {lesson.title}
               </h2>
             )}
@@ -981,10 +1025,11 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
             {/* Lesson Content */}
             {lesson && (
               <div
-                className="lesson-prose max-w-none mb-16"
+                className="lesson-prose max-w-none mb-16 animate-fade-in"
                 style={{
                   fontSize: '1.125rem',
                   lineHeight: '1.875',
+                  animationDelay: '0.1s',
                 }}
                 onContextMenu={(e) => handleContextMenu(e, 'lesson')}
               >

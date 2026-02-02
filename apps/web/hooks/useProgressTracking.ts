@@ -175,6 +175,7 @@ export function loadProgressFromStorage(courseId: string): {
 
 /**
  * Save progress state to localStorage
+ * Wrapped in try/catch to handle quota exceeded, private browsing, etc.
  */
 export function saveProgressToStorage(
   courseId: string,
@@ -182,20 +183,61 @@ export function saveProgressToStorage(
   quizAttempts: Map<string, boolean>,
   currentModule: number,
   currentLesson: number
-): void {
-  if (typeof window === 'undefined') return;
+): boolean {
+  if (typeof window === 'undefined') return false;
 
-  const progress: CourseProgress = {
-    completed: Array.from(completed),
-    quizAttempts: Array.from(quizAttempts.entries()).map(([lessonKey, passed]) => ({
-      lessonKey,
-      passed,
-      attemptedAt: new Date().toISOString(),
-    })),
-    lastModule: currentModule,
-    lastLesson: currentLesson,
-    lastAccessed: new Date().toISOString(),
-  };
+  try {
+    const progress: CourseProgress = {
+      completed: Array.from(completed),
+      quizAttempts: Array.from(quizAttempts.entries()).map(([lessonKey, passed]) => ({
+        lessonKey,
+        passed,
+        attemptedAt: new Date().toISOString(),
+      })),
+      lastModule: currentModule,
+      lastLesson: currentLesson,
+      lastAccessed: new Date().toISOString(),
+    };
 
-  localStorage.setItem(`course_${courseId}`, JSON.stringify(progress));
+    localStorage.setItem(`course_${courseId}`, JSON.stringify(progress));
+    return true;
+  } catch (error) {
+    // Handle localStorage errors gracefully:
+    // - QuotaExceededError: Storage is full
+    // - SecurityError: Private browsing mode in some browsers
+    // - Other errors: localStorage disabled or unavailable
+    console.warn('Failed to save progress to localStorage:', error);
+    return false;
+  }
+}
+
+/**
+ * Clear progress for a specific course from localStorage
+ */
+export function clearProgressFromStorage(courseId: string): boolean {
+  if (typeof window === 'undefined') return false;
+
+  try {
+    localStorage.removeItem(`course_${courseId}`);
+    return true;
+  } catch (error) {
+    console.warn('Failed to clear progress from localStorage:', error);
+    return false;
+  }
+}
+
+/**
+ * Check if localStorage is available and working
+ */
+export function isStorageAvailable(): boolean {
+  if (typeof window === 'undefined') return false;
+
+  try {
+    const testKey = '__storage_test__';
+    localStorage.setItem(testKey, testKey);
+    localStorage.removeItem(testKey);
+    return true;
+  } catch {
+    return false;
+  }
 }

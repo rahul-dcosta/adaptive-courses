@@ -349,8 +349,9 @@ Make it engaging, practical, and worth paying for.`;
 
       return NextResponse.json(
         {
-          error: `Failed to parse course: ${errorMsg}`,
-          hint: 'The AI generated malformed JSON. Please try again or try a different topic.'
+          error: 'We had trouble generating your course. Please try again.',
+          userMessage: 'Course generation encountered an issue. This can happen occasionally - please try again.',
+          hint: 'The AI generated malformed content. Please try again or try a different topic.'
         },
         { status: 500 }
       );
@@ -389,9 +390,34 @@ Make it engaging, practical, and worth paying for.`;
 
   } catch (error: unknown) {
     console.error('Course generation error:', error);
+
+    // Provide user-friendly error messages based on error type
+    const errorMessage = getErrorMessage(error);
+    let userMessage = 'Something went wrong while generating your course. Please try again.';
+    let statusCode = 500;
+
+    // Check for specific error types
+    if (errorMessage.includes('rate') || errorMessage.includes('limit')) {
+      userMessage = 'We are experiencing high demand. Please wait a moment and try again.';
+      statusCode = 429;
+    } else if (errorMessage.includes('timeout') || errorMessage.includes('ETIMEDOUT')) {
+      userMessage = 'The request took too long. Please try again with a simpler topic.';
+      statusCode = 408;
+    } else if (errorMessage.includes('network') || errorMessage.includes('ECONNREFUSED')) {
+      userMessage = 'We are having trouble connecting to our servers. Please check your connection and try again.';
+      statusCode = 503;
+    } else if (errorMessage.includes('API key') || errorMessage.includes('authentication')) {
+      userMessage = 'There is a configuration issue on our end. We are working on it.';
+      statusCode = 500;
+    }
+
     return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 }
+      {
+        error: userMessage,
+        // Only include technical details in development
+        ...(process.env.NODE_ENV === 'development' && { technicalDetails: errorMessage })
+      },
+      { status: statusCode }
     );
   }
 }
