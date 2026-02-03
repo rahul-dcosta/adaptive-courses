@@ -47,9 +47,11 @@ class Logger {
   }
   
   error(message: string, error?: Error | unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
     this.log('error', message, {
-      error: error?.message || error,
-      stack: error?.stack
+      error: errorMessage,
+      stack: errorStack
     });
   }
   
