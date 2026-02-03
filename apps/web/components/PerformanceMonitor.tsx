@@ -2,6 +2,14 @@
 
 import { useEffect } from 'react';
 
+interface WebVitalMetric {
+  name: string;
+  value: number;
+  rating: 'good' | 'needs-improvement' | 'poor';
+  delta: number;
+  id: string;
+}
+
 /**
  * Performance monitoring component
  * Tracks Core Web Vitals and sends to analytics
@@ -14,7 +22,7 @@ export default function PerformanceMonitor() {
     // Track page load time
     window.addEventListener('load', () => {
       const perfData = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-      
+
       if (perfData) {
         const metrics = {
           dns: perfData.domainLookupEnd - perfData.domainLookupStart,
@@ -39,7 +47,7 @@ export default function PerformanceMonitor() {
     });
 
     // Track Core Web Vitals using web-vitals library pattern
-    const reportWebVitals = (metric: any) => {
+    const reportWebVitals = (metric: WebVitalMetric) => {
       fetch('/api/track', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -59,14 +67,15 @@ export default function PerformanceMonitor() {
     // Simple LCP tracking (Largest Contentful Paint)
     const observer = new PerformanceObserver((list) => {
       const entries = list.getEntries();
-      const lastEntry = entries[entries.length - 1] as any;
-      
+      const lastEntry = entries[entries.length - 1] as PerformanceEntry & { renderTime?: number; loadTime?: number };
+
       if (lastEntry) {
+        const lcpTime = lastEntry.renderTime || lastEntry.loadTime || 0;
         reportWebVitals({
           name: 'LCP',
-          value: lastEntry.renderTime || lastEntry.loadTime,
-          rating: lastEntry.renderTime < 2500 ? 'good' : lastEntry.renderTime < 4000 ? 'needs-improvement' : 'poor',
-          delta: lastEntry.renderTime || lastEntry.loadTime,
+          value: lcpTime,
+          rating: lcpTime < 2500 ? 'good' : lcpTime < 4000 ? 'needs-improvement' : 'poor',
+          delta: lcpTime,
           id: `lcp-${Date.now()}`
         });
       }

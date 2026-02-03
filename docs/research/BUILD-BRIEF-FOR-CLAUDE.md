@@ -39,7 +39,7 @@ CORE FLOW:
 - User enters topic (e.g., "React hooks for job interview" or "types of water bottles")
 - AI generates 30-60 min crash course (5-8 modules) in <60 seconds
 - Free preview (1 module shown)
-- Pay $7 to unlock full course
+- Pay $3.99 to unlock full course
 - Get: Full course + flashcards + PDF download + certificate
 
 TECH STACK:
@@ -54,7 +54,7 @@ MVP FEATURES (Ship Week 1):
 1. Landing page with topic input
 2. Course generation (<60 sec)
 3. Free preview (1 module)
-4. Stripe checkout ($7)
+4. Stripe checkout ($3.99)
 5. Full course unlock
 6. Flashcards (AI-generated)
 7. Downloadable PDF
@@ -106,7 +106,7 @@ Let's ship. 🚀
 **What to build:**
 - Stripe integration
 - Free preview (show 1 module, lock others)
-- Checkout flow ($7 payment)
+- Checkout flow ($3.99 payment)
 - Success page (unlock full course)
 - Store purchases in database
 
@@ -166,7 +166,7 @@ adaptive-courses/  ← The web app (works on all platforms)
 │   ├── TopicInput.tsx           # Topic entry form
 │   ├── CourseModule.tsx         # Single module display
 │   ├── Flashcard.tsx            # Flashcard component
-│   ├── PaywallModal.tsx         # "Unlock for $7" modal
+│   ├── PaywallModal.tsx         # "Unlock for $3.99" modal
 │   └── Certificate.tsx          # Certificate generation
 ├── lib/
 │   ├── anthropic.ts             # Claude API client
@@ -261,7 +261,7 @@ export async function POST(req: Request) {
       price_data: {
         currency: 'usd',
         product_data: { name: `Crash Course: ${courseTopic}` },
-        unit_amount: 700, // $7.00
+        unit_amount: 700, // $3.99
       },
       quantity: 1,
     }],
@@ -380,7 +380,7 @@ NEXT_PUBLIC_URL=http://localhost:3000
 "Stripe checkout works, but the success page is broken. Fix it."
 
 **Better:**
-"Session 2 complete. The AI generates courses in 45 seconds. Next: Add Stripe payment so I can unlock courses after paying $7."
+"Session 2 complete. The AI generates courses in 45 seconds. Next: Add Stripe payment so I can unlock courses after paying $3.99."
 
 **Best:**
 "✅ Working: Course generation, module display

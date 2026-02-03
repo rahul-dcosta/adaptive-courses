@@ -9,32 +9,33 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-// Type for onboarding question response
-interface OnboardingQuestion {
+interface QuestionOption {
+  label: string;
+  value: string;
+  emoji: string;
+  description: string;
+}
+
+interface QuestionData {
   question: string;
   subtitle: string;
-  options: Array<{
-    label: string;
-    value: string;
-    emoji: string;
-    description: string;
-  }>;
+  options: QuestionOption[];
+}
+
+interface CacheEntry {
+  data: QuestionData;
+  timestamp: number;
 }
 
 // Simple in-memory cache for common topics (context step only)
 const questionCache = new Map<string, CacheEntry>();
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
-interface CacheEntry {
-  data: OnboardingQuestion;
-  timestamp: number;
-}
-
 function getCacheKey(topic: string, step: string): string {
   return `${topic.toLowerCase().trim()}-${step}`;
 }
 
-function getCachedQuestion(topic: string, step: string): OnboardingQuestion | null {
+function getCachedQuestion(topic: string, step: string): QuestionData | null {
   const key = getCacheKey(topic, step);
   const entry = questionCache.get(key);
 
@@ -49,7 +50,7 @@ function getCachedQuestion(topic: string, step: string): OnboardingQuestion | nu
   return entry.data;
 }
 
-function setCachedQuestion(topic: string, step: string, data: OnboardingQuestion): void {
+function setCachedQuestion(topic: string, step: string, data: QuestionData): void {
   const key = getCacheKey(topic, step);
   questionCache.set(key, {
     data,

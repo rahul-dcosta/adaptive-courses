@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getErrorMessage } from '@/lib/types';
 
+// RFC 5322 compliant email regex (simplified but robust)
+const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+
+function isValidEmail(email: string): boolean {
+  if (!email || typeof email !== 'string') return false;
+  if (email.length > 254) return false; // RFC 5321 max length
+  return EMAIL_REGEX.test(email);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { email, source } = await request.json();
 
-    // Validate email
-    if (!email || !email.includes('@')) {
+    // Validate email with proper regex
+    if (!isValidEmail(email)) {
       return NextResponse.json(
         { error: 'Invalid email address' },
         { status: 400 }

@@ -320,7 +320,7 @@ trackEvent('repeat_purchase', { topic, purchase_count: 2 });
 ### Landing Page Tests
 - **Headline:** "Learn [Topic] in 1 Hour" vs. "AI Crash Courses for Urgent Learning"
 - **CTA:** "Generate Course" vs. "Start Learning" vs. "Get Prepared"
-- **Pricing:** $7 vs. $10 (measure conversion + revenue)
+- **Pricing:** $3.99 vs. $10 (measure conversion + revenue)
 - **Social Proof:** Testimonials vs. Stats (e.g., "500+ courses generated")
 
 ### Product Tests

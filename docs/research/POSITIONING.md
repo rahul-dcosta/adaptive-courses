@@ -307,18 +307,18 @@ You asked for a course on "types of water bottles" and got:
 ## Pricing Perception
 
 ### For Professionals
-**$7 = Less than:**
+**$3.99 = Less than:**
 - Chipotle burrito
 - 2 coffees
 - Uber ride
 - 1 hour of billable time
 
-**ROI:** Job offer, client win, promotion → $7 is nothing
+**ROI:** Job offer, client win, promotion → $3.99 is nothing
 
 ---
 
 ### For Casual Learners
-**$7 = Comparable to:**
+**$3.99 = Comparable to:**
 - Book ($10-20 but takes 5 hours to read)
 - Movie ticket ($12 but only 2 hours of entertainment)
 - Streaming service (1 month Netflix = $15)
@@ -328,11 +328,11 @@ You asked for a course on "types of water bottles" and got:
 ---
 
 ### For Gift-Givers
-**$7 = Thoughtful gift for:**
+**$3.99 = Thoughtful gift for:**
 - Secret Santa
 - Stocking stuffer
 - "Thinking of you" gift
-- Way more personal than a $7 coffee gift card
+- Way more personal than a $3.99 coffee gift card
 
 ---
 

@@ -8,7 +8,7 @@
 - Modular course structure (5-8 sections)
 - Flashcards for review
 - Downloadable PDF
-- Pay-per-course ($7)
+- Pay-per-course ($3.99)
 - Stripe payment integration
 
 ### Target Users
@@ -123,7 +123,7 @@
 - Executive coaches (client prep)
 
 **Economics:**
-- Break-even: 3 courses/month ($7 x 3 = $21)
+- Break-even: 3 courses/month ($3.99 x 3 = $21)
 - Value prop: "Unlimited learning for less than 3 courses"
 
 ---
@@ -255,7 +255,7 @@
 **How It Works:**
 - User generates "Supply Chain for Beginners"
 - Chooses to publish to marketplace
-- Other users buy it for $3 (vs. $7 to generate their own)
+- Other users buy it for $3 (vs. $3.99 to generate their own)
 - Original creator gets 50% ($1.50)
 
 **Pros:**
@@ -335,7 +335,7 @@
 ### Value Multipliers (Why Pay 4x More?)
 
 **1. Unlimited Access**
-- Pay $7 per course → expensive if you need 5+ courses/month
+- Pay $3.99 per course → expensive if you need 5+ courses/month
 - Pay $20/month unlimited → cheaper at 3+ courses/month
 - **Economics:** Consultants, career changers generate 5-10 courses/month
 
@@ -385,7 +385,7 @@
 - **Coaches/trainers:** Generate courses for clients
 - **Students:** Cramming for multiple exams
 
-**Break-Even:** 3 courses/month ($7 x 3 = $21 vs. $20 subscription)
+**Break-Even:** 3 courses/month ($3.99 x 3 = $21 vs. $20 subscription)
 
 **Positioning:** "Unlimited learning for less than 3 courses"
 
@@ -432,12 +432,12 @@
 ## Revenue Model Evolution
 
 ### Phase 1: MVP (Month 1-3)
-- **Model:** Pay-per-course ($7)
+- **Model:** Pay-per-course ($3.99)
 - **Revenue:** $1,000-5,000/month
 - **Focus:** Product-market fit
 
 ### Phase 2: Pro Tier (Month 4-6)
-- **Model:** Pay-per-course ($7) + Pro subscription ($20/month)
+- **Model:** Pay-per-course ($3.99) + Pro subscription ($20/month)
 - **Revenue:** $5,000-15,000/month
 - **Focus:** Retention & LTV
 

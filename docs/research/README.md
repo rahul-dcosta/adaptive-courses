@@ -13,7 +13,7 @@ These documents contain market research, competitive analysis, and launch strate
 
 ### Go-to-Market
 - **SEO-STRATEGY.md** - Keywords, blog post ideas, content calendar
-- **PRICING-STRATEGY.md** - $7 pricing rationale, pay-per-course vs subscription analysis
+- **PRICING-STRATEGY.md** - $3.99 pricing rationale, pay-per-course vs subscription analysis
 - **METRICS.md** - KPIs to track, analytics setup (PostHog recommended), 90-day benchmarks
 
 ### Product Strategy

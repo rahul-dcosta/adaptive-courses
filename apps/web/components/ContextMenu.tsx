@@ -17,7 +17,7 @@ interface ContextMenuProps {
   onClose: () => void;
   context?: {
     type: 'lesson' | 'diagram' | 'text' | 'quiz';
-    data?: any;
+    data?: unknown;
   };
 }
 

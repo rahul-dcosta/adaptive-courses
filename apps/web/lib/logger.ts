@@ -4,7 +4,7 @@ interface LogEntry {
   timestamp: string;
   level: LogLevel;
   message: string;
-  data?: any;
+  data?: unknown;
   userId?: string;
   requestId?: string;
 }
@@ -12,7 +12,7 @@ interface LogEntry {
 class Logger {
   private isDevelopment = process.env.NODE_ENV === 'development';
   
-  private log(level: LogLevel, message: string, data?: any) {
+  private log(level: LogLevel, message: string, data?: unknown) {
     const entry: LogEntry = {
       timestamp: new Date().toISOString(),
       level,
@@ -32,24 +32,26 @@ class Logger {
     console.log(JSON.stringify(entry));
   }
   
-  debug(message: string, data?: any) {
+  debug(message: string, data?: unknown) {
     if (this.isDevelopment) {
       this.log('debug', message, data);
     }
   }
   
-  info(message: string, data?: any) {
+  info(message: string, data?: unknown) {
     this.log('info', message, data);
   }
   
-  warn(message: string, data?: any) {
+  warn(message: string, data?: unknown) {
     this.log('warn', message, data);
   }
   
-  error(message: string, error?: Error | any) {
+  error(message: string, error?: Error | unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
     this.log('error', message, {
-      error: error?.message || error,
-      stack: error?.stack
+      error: errorMessage,
+      stack: errorStack
     });
   }
   

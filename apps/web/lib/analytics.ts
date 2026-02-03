@@ -1,4 +1,4 @@
-export async function track(event: string, properties?: Record<string, any>) {
+export async function track(event: string, properties?: Record<string, unknown>) {
   try {
     if (typeof window === 'undefined') return; // Server-side, skip
     
