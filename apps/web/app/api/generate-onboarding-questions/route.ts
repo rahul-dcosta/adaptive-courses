@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
+import { getErrorMessage } from '@/lib/types';
 
 // Maintenance mode - blocks API usage on production
 const MAINTENANCE_MODE = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true';
@@ -183,11 +184,10 @@ Generate 4 depth options.`;
     }
 
     return NextResponse.json(result);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Generate onboarding error:', error);
-    const message = error instanceof Error ? error.message : 'Failed to generate questions';
     return NextResponse.json(
-      { error: message },
+      { error: getErrorMessage(error) || 'Failed to generate questions' },
       { status: 500 }
     );
   }

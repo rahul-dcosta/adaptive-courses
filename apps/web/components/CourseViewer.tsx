@@ -1,37 +1,111 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Component, ReactNode } from 'react';
 import { analytics } from '@/lib/analytics';
+import { generateCoursePDF } from '@/lib/generateCoursePDF';
 import MermaidDiagram from './MermaidDiagram';
 import ContextMenu, { ContextMenuItem, Icons } from './ContextMenu';
-
-interface Module {
-  title: string;
-  description?: string;
-  lessons?: Array<{
-    title: string;
-    content: string;
-    quiz?: {
-      question: string;
-      answer?: string;
-    };
-  }>;
-  content?: string;
-}
-
-interface Course {
-  id?: string;
-  title: string;
-  description?: string;
-  estimated_time?: string;
-  modules: Module[];
-  next_steps?: string[];
-  topic?: string;
-}
+import { ProgressTable } from './ProgressTable';
+import { KnowledgeGraph } from './KnowledgeGraph';
+import { useProgressTracking, loadProgressFromStorage, saveProgressToStorage } from '@/hooks/useProgressTracking';
+import { EmptyState } from './EmptyState';
+import type { ViewerCourse, ContextMenuState, ContextMenuType } from '@/lib/types';
 
 interface CourseViewerProps {
-  course: Course;
+  course: ViewerCourse;
   onExit?: () => void;
+}
+
+// Error Boundary for CourseViewer component
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  onReset?: () => void;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
+class CourseViewerErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('CourseViewer error:', error, errorInfo);
+    analytics.track('course_viewer_error', {
+      error: error.message,
+      componentStack: errorInfo.componentStack?.slice(0, 500)
+    });
+  }
+
+  handleReset = () => {
+    this.setState({ hasError: false, error: undefined });
+    this.props.onReset?.();
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #ffffff 100%)' }}>
+          <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)' }}>
+              <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+
+            <h2 className="text-2xl font-bold text-gray-900 mb-3 font-serif">Course Display Error</h2>
+            <p className="text-gray-600 mb-6">
+              We had trouble displaying this course. Don't worry, your progress is saved.
+            </p>
+
+            {process.env.NODE_ENV === 'development' && this.state.error && (
+              <div className="mb-6 p-4 bg-red-50 rounded-xl text-left">
+                <p className="text-xs text-red-700 font-mono break-all">
+                  {this.state.error.message}
+                </p>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={this.handleReset}
+                className="w-full py-3 rounded-xl font-semibold text-white transition-all shadow-lg hover:shadow-xl"
+                style={{ backgroundColor: 'var(--royal-blue)' }}
+              >
+                Try Again
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                className="w-full py-3 rounded-xl font-medium text-gray-600 hover:text-gray-900 transition-all"
+                style={{ backgroundColor: 'rgba(0, 63, 135, 0.05)' }}
+              >
+                Reload Page
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+// Export a wrapper component that includes error boundary
+export function CourseViewerWithErrorBoundary({ course, onExit }: CourseViewerProps) {
+  return (
+    <CourseViewerErrorBoundary onReset={() => window.location.reload()}>
+      <CourseViewerContent course={course} onExit={onExit} />
+    </CourseViewerErrorBoundary>
+  );
 }
 
 // Helper function to parse content and extract mermaid diagrams
@@ -150,32 +224,214 @@ function escapeHtml(text: string): string {
     .replace(/'/g, '&#039;');
 }
 
-export default function CourseViewer({ course, onExit }: CourseViewerProps) {
+// Interactive Quiz Section with answer tracking
+interface QuizSectionProps {
+  quiz: { question: string; answer?: string };
+  lessonKey: string;
+  previousAttempt?: boolean;
+  onAttempt: (passed: boolean) => void;
+  onContextMenu: (e: React.MouseEvent) => void;
+}
+
+function QuizSection({ quiz, lessonKey, previousAttempt, onAttempt, onContextMenu }: QuizSectionProps) {
+  const [showAnswer, setShowAnswer] = useState(false);
+  const [hasAnswered, setHasAnswered] = useState(previousAttempt !== undefined);
+  const [justMastered, setJustMastered] = useState(false);
+
+  // Reset state when lesson changes
+  useEffect(() => {
+    setShowAnswer(previousAttempt !== undefined);
+    setHasAnswered(previousAttempt !== undefined);
+    setJustMastered(false);
+  }, [lessonKey, previousAttempt]);
+
+  const handleRevealAnswer = () => {
+    setShowAnswer(true);
+  };
+
+  const handleSelfAssess = (gotItRight: boolean) => {
+    setHasAnswered(true);
+    if (gotItRight) {
+      setJustMastered(true);
+      // Reset celebration after animation completes
+      setTimeout(() => setJustMastered(false), 2000);
+    }
+    onAttempt(gotItRight);
+  };
+
+  return (
+    <div
+      key={`quiz-${lessonKey}`}
+      className={`p-8 rounded-xl mb-16 group relative transition-all duration-300 hover:shadow-md ${
+        justMastered ? 'animate-celebrate-pulse' : ''
+      }`}
+      style={{
+        backgroundColor: previousAttempt === true
+          ? 'rgba(34, 197, 94, 0.06)'
+          : previousAttempt === false
+            ? 'rgba(239, 68, 68, 0.06)'
+            : 'rgba(0, 63, 135, 0.04)',
+        border: previousAttempt === true
+          ? '1px solid rgba(34, 197, 94, 0.2)'
+          : previousAttempt === false
+            ? '1px solid rgba(239, 68, 68, 0.2)'
+            : '1px solid rgba(0, 63, 135, 0.12)'
+      }}
+      onContextMenu={onContextMenu}
+    >
+      {/* Celebration overlay with confetti-like sparkles */}
+      {justMastered && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl">
+          {[...Array(8)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 rounded-full"
+              style={{
+                backgroundColor: i % 3 === 0 ? 'rgb(34, 197, 94)' : i % 3 === 1 ? 'rgb(250, 204, 21)' : 'rgb(96, 165, 250)',
+                left: `${10 + i * 11}%`,
+                top: '50%',
+                animation: `confetti 0.8s ease-out ${i * 0.08}s forwards`,
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      <div className="flex items-start gap-3">
+        <svg
+          className={`w-6 h-6 flex-shrink-0 mt-1 transition-transform duration-300 ${
+            justMastered ? 'scale-125' : ''
+          }`}
+          style={{
+            color: previousAttempt === true
+              ? 'rgb(34, 197, 94)'
+              : previousAttempt === false
+                ? 'rgb(239, 68, 68)'
+                : 'var(--royal-blue)'
+          }}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          {previousAttempt === true ? (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          ) : previousAttempt === false ? (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          ) : (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          )}
+        </svg>
+        <div className="w-full">
+          <div className="flex items-center gap-2 mb-2">
+            <h3 className="text-lg font-bold text-gray-900">Quick Check</h3>
+            {previousAttempt !== undefined && (
+              <span
+                className={`text-xs font-medium px-2 py-0.5 rounded-full transition-all duration-300 ${
+                  justMastered ? 'animate-celebrate-pop mastery-badge' : ''
+                }`}
+                style={{
+                  backgroundColor: previousAttempt ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                  color: previousAttempt ? 'rgb(22, 163, 74)' : 'rgb(220, 38, 38)'
+                }}
+              >
+                {previousAttempt ? 'Mastered' : 'Review needed'}
+              </span>
+            )}
+          </div>
+          <p className="text-base text-gray-700 font-medium mb-4">{quiz.question}</p>
+
+          {!showAnswer && !hasAnswered && (
+            <button
+              onClick={handleRevealAnswer}
+              className="text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 hover:shadow-sm hover-lift btn-press"
+              style={{
+                backgroundColor: 'rgba(0, 63, 135, 0.08)',
+                color: 'var(--royal-blue)'
+              }}
+            >
+              Think about it, then reveal answer
+            </button>
+          )}
+
+          {showAnswer && quiz.answer && (
+            <div className="mt-4 animate-fade-in">
+              <p className="text-sm text-gray-700 pl-4 border-l-2 mb-4 transition-all duration-300" style={{ borderColor: 'var(--royal-blue)' }}>
+                {quiz.answer}
+              </p>
+
+              {!hasAnswered && (
+                <div className="flex flex-wrap gap-3 mt-4 animate-fade-in-up">
+                  <p className="text-sm text-gray-600 mr-2">Did you get it right?</p>
+                  <button
+                    onClick={() => handleSelfAssess(true)}
+                    className="text-sm font-medium px-4 py-1.5 rounded-lg transition-all duration-200 hover-lift btn-press"
+                    style={{
+                      backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                      color: 'rgb(22, 163, 74)'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(34, 197, 94, 0.2)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(34, 197, 94, 0.1)'}
+                  >
+                    Yes, got it!
+                  </button>
+                  <button
+                    onClick={() => handleSelfAssess(false)}
+                    className="text-sm font-medium px-4 py-1.5 rounded-lg transition-all duration-200 hover-lift btn-press"
+                    style={{
+                      backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                      color: 'rgb(220, 38, 38)'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.2)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)'}
+                  >
+                    Not quite
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CourseViewerContent({ course, onExit }: CourseViewerProps) {
   const [currentModule, setCurrentModule] = useState(0);
   const [currentLesson, setCurrentLesson] = useState(0);
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
+  const [quizAttempts, setQuizAttempts] = useState<Map<string, boolean>>(new Map());
   const [showNav, setShowNav] = useState(true);
-
+  const [viewMode, setViewMode] = useState<'outline' | 'graph'>('outline');
+  const [showMobileGraph, setShowMobileGraph] = useState(false);
+  // Animation states
+  const [lessonTransition, setLessonTransition] = useState<'idle' | 'slide-left' | 'slide-right'>('idle');
+  const [showMasteryCelebration, setShowMasteryCelebration] = useState(false);
   // Context menu state
-  const [contextMenu, setContextMenu] = useState<{
-    x: number;
-    y: number;
-    type: 'lesson' | 'diagram' | 'text' | 'quiz';
-    data?: any;
-  } | null>(null);
+  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
+  // PDF download state
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
+  // Check if course has valid content
+  const hasValidCourse = course && course.modules && course.modules.length > 0;
+
+  // Progress tracking hook - must be called unconditionally (before any early returns)
+  const { moduleProgress, overallProgress, lessonsMastered, totalLessons } = useProgressTracking(
+    hasValidCourse ? { content: { modules: course.modules } } : null,
+    completedLessons,
+    quizAttempts
+  );
 
   useEffect(() => {
-    // Load progress from localStorage
-    if (course.id) {
-      const saved = localStorage.getItem(`course_${course.id}`);
-      if (saved) {
-        const { completed } = JSON.parse(saved);
-        setCompletedLessons(new Set(completed));
-      }
+    // Load progress from localStorage (including quiz attempts)
+    if (hasValidCourse && course.id) {
+      const savedProgress = loadProgressFromStorage(course.id);
+      setCompletedLessons(savedProgress.completed);
+      setQuizAttempts(savedProgress.quizAttempts);
     }
 
     // Read URL params for deep linking
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && hasValidCourse) {
       const params = new URLSearchParams(window.location.search);
       const moduleParam = params.get('module');
       const lessonParam = params.get('lesson');
@@ -196,17 +452,29 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
         }
       }
     }
-  }, [course.id, course.modules]);
+  }, [course?.id, course?.modules, hasValidCourse]);
+
+  // Handle empty course - show empty state (after all hooks)
+  if (!hasValidCourse) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #ffffff 100%)' }}>
+        <EmptyState
+          type="no-modules"
+          title="Course Not Available"
+          description="This course doesn't have any content yet. Please try generating it again."
+          action={onExit ? {
+            label: 'Go Back',
+            onClick: onExit
+          } : undefined}
+        />
+      </div>
+    );
+  }
 
   useEffect(() => {
-    // Save progress
+    // Save progress (including quiz attempts)
     if (course.id) {
-      localStorage.setItem(`course_${course.id}`, JSON.stringify({
-        completed: Array.from(completedLessons),
-        lastModule: currentModule,
-        lastLesson: currentLesson,
-        lastAccessed: new Date().toISOString()
-      }));
+      saveProgressToStorage(course.id, completedLessons, quizAttempts, currentModule, currentLesson);
     }
 
     // Update URL with current position
@@ -214,7 +482,7 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
     url.searchParams.set('module', String(currentModule + 1));
     url.searchParams.set('lesson', String(currentLesson + 1));
     window.history.replaceState({}, '', url.toString());
-  }, [completedLessons, currentModule, currentLesson, course.id]);
+  }, [completedLessons, quizAttempts, currentModule, currentLesson, course.id]);
 
   useEffect(() => {
     // Keyboard shortcuts
@@ -251,38 +519,80 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
   const handleNext = () => {
     const module = course.modules[currentModule];
     const lessons = module.lessons || [];
-    
-    if (currentLesson < lessons.length - 1) {
-      setCurrentLesson(currentLesson + 1);
-    } else if (currentModule < course.modules.length - 1) {
-      setCurrentModule(currentModule + 1);
-      setCurrentLesson(0);
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Start transition animation
+    setLessonTransition('slide-left');
+
+    setTimeout(() => {
+      if (currentLesson < lessons.length - 1) {
+        setCurrentLesson(currentLesson + 1);
+      } else if (currentModule < course.modules.length - 1) {
+        setCurrentModule(currentModule + 1);
+        setCurrentLesson(0);
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Reset transition after navigation
+      setTimeout(() => setLessonTransition('idle'), 50);
+    }, 150);
   };
 
   const handlePrevious = () => {
-    if (currentLesson > 0) {
-      setCurrentLesson(currentLesson - 1);
-    } else if (currentModule > 0) {
-      const prevModule = course.modules[currentModule - 1];
-      const prevLessons = prevModule.lessons || [];
-      setCurrentModule(currentModule - 1);
-      setCurrentLesson(Math.max(0, prevLessons.length - 1));
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Start transition animation
+    setLessonTransition('slide-right');
+
+    setTimeout(() => {
+      if (currentLesson > 0) {
+        setCurrentLesson(currentLesson - 1);
+      } else if (currentModule > 0) {
+        const prevModule = course.modules[currentModule - 1];
+        const prevLessons = prevModule.lessons || [];
+        setCurrentModule(currentModule - 1);
+        setCurrentLesson(Math.max(0, prevLessons.length - 1));
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Reset transition after navigation
+      setTimeout(() => setLessonTransition('idle'), 50);
+    }, 150);
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
+    if (isGeneratingPDF) return;
+
+    setIsGeneratingPDF(true);
     analytics.track('pdf_download', { courseId: course.id });
-    alert('PDF download coming soon!');
+
+    try {
+      await generateCoursePDF(course);
+      analytics.track('pdf_download_success', { courseId: course.id });
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      alert('Failed to generate PDF. Please try again.');
+      analytics.track('pdf_download_error', { courseId: course.id, error: String(error) });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+
+  // Handle quiz answer submission
+  const handleQuizAnswer = (lessonKey: string, isCorrect: boolean) => {
+    const newAttempts = new Map(quizAttempts);
+    newAttempts.set(lessonKey, isCorrect);
+    setQuizAttempts(newAttempts);
+
+    analytics.track('quiz_attempted', {
+      courseId: course.id,
+      lessonKey,
+      isCorrect
+    });
   };
 
   // Context menu handlers
   const handleContextMenu = useCallback((
     e: React.MouseEvent,
-    type: 'lesson' | 'diagram' | 'text' | 'quiz',
-    data?: any
+    type: ContextMenuType,
+    data?: string
   ) => {
     e.preventDefault();
     e.stopPropagation();
@@ -395,12 +705,11 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
   const lessonKey = `${currentModule}-${currentLesson}`;
   const isCompleted = completedLessons.has(lessonKey);
 
-  // Calculate total progress
-  const totalLessons = course.modules.reduce((sum, m) => sum + (m.lessons?.length || 0), 0);
+  // Progress comes from the hook (hybrid: viewing + quiz mastery)
   const completedCount = completedLessons.size;
-  const progress = totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0;
+  const progress = overallProgress;
 
-  const isLastLesson = currentModule === course.modules.length - 1 && 
+  const isLastLesson = currentModule === course.modules.length - 1 &&
                        currentLesson === (module.lessons?.length || 1) - 1;
 
   return (
@@ -417,13 +726,13 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
     >
       {/* Premium Header */}
       <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b shadow-sm" style={{ borderColor: 'rgba(0, 63, 135, 0.1)' }}>
-        <div className="max-w-6xl mx-auto px-6 py-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-5">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
               {onExit && (
                 <button
                   onClick={onExit}
-                  className="text-gray-500 hover:text-gray-900 transition-colors p-1"
+                  className="text-gray-500 hover:text-gray-900 transition-colors p-1 flex-shrink-0"
                   title="Exit course"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -431,51 +740,75 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
                   </svg>
                 </button>
               )}
-              
-              <div>
-                <h1 className="text-xl font-bold text-gray-900 font-serif">{course.title}</h1>
-                <div className="flex items-center gap-3 mt-1">
-                  <p className="text-sm text-gray-600">
-                    Module {currentModule + 1} of {course.modules.length}
+
+              <div className="min-w-0">
+                <h1 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 font-serif truncate">{course.title}</h1>
+                <div className="flex items-center gap-2 sm:gap-3 mt-0.5 sm:mt-1">
+                  <p className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
+                    Module {currentModule + 1}/{course.modules.length}
                   </p>
                   {course.estimated_time && (
                     <>
-                      <span className="text-gray-300">•</span>
-                      <p className="text-sm text-gray-600">{course.estimated_time}</p>
+                      <span className="text-gray-300 hidden sm:inline">•</span>
+                      <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">{course.estimated_time}</p>
                     </>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
-              {/* Progress bar */}
-              <div className="hidden md:flex items-center gap-3">
-                <div className="w-40 h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <div 
+            <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+              {/* Progress bar - responsive width */}
+              <div className="hidden sm:flex items-center gap-2 sm:gap-3">
+                <div className="w-16 sm:w-24 md:w-40 h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div
                     className="h-2 transition-all duration-500 rounded-full"
-                    style={{ 
+                    style={{
                       width: `${progress}%`,
                       backgroundColor: 'var(--royal-blue)'
                     }}
                   />
                 </div>
-                <span className="text-sm font-medium" style={{ color: 'var(--royal-blue)' }}>
+                <span className="text-xs sm:text-sm font-medium" style={{ color: 'var(--royal-blue)' }}>
                   {Math.round(progress)}%
                 </span>
               </div>
 
-              {/* Download PDF */}
+              {/* Mobile Knowledge Graph button */}
               <button
-                onClick={handleDownloadPDF}
-                className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all hover:bg-gray-50"
-                style={{ color: 'var(--royal-blue)' }}
-                title="Download PDF"
+                onClick={() => setShowMobileGraph(true)}
+                className="lg:hidden flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 text-xs font-medium rounded-lg transition-all"
+                style={{
+                  backgroundColor: 'rgba(0, 63, 135, 0.08)',
+                  color: 'var(--royal-blue)'
+                }}
+                title="View Knowledge Graph"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                 </svg>
-                Download
+                <span className="hidden sm:inline">Graph</span>
+              </button>
+
+              {/* Download PDF - icon only on mobile */}
+              <button
+                onClick={handleDownloadPDF}
+                disabled={isGeneratingPDF}
+                className="flex items-center gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-sm font-medium rounded-lg transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-wait"
+                style={{ color: 'var(--royal-blue)' }}
+                title={isGeneratingPDF ? 'Generating PDF...' : 'Download PDF'}
+              >
+                {isGeneratingPDF ? (
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                )}
+                <span className="hidden sm:inline">{isGeneratingPDF ? 'Generating...' : 'Download'}</span>
               </button>
             </div>
           </div>
@@ -543,78 +876,136 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
                 )}
               </div>
 
+              {/* Module Progress Breakdown */}
+              {moduleProgress.length > 0 && (
+                <ProgressTable
+                  moduleProgress={moduleProgress}
+                  overallProgress={overallProgress}
+                  lessonsMastered={lessonsMastered}
+                  totalLessons={totalLessons}
+                />
+              )}
+
               {/* Divider */}
-              <div className="mb-8 border-t" style={{ borderColor: 'rgba(0, 63, 135, 0.08)' }}></div>
+              <div className="mb-6 border-t" style={{ borderColor: 'rgba(0, 63, 135, 0.08)' }}></div>
 
-              {/* Module outline header */}
-              <div className="mb-6">
-                <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--royal-blue)' }}>
-                  Course Outline
-                </h3>
+              {/* View Toggle */}
+              <div className="flex gap-2 mb-6">
+                <button
+                  onClick={() => setViewMode('outline')}
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg transition-all ${
+                    viewMode === 'outline' ? 'text-white' : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                  style={{
+                    backgroundColor: viewMode === 'outline' ? 'var(--royal-blue)' : 'rgba(0, 63, 135, 0.05)',
+                  }}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                  </svg>
+                  Outline
+                </button>
+                <button
+                  onClick={() => setViewMode('graph')}
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg transition-all ${
+                    viewMode === 'graph' ? 'text-white' : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                  style={{
+                    backgroundColor: viewMode === 'graph' ? 'var(--royal-blue)' : 'rgba(0, 63, 135, 0.05)',
+                  }}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                  Graph
+                </button>
               </div>
-              
-              <nav className="space-y-6">
-                {course.modules.map((mod, modIdx) => {
-                  const lessons = mod.lessons || [];
-                  return (
-                    <div key={modIdx}>
-                      <h4 className="text-sm font-bold text-gray-900 mb-3 font-serif">
-                        {modIdx + 1}. {mod.title}
-                      </h4>
-                      <div className="space-y-1 ml-3 border-l" style={{ borderColor: 'rgba(0, 63, 135, 0.12)' }}>
-                        {lessons.map((les, lesIdx) => {
-                          const key = `${modIdx}-${lesIdx}`;
-                          const isActive = modIdx === currentModule && lesIdx === currentLesson;
-                          const isDone = completedLessons.has(key);
 
-                          return (
-                            <button
-                              key={lesIdx}
-                              onClick={() => {
-                                setCurrentModule(modIdx);
-                                setCurrentLesson(lesIdx);
-                              }}
-                              className={`
-                                w-full text-left px-4 py-2 text-sm transition-all rounded-r-lg -ml-px
-                                ${isActive 
-                                  ? 'font-medium' 
-                                  : 'text-gray-600 hover:text-gray-900'
-                                }
-                              `}
-                              style={{
-                                color: isActive ? 'var(--royal-blue)' : undefined,
-                                backgroundColor: isActive ? 'rgba(0, 63, 135, 0.08)' : undefined,
-                                borderLeft: isActive ? '2px solid var(--royal-blue)' : undefined
-                              }}
-                            >
-                              <div className="flex items-center gap-2">
-                                {isDone && (
-                                  <svg className="w-4 h-4 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                  </svg>
-                                )}
-                                <span className="line-clamp-2">{les.title}</span>
-                              </div>
-                            </button>
-                          );
-                        })}
+              {/* Conditional View: Outline or Graph */}
+              {viewMode === 'outline' ? (
+                <nav className="space-y-6">
+                  {course.modules.map((mod, modIdx) => {
+                    const lessons = mod.lessons || [];
+                    return (
+                      <div key={modIdx}>
+                        <h4 className="text-sm font-bold text-gray-900 mb-3 font-serif">
+                          {modIdx + 1}. {mod.title}
+                        </h4>
+                        <div className="space-y-1 ml-3 border-l" style={{ borderColor: 'rgba(0, 63, 135, 0.12)' }}>
+                          {lessons.map((les, lesIdx) => {
+                            const key = `${modIdx}-${lesIdx}`;
+                            const isActive = modIdx === currentModule && lesIdx === currentLesson;
+                            const isDone = completedLessons.has(key);
+
+                            return (
+                              <button
+                                key={lesIdx}
+                                onClick={() => {
+                                  setCurrentModule(modIdx);
+                                  setCurrentLesson(lesIdx);
+                                }}
+                                className={`
+                                  w-full text-left px-4 py-2 text-sm transition-all rounded-r-lg -ml-px
+                                  ${isActive
+                                    ? 'font-medium'
+                                    : 'text-gray-600 hover:text-gray-900'
+                                  }
+                                `}
+                                style={{
+                                  color: isActive ? 'var(--royal-blue)' : undefined,
+                                  backgroundColor: isActive ? 'rgba(0, 63, 135, 0.08)' : undefined,
+                                  borderLeft: isActive ? '2px solid var(--royal-blue)' : undefined
+                                }}
+                              >
+                                <div className="flex items-center gap-2">
+                                  {isDone && (
+                                    <svg className="w-4 h-4 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                    </svg>
+                                  )}
+                                  <span className="line-clamp-2">{les.title}</span>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </nav>
+                    );
+                  })}
+                </nav>
+              ) : (
+                <KnowledgeGraph
+                  course={course}
+                  completedLessons={completedLessons}
+                  quizAttempts={quizAttempts}
+                  currentLesson={lessonKey}
+                  onLessonClick={(modIdx, lesIdx) => {
+                    setCurrentModule(modIdx);
+                    setCurrentLesson(lesIdx);
+                  }}
+                />
+              )}
             </div>
           </aside>
         )}
 
         {/* Premium Main Content */}
         <main className="flex-1 min-h-screen">
-          <article className="max-w-3xl mx-auto px-8 py-16">
+          <article
+            className={`max-w-3xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12 md:py-16 transition-all duration-300 ${
+              lessonTransition === 'slide-left'
+                ? 'opacity-0 translate-x-4'
+                : lessonTransition === 'slide-right'
+                  ? 'opacity-0 -translate-x-4'
+                  : 'opacity-100 translate-x-0'
+            }`}
+            key={lessonKey}
+          >
             {/* Module badge */}
-            <div className="mb-6">
-              <span 
-                className="inline-block px-3 py-1 text-xs font-semibold rounded-full border"
-                style={{ 
+            <div className="mb-6 animate-fade-in">
+              <span
+                className="inline-block px-3 py-1 text-xs font-semibold rounded-full border transition-all duration-200 hover:shadow-sm"
+                style={{
                   backgroundColor: 'rgba(0, 63, 135, 0.05)',
                   borderColor: 'rgba(0, 63, 135, 0.15)',
                   color: 'var(--royal-blue)'
@@ -626,7 +1017,7 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
 
             {/* Lesson Title */}
             {lesson && (
-              <h2 className="text-5xl font-bold text-gray-900 mb-8 leading-tight font-serif">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 sm:mb-8 leading-tight font-serif animate-fade-in-up">
                 {lesson.title}
               </h2>
             )}
@@ -634,10 +1025,11 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
             {/* Lesson Content */}
             {lesson && (
               <div
-                className="lesson-prose max-w-none mb-16"
+                className="lesson-prose max-w-none mb-16 animate-fade-in"
                 style={{
                   fontSize: '1.125rem',
                   lineHeight: '1.875',
+                  animationDelay: '0.1s',
                 }}
                 onContextMenu={(e) => handleContextMenu(e, 'lesson')}
               >
@@ -697,35 +1089,13 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
 
             {/* Quiz Section */}
             {lesson?.quiz && (
-              <div
-                key={`quiz-${currentModule}-${currentLesson}`}
-                className="p-8 rounded-xl mb-16 group relative cursor-pointer transition-all duration-200 hover:shadow-md"
-                style={{
-                  backgroundColor: 'rgba(0, 63, 135, 0.04)',
-                  border: '1px solid rgba(0, 63, 135, 0.12)'
-                }}
+              <QuizSection
+                quiz={lesson.quiz}
+                lessonKey={lessonKey}
+                previousAttempt={quizAttempts.get(lessonKey)}
+                onAttempt={(passed) => handleQuizAnswer(lessonKey, passed)}
                 onContextMenu={(e) => handleContextMenu(e, 'quiz')}
-              >
-                <div className="flex items-start gap-3 mb-4">
-                  <svg className="w-6 h-6 flex-shrink-0 mt-1" style={{ color: 'var(--royal-blue)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <div className="w-full">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">Quick Check</h3>
-                    <p className="text-base text-gray-700 font-medium mb-3">{lesson.quiz.question}</p>
-                    {lesson.quiz.answer && (
-                      <details key={`answer-${currentModule}-${currentLesson}`} className="mt-4">
-                        <summary className="text-sm font-semibold cursor-pointer hover:opacity-75 transition-opacity" style={{ color: 'var(--royal-blue)' }}>
-                          View Answer
-                        </summary>
-                        <p className="mt-3 text-sm text-gray-700 pl-4 border-l-2" style={{ borderColor: 'var(--royal-blue)' }}>
-                          {lesson.quiz.answer}
-                        </p>
-                      </details>
-                    )}
-                  </div>
-                </div>
-              </div>
+              />
             )}
 
             {/* Completion Status */}
@@ -837,8 +1207,8 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
               </div>
             )}
 
-            {/* Keyboard shortcuts */}
-            <div className="mt-12 p-6 rounded-xl border" style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(0, 63, 135, 0.08)' }}>
+            {/* Keyboard shortcuts - hidden on mobile */}
+            <div className="hidden sm:block mt-12 p-6 rounded-xl border" style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(0, 63, 135, 0.08)' }}>
               <p className="text-xs text-gray-500 text-center flex items-center justify-center gap-4 flex-wrap">
                 <span className="flex items-center gap-2">
                   <kbd className="px-3 py-1 bg-white border rounded text-xs font-mono" style={{ borderColor: 'var(--royal-blue)' }}>←</kbd>
@@ -874,6 +1244,120 @@ export default function CourseViewer({ course, onExit }: CourseViewerProps) {
           context={{ type: contextMenu.type, data: contextMenu.data }}
         />
       )}
+
+      {/* Mobile Knowledge Graph Modal */}
+      {showMobileGraph && (
+        <div
+          className="fixed inset-0 z-50 lg:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Knowledge Graph"
+        >
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowMobileGraph(false)}
+          />
+
+          {/* Modal Content */}
+          <div className="absolute inset-4 sm:inset-6 md:inset-8 bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+            {/* Modal Header */}
+            <div
+              className="flex items-center justify-between px-4 sm:px-6 py-4 border-b"
+              style={{ borderColor: 'rgba(0, 63, 135, 0.1)' }}
+            >
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 font-serif">Knowledge Graph</h3>
+                <p className="text-sm text-gray-500 mt-0.5">
+                  Tap a lesson to navigate
+                </p>
+              </div>
+              <button
+                onClick={() => setShowMobileGraph(false)}
+                className="p-2 rounded-lg transition-colors hover:bg-gray-100"
+                aria-label="Close"
+              >
+                <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Progress Summary */}
+            <div
+              className="px-4 sm:px-6 py-4 border-b"
+              style={{ borderColor: 'rgba(0, 63, 135, 0.1)', backgroundColor: 'rgba(0, 63, 135, 0.02)' }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="relative w-14 h-14">
+                    <svg className="transform -rotate-90 w-14 h-14">
+                      <circle
+                        cx="28"
+                        cy="28"
+                        r="22"
+                        stroke="rgba(0, 63, 135, 0.1)"
+                        strokeWidth="6"
+                        fill="none"
+                      />
+                      <circle
+                        cx="28"
+                        cy="28"
+                        r="22"
+                        stroke="var(--royal-blue)"
+                        strokeWidth="6"
+                        fill="none"
+                        strokeDasharray={`${2 * Math.PI * 22}`}
+                        strokeDashoffset={`${2 * Math.PI * 22 * (1 - progress / 100)}`}
+                        strokeLinecap="round"
+                        style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-sm font-bold" style={{ color: 'var(--royal-blue)' }}>
+                        {Math.round(progress)}%
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-gray-900">
+                      {completedCount}/{totalLessons}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      lessons complete
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Knowledge Graph */}
+            <div className="flex-1 p-4 sm:p-6 overflow-hidden">
+              <KnowledgeGraph
+                course={course}
+                completedLessons={completedLessons}
+                quizAttempts={quizAttempts}
+                currentLesson={lessonKey}
+                onLessonClick={(modIdx, lesIdx) => {
+                  setCurrentModule(modIdx);
+                  setCurrentLesson(lesIdx);
+                  setShowMobileGraph(false);
+                }}
+                fullHeight
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+// Default export wraps content with error boundary
+export default function CourseViewer({ course, onExit }: CourseViewerProps) {
+  return (
+    <CourseViewerErrorBoundary onReset={() => window.location.reload()}>
+      <CourseViewerContent course={course} onExit={onExit} />
+    </CourseViewerErrorBoundary>
   );
 }

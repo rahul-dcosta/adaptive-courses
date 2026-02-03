@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getErrorMessage } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -51,10 +52,10 @@ export async function POST(request: NextRequest) {
       message: 'Thank you for your feedback!'
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Feedback error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to submit feedback' },
+      { error: getErrorMessage(error) || 'Failed to submit feedback' },
       { status: 500 }
     );
   }
@@ -104,10 +105,10 @@ export async function GET(request: NextRequest) {
       recentFeedback: data?.slice(0, 10) || []
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Feedback fetch error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch feedback' },
+      { error: getErrorMessage(error) || 'Failed to fetch feedback' },
       { status: 500 }
     );
   }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendOTP } from '@/lib/services/auth';
+import { getErrorMessage } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,10 +28,10 @@ export async function POST(request: NextRequest) {
       expiresIn: result.expiresIn,
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Send OTP error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to send verification code' },
+      { error: getErrorMessage(error) || 'Failed to send verification code' },
       { status: 500 }
     );
   }

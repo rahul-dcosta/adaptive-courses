@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { getErrorMessage } from '@/lib/types';
 
 // Maintenance mode - blocks API usage on production
 const MAINTENANCE_MODE = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true';
@@ -19,13 +20,13 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { 
-      topic, 
-      skillLevel, 
-      goal, 
-      timeAvailable, 
-      context, 
-      timeline, 
+    const {
+      topic,
+      skillLevel,
+      goal,
+      timeAvailable,
+      context,
+      timeline,
       depth,
       // NEW: Learner Fingerprint fields
       fingerprint,
@@ -34,7 +35,9 @@ export async function POST(request: NextRequest) {
       learningGoal,
       timeCommitment,
       contentFormat,
-      challengePreference
+      challengePreference,
+      // Approved outline from preview step
+      approvedOutline
     } = body;
 
     // Use fingerprint if provided, otherwise fall back to old format
@@ -208,6 +211,20 @@ The art: Find the MINIMUM WIP to keep flow stable without excessive holding cost
 
 DON'T just say "WIP = work in progress" and move on. Teach the nuances.
 
+${approvedOutline ? `
+📋 APPROVED COURSE STRUCTURE (FOLLOW THIS EXACTLY):
+${JSON.stringify(approvedOutline, null, 2)}
+
+Generate content for EACH lesson in the approved outline above. Keep the exact same:
+- Course title
+- Module titles and order
+- Lesson titles and order
+- Estimated time
+
+For each lesson, add:
+- 100-200 words of rich content WITH embedded \`\`\`mermaid code blocks
+- A quiz question with answer
+` : `
 Generate a SIMPLE structured course with:
 1. A specific, actionable course title (not generic)
 2. EXACTLY 2 modules, each with EXACTLY 2 lessons
@@ -217,7 +234,7 @@ Generate a SIMPLE structured course with:
    - A simple quiz question with short answer
 4. Module descriptions (ONE sentence, simple words)
 5. Estimated time for the entire course
-6. EXACTLY 3 concrete "next steps"
+6. EXACTLY 3 concrete "next steps"`}
 
 ⚠️ CRITICAL: You MUST include \`\`\`mermaid code blocks (not ASCII art). If you write [A]-->[B] instead of a mermaid block, you have FAILED. Use the exact mermaid format shown above.
 
@@ -255,7 +272,7 @@ EXACT JSON FORMAT WITH MERMAID EXAMPLE:
   "next_steps": ["Step 1", "Step 2", "Step 3"]
 }
 
-Make it engaging, practical, and worth $5.`;
+Make it engaging, practical, and worth paying for.`;
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-5-20250929',
@@ -315,24 +332,26 @@ Make it engaging, practical, and worth $5.`;
         }
       }
       
-    } catch (parseError: any) {
+    } catch (parseError: unknown) {
+      const errorMsg = getErrorMessage(parseError);
       console.error('=== JSON PARSE ERROR ===');
-      console.error('Error:', parseError.message);
+      console.error('Error:', errorMsg);
       console.error('Response length:', responseText.length);
       console.error('First 500 chars:', responseText.substring(0, 500));
       console.error('Last 500 chars:', responseText.substring(responseText.length - 500));
-      
+
       // Try to identify the problem area from error message
-      const posMatch = parseError.message.match(/position (\d+)/);
+      const posMatch = errorMsg.match(/position (\d+)/);
       if (posMatch) {
         const pos = parseInt(posMatch[1]);
         console.error(`Problem area (pos ${pos}):`, responseText.substring(Math.max(0, pos - 100), pos + 100));
       }
-      
+
       return NextResponse.json(
-        { 
-          error: `Failed to parse course: ${parseError.message}`,
-          hint: 'The AI generated malformed JSON. Please try again or try a different topic.'
+        {
+          error: 'We had trouble generating your course. Please try again.',
+          userMessage: 'Course generation encountered an issue. This can happen occasionally - please try again.',
+          hint: 'The AI generated malformed content. Please try again or try a different topic.'
         },
         { status: 500 }
       );
@@ -369,11 +388,36 @@ Make it engaging, practical, and worth $5.`;
       courseId: courseRecord?.id
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Course generation error:', error);
+
+    // Provide user-friendly error messages based on error type
+    const errorMessage = getErrorMessage(error);
+    let userMessage = 'Something went wrong while generating your course. Please try again.';
+    let statusCode = 500;
+
+    // Check for specific error types
+    if (errorMessage.includes('rate') || errorMessage.includes('limit')) {
+      userMessage = 'We are experiencing high demand. Please wait a moment and try again.';
+      statusCode = 429;
+    } else if (errorMessage.includes('timeout') || errorMessage.includes('ETIMEDOUT')) {
+      userMessage = 'The request took too long. Please try again with a simpler topic.';
+      statusCode = 408;
+    } else if (errorMessage.includes('network') || errorMessage.includes('ECONNREFUSED')) {
+      userMessage = 'We are having trouble connecting to our servers. Please check your connection and try again.';
+      statusCode = 503;
+    } else if (errorMessage.includes('API key') || errorMessage.includes('authentication')) {
+      userMessage = 'There is a configuration issue on our end. We are working on it.';
+      statusCode = 500;
+    }
+
     return NextResponse.json(
-      { error: error.message || 'Failed to generate course' },
-      { status: 500 }
+      {
+        error: userMessage,
+        // Only include technical details in development
+        ...(process.env.NODE_ENV === 'development' && { technicalDetails: errorMessage })
+      },
+      { status: statusCode }
     );
   }
 }

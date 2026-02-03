@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { getErrorMessage } from '@/lib/types';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -61,8 +62,8 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       setSessionId(data.sessionId);
       setStep('otp');
       setTimeout(() => otpRefs.current[0]?.focus(), 100);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -129,8 +130,8 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         onClose();
         window.location.reload();
       }, 2000);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
       setOtp(['', '', '', '', '', '']);
       otpRefs.current[0]?.focus();
     } finally {
@@ -157,6 +158,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
       {/* Modal */}
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auth-modal-title"
         className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
         style={{ border: '1px solid rgba(0, 63, 135, 0.1)' }}
@@ -179,15 +183,16 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             </div>
             <button
               onClick={onClose}
+              aria-label="Close sign-in modal"
               className="text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
 
-          <h2 className="text-2xl font-bold text-gray-900 font-serif">
+          <h2 id="auth-modal-title" className="text-2xl font-bold text-gray-900 font-serif">
             {step === 'email' && 'Welcome back'}
             {step === 'otp' && 'Check your email'}
             {step === 'success' && 'You\'re in!'}
@@ -205,10 +210,11 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           {step === 'email' && (
             <form onSubmit={handleSendOTP} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="auth-email-input" className="block text-sm font-medium text-gray-700 mb-2">
                   Email address
                 </label>
                 <input
+                  id="auth-email-input"
                   ref={emailInputRef}
                   type="email"
                   value={email}
@@ -216,11 +222,13 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   placeholder="you@example.com"
                   className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[var(--royal-blue)] focus:outline-none transition-colors text-gray-900"
                   required
+                  aria-describedby={error ? 'auth-email-error' : undefined}
+                  aria-invalid={error ? 'true' : undefined}
                 />
               </div>
 
               {error && (
-                <p className="text-red-500 text-sm">{error}</p>
+                <p id="auth-email-error" role="alert" className="text-red-500 text-sm">{error}</p>
               )}
 
               <button
@@ -241,11 +249,11 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           {/* OTP Step */}
           {step === 'otp' && (
             <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-4 text-center">
+              <fieldset>
+                <legend className="block text-sm font-medium text-gray-700 mb-4 text-center">
                   Enter verification code
-                </label>
-                <div className="flex justify-center gap-2">
+                </legend>
+                <div className="flex justify-center gap-2" role="group" aria-label="6-digit verification code">
                   {otp.map((digit, index) => (
                     <input
                       key={index}
@@ -256,15 +264,18 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                       value={digit}
                       onChange={(e) => handleOTPChange(index, e.target.value)}
                       onKeyDown={(e) => handleOTPKeyDown(index, e)}
+                      aria-label={`Digit ${index + 1} of 6`}
+                      aria-describedby={error ? 'auth-otp-error' : undefined}
+                      aria-invalid={error ? 'true' : undefined}
                       className="w-12 h-14 text-center text-2xl font-bold rounded-xl border-2 border-gray-200 focus:border-[var(--royal-blue)] focus:outline-none transition-colors text-gray-900"
                       style={{ fontFamily: 'monospace' }}
                     />
                   ))}
                 </div>
-              </div>
+              </fieldset>
 
               {error && (
-                <p className="text-red-500 text-sm text-center">{error}</p>
+                <p id="auth-otp-error" role="alert" className="text-red-500 text-sm text-center">{error}</p>
               )}
 
               {loading && (
@@ -286,7 +297,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
           {/* Success Step */}
           {step === 'success' && (
-            <div className="text-center py-8">
+            <div className="text-center py-8" role="status" aria-live="polite">
               <div
                 className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
                 style={{ background: 'rgba(0, 63, 135, 0.1)' }}
@@ -296,6 +307,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   fill="none"
                   stroke="var(--royal-blue)"
                   viewBox="0 0 24 24"
+                  aria-hidden="true"
                 >
                   <path
                     strokeLinecap="round"

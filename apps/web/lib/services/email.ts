@@ -3,6 +3,7 @@
 
 import { Resend } from 'resend';
 import { env } from '../env';
+import { getErrorMessage } from '../types';
 import {
   generateOTPEmail,
   generateMagicLinkEmail,
@@ -63,9 +64,9 @@ export async function sendOTPEmail(
 
     console.log(`[EMAIL] OTP sent to ${email}, messageId: ${data?.id}`);
     return { success: true, messageId: data?.id };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[EMAIL] OTP send error:', err);
-    return { success: false, error: err.message || 'Failed to send email' };
+    return { success: false, error: getErrorMessage(err) };
   }
 }
 
@@ -97,9 +98,9 @@ export async function sendMagicLinkEmail(
 
     console.log(`[EMAIL] Magic link sent to ${email}, messageId: ${data?.id}`);
     return { success: true, messageId: data?.id };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[EMAIL] Magic link send error:', err);
-    return { success: false, error: err.message || 'Failed to send email' };
+    return { success: false, error: getErrorMessage(err) };
   }
 }
 
@@ -126,9 +127,9 @@ export async function sendWelcomeEmail(email: string): Promise<SendEmailResult> 
 
     console.log(`[EMAIL] Welcome email sent to ${email}, messageId: ${data?.id}`);
     return { success: true, messageId: data?.id };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[EMAIL] Welcome email error:', err);
-    return { success: false, error: err.message || 'Failed to send email' };
+    return { success: false, error: getErrorMessage(err) };
   }
 }
 
@@ -157,9 +158,9 @@ export async function sendCourseEmail(
 
     console.log(`[EMAIL] Course email sent to ${data.userEmail}, messageId: ${emailData?.id}`);
     return { success: true, messageId: emailData?.id };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[EMAIL] Course email error:', err);
-    return { success: false, error: err.message || 'Failed to send email' };
+    return { success: false, error: getErrorMessage(err) };
   }
 }
 
@@ -223,8 +224,8 @@ export async function sendInactiveWarningEmail(
     }
 
     return { success: true, messageId: data?.id };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[EMAIL] Inactive warning error:', err);
-    return { success: false, error: err.message || 'Failed to send email' };
+    return { success: false, error: getErrorMessage(err) };
   }
 }

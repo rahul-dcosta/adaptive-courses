@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { getErrorMessage } from '@/lib/types';
 
 export async function GET() {
   try {
@@ -35,11 +36,11 @@ export async function GET() {
       model: 'claude-sonnet-4-5-20250929'
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json({
       success: false,
-      error: error.message || 'Unknown error',
-      details: error.error?.message || error.toString()
+      error: getErrorMessage(error),
+      details: error instanceof Error ? error.message : String(error)
     });
   }
 }

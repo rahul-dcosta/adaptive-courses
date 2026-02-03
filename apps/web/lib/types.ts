@@ -36,6 +36,29 @@ export interface Quiz {
   answer?: string;
 }
 
+// Progress tracking types
+export interface QuizAttempt {
+  lessonKey: string;      // "moduleIdx-lessonIdx"
+  passed: boolean;
+  attemptedAt: string;
+}
+
+export interface CourseProgress {
+  completed: string[];           // Viewed lessons (lessonKey format)
+  quizAttempts: QuizAttempt[];   // Quiz results
+  lastModule: number;
+  lastLesson: number;
+  lastAccessed: string;
+}
+
+export interface ModuleProgress {
+  title: string;
+  progress: number;              // 0-100
+  status: 'empty' | 'started' | 'complete';
+  lessonsComplete: number;
+  totalLessons: number;
+}
+
 export interface EmailSignup {
   id: string;
   email: string;
@@ -55,10 +78,71 @@ export interface CourseFeedback {
 export interface AnalyticsEvent {
   id: string;
   event_name: string;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   user_agent?: string;
   ip_address?: string;
   created_at: string;
+}
+
+// Error type for catch blocks
+export function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'string') return error;
+  return 'An unexpected error occurred';
+}
+
+// Course outline for preview step
+export interface CourseOutline {
+  title: string;
+  estimated_time: string;
+  modules: Array<{
+    title: string;
+    description: string;
+    lessons: Array<{ title: string }>;
+  }>;
+  next_steps?: string[];
+}
+
+// Context menu action data
+export interface ContextMenuData {
+  lessonTitle?: string;
+  lessonContent?: string;
+  moduleTitle?: string;
+}
+
+// Types for CourseViewer and KnowledgeGraph components
+// These represent the course content structure as rendered in the viewer
+export interface ViewerLesson {
+  title: string;
+  content: string;
+  quiz?: Quiz;
+}
+
+export interface ViewerModule {
+  title: string;
+  description?: string;
+  lessons?: ViewerLesson[];
+  content?: string;
+}
+
+export interface ViewerCourse {
+  id?: string;
+  title: string;
+  description?: string;
+  estimated_time?: string;
+  modules: ViewerModule[];
+  next_steps?: string[];
+  topic?: string;
+}
+
+// Context menu state type for CourseViewer
+export type ContextMenuType = 'lesson' | 'diagram' | 'text' | 'quiz';
+
+export interface ContextMenuState {
+  x: number;
+  y: number;
+  type: ContextMenuType;
+  data?: string;
 }
 
 export interface Stats {
@@ -87,7 +171,7 @@ export interface HealthCheck {
   };
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;

@@ -1,5 +1,14 @@
+import { Module, Lesson } from '@/lib/types';
+
+interface SampleCourse {
+  title: string;
+  estimated_time: string;
+  modules: Module[];
+  next_steps: string[];
+}
+
 export default function SampleCoursePage() {
-  const sampleCourse = {
+  const sampleCourse: SampleCourse = {
     title: "Manufacturing Operations Essentials",
     estimated_time: "45 minutes",
     modules: [
@@ -53,8 +62,7 @@ export default function SampleCoursePage() {
         lessons: [
           {
             title: "Questions About Operations",
-            content: "• 'What's your average cycle time for this product?' (shows you understand production metrics)\n• 'How do you handle bottlenecks in the line?' (demonstrates systems thinking)\n• 'What's the most recent improvement you've implemented?' (signals you value continuous improvement)\n• 'How do you track OEE, and what's your current performance?' (you know the metrics that matter)\n• 'What percentage of your processes are automated vs. manual?' (shows interest in operational strategy)",
-            quiz: null
+            content: "• 'What's your average cycle time for this product?' (shows you understand production metrics)\n• 'How do you handle bottlenecks in the line?' (demonstrates systems thinking)\n• 'What's the most recent improvement you've implemented?' (signals you value continuous improvement)\n• 'How do you track OEE, and what's your current performance?' (you know the metrics that matter)\n• 'What percentage of your processes are automated vs. manual?' (shows interest in operational strategy)"
           }
         ]
       }
@@ -68,24 +76,24 @@ export default function SampleCoursePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
       <div className="max-w-4xl mx-auto">
         {/* Sample Badge */}
-        <div className="bg-yellow-100 border-l-4 border-yellow-600 p-4 mb-6 rounded-lg">
+        <div className="bg-amber-50 border-l-4 p-4 mb-6 rounded-lg" style={{ borderColor: 'var(--royal-blue)' }}>
           <div className="flex items-center gap-2">
-            <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6" style={{ color: 'var(--royal-blue)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div>
-              <p className="font-semibold text-yellow-800">Sample Course</p>
-              <p className="text-sm text-yellow-700">This is an example of what you'll get. Real courses are personalized to your situation.</p>
+              <p className="font-semibold" style={{ color: 'var(--royal-blue-dark)' }}>Sample Course</p>
+              <p className="text-sm text-gray-600">This is an example of what you'll get. Real courses are personalized to your situation.</p>
             </div>
           </div>
         </div>
 
         {/* Course Header */}
-        <div className="bg-white rounded-t-2xl shadow-xl p-6 md:p-8 border-b-4 border-indigo-600">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
+        <div className="bg-white rounded-t-2xl shadow-xl p-6 md:p-8 border-b-4" style={{ borderColor: 'var(--royal-blue)' }}>
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900 font-serif">
             {sampleCourse.title}
           </h1>
           <p className="text-gray-600 flex items-center gap-2">
@@ -98,14 +106,14 @@ export default function SampleCoursePage() {
 
         {/* Course Content */}
         <div className="bg-white rounded-b-2xl shadow-xl p-6 md:p-8">
-          {sampleCourse.modules?.map((module: any, idx: number) => (
+          {sampleCourse.modules?.map((module: Module, idx: number) => (
             <div key={idx} className="mb-10 last:mb-0">
               <div className="flex items-start gap-3 mb-6">
-                <div className="flex-shrink-0 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold">
+                <div className="flex-shrink-0 w-10 h-10 text-white rounded-full flex items-center justify-center font-bold" style={{ background: 'var(--royal-blue)' }}>
                   {idx + 1}
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <h2 className="text-2xl font-bold text-gray-900 font-serif">
                     {module.title}
                   </h2>
                   {module.description && (
@@ -113,8 +121,8 @@ export default function SampleCoursePage() {
                   )}
                 </div>
               </div>
-              
-              {module.lessons?.map((lesson: any, lessonIdx: number) => (
+
+              {module.lessons?.map((lesson: Lesson, lessonIdx: number) => (
                 <div key={lessonIdx} className="ml-0 md:ml-13 mb-8 last:mb-0 pl-6 border-l-2 border-gray-200">
                   <h3 className="text-xl font-semibold mb-3 text-gray-900">
                     {lesson.title}
@@ -122,10 +130,10 @@ export default function SampleCoursePage() {
                   <div className="prose max-w-none text-gray-700 leading-relaxed mb-4 whitespace-pre-line">
                     {lesson.content}
                   </div>
-                  
+
                   {lesson.quiz && (
-                    <div className="mt-4 p-5 bg-indigo-50 rounded-xl border-l-4 border-indigo-600">
-                      <p className="font-semibold text-indigo-900 mb-2 flex items-center gap-2">
+                    <div className="mt-4 p-5 rounded-xl border-l-4" style={{ background: 'rgba(0, 63, 135, 0.05)', borderColor: 'var(--royal-blue)' }}>
+                      <p className="font-semibold mb-2 flex items-center gap-2" style={{ color: 'var(--royal-blue-dark)' }}>
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -134,7 +142,7 @@ export default function SampleCoursePage() {
                       <p className="text-gray-800">{lesson.quiz.question}</p>
                       {lesson.quiz.answer && (
                         <details className="mt-2">
-                          <summary className="cursor-pointer text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                          <summary className="cursor-pointer text-sm font-medium" style={{ color: 'var(--royal-blue)' }}>
                             Show answer
                           </summary>
                           <p className="mt-2 text-gray-700 text-sm">{lesson.quiz.answer}</p>
@@ -170,13 +178,13 @@ export default function SampleCoursePage() {
 
         {/* CTA */}
         <div className="mt-8 bg-white rounded-2xl shadow-xl p-8 text-center">
-          <h2 className="text-2xl font-bold mb-4">Like what you see?</h2>
+          <h2 className="text-2xl font-bold mb-4 font-serif">Like what you see?</h2>
           <p className="text-gray-600 mb-6">
             Generate your own personalized course in 30 seconds. First one free, then $3.99.
           </p>
           <a
             href="/"
-            className="inline-block bg-indigo-600 text-white font-semibold px-8 py-4 rounded-lg hover:bg-indigo-700 transition text-lg"
+            className="inline-block text-white font-semibold px-8 py-4 rounded-xl transition-all text-lg shadow-lg hover:shadow-xl bg-[var(--royal-blue)] hover:bg-[var(--royal-blue-light)]"
           >
             Create My Course →
           </a>
