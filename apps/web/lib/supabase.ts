@@ -19,6 +19,16 @@ export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 // Database Types
 // =============================================================================
 
+export type CourseContent = {
+  title: string;
+  lessons: Array<{
+    title: string;
+    content: string;
+    quiz?: unknown;
+  }>;
+  [key: string]: unknown;
+};
+
 export type Course = {
   id: string;
   user_id: string;
@@ -26,7 +36,7 @@ export type Course = {
   skill_level: string;
   goal: string;
   time_available: string;
-  content: any;
+  content: CourseContent;
   created_at: string;
   paid: boolean;
 };

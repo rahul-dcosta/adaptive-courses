@@ -8,35 +8,48 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-// Simple in-memory cache for common topics (context step only)
-const questionCache = new Map<string, any>();
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+interface QuestionOption {
+  label: string;
+  value: string;
+  emoji: string;
+  description: string;
+}
+
+interface QuestionData {
+  question: string;
+  subtitle: string;
+  options: QuestionOption[];
+}
 
 interface CacheEntry {
-  data: any;
+  data: QuestionData;
   timestamp: number;
 }
+
+// Simple in-memory cache for common topics (context step only)
+const questionCache = new Map<string, CacheEntry>();
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
 function getCacheKey(topic: string, step: string): string {
   return `${topic.toLowerCase().trim()}-${step}`;
 }
 
-function getCachedQuestion(topic: string, step: string): any | null {
+function getCachedQuestion(topic: string, step: string): QuestionData | null {
   const key = getCacheKey(topic, step);
-  const entry = questionCache.get(key) as CacheEntry | undefined;
-  
+  const entry = questionCache.get(key);
+
   if (!entry) return null;
-  
+
   // Check if expired
   if (Date.now() - entry.timestamp > CACHE_TTL) {
     questionCache.delete(key);
     return null;
   }
-  
+
   return entry.data;
 }
 
-function setCachedQuestion(topic: string, step: string, data: any): void {
+function setCachedQuestion(topic: string, step: string, data: QuestionData): void {
   const key = getCacheKey(topic, step);
   questionCache.set(key, {
     data,
@@ -170,10 +183,11 @@ Generate 4 depth options.`;
     }
 
     return NextResponse.json(result);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Generate onboarding error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to generate questions';
     return NextResponse.json(
-      { error: error.message || 'Failed to generate questions' },
+      { error: message },
       { status: 500 }
     );
   }
