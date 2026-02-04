@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { getErrorMessage } from '@/lib/types';
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 // Maintenance mode - blocks API usage on production
 const MAINTENANCE_MODE = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true';
@@ -16,6 +17,12 @@ export async function POST(request: NextRequest) {
       { error: 'Service temporarily unavailable. Launching soon!' },
       { status: 503 }
     );
+  }
+
+  // Check rate limit
+  const rateLimitResult = await checkRateLimit(request, 'generate-course');
+  if (!rateLimitResult.success) {
+    return rateLimitResponse(rateLimitResult, 'generate-course');
   }
 
   try {
@@ -382,11 +389,18 @@ Make it engaging, practical, and worth paying for.`;
       // Still return the course even if DB save fails
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       course: courseData,
       courseId: courseRecord?.id
     });
+
+    // Add rate limit headers
+    response.headers.set('X-RateLimit-Limit', rateLimitResult.limit.toString());
+    response.headers.set('X-RateLimit-Remaining', rateLimitResult.remaining.toString());
+    response.headers.set('X-RateLimit-Reset', rateLimitResult.reset.toString());
+
+    return response;
 
   } catch (error: unknown) {
     console.error('Course generation error:', error);

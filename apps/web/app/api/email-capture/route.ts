@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getErrorMessage } from '@/lib/types';
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 // RFC 5322 compliant email regex (simplified but robust)
 const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
@@ -11,6 +12,12 @@ function isValidEmail(email: string): boolean {
 }
 
 export async function POST(request: NextRequest) {
+  // Check rate limit
+  const rateLimitResult = await checkRateLimit(request, 'email-capture');
+  if (!rateLimitResult.success) {
+    return rateLimitResponse(rateLimitResult, 'email-capture');
+  }
+
   try {
     const { email, source } = await request.json();
 

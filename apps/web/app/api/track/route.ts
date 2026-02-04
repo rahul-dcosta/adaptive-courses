@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
+  // Check rate limit (fail silently for analytics - don't block user experience)
+  const rateLimitResult = await checkRateLimit(request, 'track');
+  if (!rateLimitResult.success) {
+    // For analytics, just return success but don't actually track
+    // This prevents attackers from knowing they're rate limited
+    return NextResponse.json({ success: true });
+  }
+
   try {
     const body = await request.json();
     const { event, properties } = body;

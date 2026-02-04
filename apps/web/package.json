@@ -11,6 +11,8 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.72.1",
     "@supabase/supabase-js": "^2.93.3",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.36.2",
     "apify-client": "^2.22.0",
     "jspdf": "^4.0.0",
     "mermaid": "^11.12.2",
