@@ -100,9 +100,9 @@ export default function LoadingSpinner({ topic }: LoadingSpinnerProps) {
               key={idx} 
               className={`
                 flex items-center gap-3 transition-all duration-500
-                ${idx === messageIndex ? 'opacity-100 translate-x-0' : 
-                  idx < messageIndex ? 'opacity-40 -translate-x-2' : 
-                  'opacity-20 translate-x-2'}
+                ${idx === messageIndex ? 'opacity-100 translate-x-0' :
+                  idx < messageIndex ? 'opacity-60 -translate-x-2' :
+                  'opacity-70 translate-x-2'}
               `}
             >
               <div 
@@ -123,7 +123,8 @@ export default function LoadingSpinner({ topic }: LoadingSpinnerProps) {
                 </span>
               </div>
               <span className={`
-                ${idx === messageIndex ? 'text-gray-900 font-medium' : 'text-gray-400'}
+                ${idx === messageIndex ? 'text-gray-900 font-medium' :
+                  idx < messageIndex ? 'text-gray-600' : 'text-gray-500'}
                 transition-colors duration-500
               `}>
                 {msg.text}
