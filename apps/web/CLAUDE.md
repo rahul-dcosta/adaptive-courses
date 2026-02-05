@@ -39,6 +39,7 @@ adaptive-courses/
 │   │   ├── page.tsx          # Homepage
 │   │   └── globals.css
 │   ├── components/           # React components
+│   │   ├── AccessGate.tsx            # Beta access code gate
 │   │   ├── LandingPagePremium.tsx    # Main landing page
 │   │   ├── CourseBuilderSmart.tsx    # Course generation flow
 │   │   ├── CourseViewer.tsx          # Course reading UI
@@ -77,6 +78,8 @@ adaptive-courses/
 | `POST /api/track` | Analytics events |
 
 **Rate Limiting:** All APIs use Upstash Redis rate limiting (see [lib/rate-limit.ts](lib/rate-limit.ts)). Limits vary by user type (anonymous/authenticated/paid) and endpoint.
+
+**Access Gate:** Site requires access code "sixseven" to enter (see [AccessGate.tsx](components/AccessGate.tsx)). Access stored in localStorage.
 
 **Maintenance Mode:** When `NEXT_PUBLIC_MAINTENANCE_MODE=true`, generation APIs return 503 and landing shows waitlist modal.
 
