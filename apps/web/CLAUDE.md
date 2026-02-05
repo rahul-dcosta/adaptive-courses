@@ -181,6 +181,48 @@ npm run lint      # Lint
 
 ---
 
+## Testing
+
+**Requires Node 22+** (use `nvm use` - .nvmrc configured)
+
+```bash
+# Unit/Integration (Vitest) - 141 tests
+npm test              # Watch mode
+npm run test:run      # Single run (~700ms)
+npm run test:coverage # With coverage report
+
+# E2E (Playwright) - 42 tests
+npm run test:e2e         # Headless (~26s)
+npm run test:e2e:ui      # Interactive UI
+npm run test:e2e:headed  # Visible browser
+```
+
+**Test Structure:**
+```
+apps/web/
+├── __tests__/           # Vitest unit/integration
+│   ├── api/             # API route tests
+│   │   ├── auth.test.ts
+│   │   ├── generate-course.test.ts
+│   │   └── health.test.ts
+│   ├── lib/             # Utility tests
+│   │   ├── validation.test.ts
+│   │   └── helpers.test.ts
+│   └── setup.ts         # Test setup (mocks env vars)
+├── e2e/                 # Playwright E2E
+│   ├── access-gate.spec.ts
+│   ├── auth.spec.ts
+│   ├── navigation.spec.ts
+│   ├── onboarding.spec.ts
+│   └── fixtures.ts      # Test fixtures (bypasses access gate)
+├── vitest.config.ts
+└── playwright.config.ts
+```
+
+**Always run tests before pushing** - they catch regressions.
+
+---
+
 ## Links
 
 - **Repo:** https://github.com/rahul-dcosta/adaptive-courses
