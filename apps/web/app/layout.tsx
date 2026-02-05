@@ -1,7 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Suspense } from 'react';
 import './globals.css';
-import Navbar from '@/components/Navbar';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -50,9 +48,6 @@ export const metadata: Metadata = {
   },
 };
 
-import MobileOptimized from '@/components/MobileOptimized';
-import AccessGate from '@/components/AccessGate';
-
 export default function RootLayout({
   children,
 }: {
@@ -61,53 +56,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Additional SEO tags */}
         <meta name="application-name" content="Adaptive Courses" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Adaptive Courses" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
-        
-        {/* Preconnect to external domains */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-        
-        {/* Schema.org structured data */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'EducationalOrganization',
-              name: 'Adaptive Courses',
-              description: 'AI-powered learning platform that creates custom 30-minute courses tailored to your situation',
-              url: 'https://adaptivecourses.ai',
-              logo: 'https://adaptivecourses.ai/icon.svg',
-              sameAs: [
-                'https://twitter.com/AdaptiveCourses',
-                'https://linkedin.com/company/adaptive-courses',
-              ],
-              offers: {
-                '@type': 'Offer',
-                price: '3.99',
-                priceCurrency: 'USD',
-                availability: 'https://schema.org/InStock',
-                description: 'Custom AI-generated course (first course free)',
-              },
-            }),
-          }}
-        />
       </head>
       <body className="antialiased">
-        <AccessGate>
-          <Suspense fallback={null}>
-            <Navbar />
-          </Suspense>
-          <MobileOptimized>
-            {children}
-          </MobileOptimized>
-        </AccessGate>
+        {children}
       </body>
     </html>
   );
