@@ -329,12 +329,38 @@ Make it engaging, practical, and worth paying for.`;
       }
       jsonString = jsonString.substring(jsonStart, jsonEnd + 1);
       
-      // 3. Fix common JSON errors (safe fixes only)
+      // 3. Fix common JSON errors
       jsonString = jsonString
-        .replace(/,(\s*[}\]])/g, '$1'); // Remove trailing commas
-      
-      // 4. Try to parse
-      courseData = JSON.parse(jsonString);
+        .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
+        .replace(/[\u2018\u2019]/g, "'") // Replace curly single quotes with straight
+        .replace(/[\u201C\u201D]/g, '"'); // Replace curly double quotes with straight
+
+      // 4. Try to parse, with fallback repair for unescaped quotes
+      try {
+        courseData = JSON.parse(jsonString);
+      } catch (firstError) {
+        // Attempt to repair common JSON issues
+        console.log('First parse failed, attempting repair...');
+
+        // Fix unescaped quotes inside string values
+        // This regex finds string values and escapes unescaped quotes within them
+        let repaired = jsonString;
+
+        // Replace newlines inside strings with escaped newlines
+        // Match content between "content": " and the closing ",
+        repaired = repaired.replace(
+          /("content"\s*:\s*")([^"]*(?:"[^"]*)*?)("(?:\s*,|\s*}))/g,
+          (_match, start, content, end) => {
+            // Escape any unescaped double quotes in the content (but not the boundaries)
+            const fixed = content
+              .replace(/(?<!\\)"/g, '\\"') // Escape unescaped double quotes
+              .replace(/\n/g, '\\n'); // Escape actual newlines
+            return start + fixed + end;
+          }
+        );
+
+        courseData = JSON.parse(repaired);
+      }
       
       // Validate basic course structure
       if (!courseData.title || !courseData.modules || !Array.isArray(courseData.modules) || courseData.modules.length === 0) {
