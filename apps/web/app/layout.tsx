@@ -51,6 +51,7 @@ export const metadata: Metadata = {
 };
 
 import MobileOptimized from '@/components/MobileOptimized';
+import AccessGate from '@/components/AccessGate';
 
 export default function RootLayout({
   children,
@@ -99,12 +100,14 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <Suspense fallback={null}>
-          <Navbar />
-        </Suspense>
-        <MobileOptimized>
-          {children}
-        </MobileOptimized>
+        <AccessGate>
+          <Suspense fallback={null}>
+            <Navbar />
+          </Suspense>
+          <MobileOptimized>
+            {children}
+          </MobileOptimized>
+        </AccessGate>
       </body>
     </html>
   );
