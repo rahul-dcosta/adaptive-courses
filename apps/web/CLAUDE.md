@@ -1,6 +1,6 @@
 # CLAUDE.md - Adaptive Courses
 
-**Updated:** 2026-02-04 | **Domain:** [adaptivecourses.ai](https://adaptivecourses.ai) | **Status:** Beta
+**Updated:** 2026-02-05 | **Domain:** [adaptivecourses.ai](https://adaptivecourses.ai) | **Status:** Beta
 
 ---
 
@@ -12,10 +12,10 @@ cd adaptive-courses && npm install
 git checkout dev && npm run dev
 ```
 
-| Environment | URL | Branch |
-|-------------|-----|--------|
-| Production | https://adaptivecourses.ai | `main` (maintenance mode) |
-| Development | https://adaptive-courses.vercel.app | `dev` (full features) |
+| Environment | URL                                     | Branch                  |
+|-------------|-----------------------------------------|-------------------------|
+| Production  | <https://adaptivecourses.ai>            | `main` (teaser landing) |
+| Development | <https://adaptive-courses.vercel.app>   | `dev` (full app)        |
 
 ---
 
@@ -57,11 +57,12 @@ adaptive-courses/
 │   │   ├── page.tsx          # Homepage
 │   │   └── globals.css
 │   ├── components/           # React components
-│   │   ├── AccessGate.tsx            # Beta access code gate
-│   │   ├── LandingPagePremium.tsx    # Main landing page
+│   │   ├── AccessGate.tsx            # Beta access code gate (dev only)
+│   │   ├── LandingPageTeaser.tsx     # Teaser landing (main branch)
+│   │   ├── LandingPagePremium.tsx    # Full landing page (dev branch)
 │   │   ├── CourseBuilderSmart.tsx    # Course generation flow
 │   │   ├── CourseViewer.tsx          # Course reading UI
-│   │   └── ErrorBoundary.tsx
+│   │   └── LoadingSpinner.tsx        # Generation progress UI
 │   ├── lib/                  # Utilities (analytics, logger, rate-limit, supabase, types)
 │   └── legal/                # UAE legal docs (privacy, terms, business setup)
 ├── packages/api-client/      # Shared types & Supabase client
@@ -99,7 +100,21 @@ adaptive-courses/
 
 **Access Gate:** Site requires access code "sixseven" to enter (see [AccessGate.tsx](components/AccessGate.tsx)). Access stored in localStorage.
 
-**Branch Strategy:** `main` shows teaser landing, `dev` shows full app. Different `page.tsx` on each branch.
+**Branch Strategy:** `main` shows teaser landing (no navbar/access gate), `dev` shows full app.
+
+---
+
+## Course Generation Behavior
+
+**Learner Fingerprint:** Courses adapt based on learning style, prior knowledge, goal, time commitment, content format, and challenge preference.
+
+**Goal-Aware Next Steps:** The "What You'll Do Next" section adapts to topic type:
+
+- **Casual/fun topics** (memes, dance moves, pop culture): Light suggestions like "Try it at your next party"
+- **Academic/professional topics**: Concrete exercises and practice drills
+- **Goal-specific**: hobby/sound_smart gets casual tone, career/interview gets professional tone
+
+**Time Mapping:** Time options map to course structure (modules, lessons, word counts) in `generate-course/route.ts`.
 
 ---
 
