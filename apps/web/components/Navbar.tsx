@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import AuthModal from './AuthModal';
+import ThemeToggle from './ThemeToggle';
 
 // Marketing pages where navbar should appear
-const MARKETING_PAGES = ['/', '/pricing', '/about', '/faq', '/terms', '/privacy'];
+const MARKETING_PAGES = ['/', '/pricing', '/about', '/faq', '/terms', '/privacy', '/library'];
 
 // Helper to check for auth cookie
 function getAuthCookie(): boolean {
@@ -73,7 +74,7 @@ export default function Navbar() {
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? 'h-14 bg-white/70 backdrop-blur-xl border-b border-[rgba(0,63,135,0.1)] shadow-sm'
+            ? 'h-14 bg-[var(--bg-card)]/70 backdrop-blur-xl border-b border-[var(--border-secondary)] shadow-sm'
             : 'h-16 bg-transparent'
         }`}
       >
@@ -90,20 +91,23 @@ export default function Navbar() {
               <span className="text-white font-bold text-lg font-serif">A</span>
             </div>
             <div className="hidden sm:block">
-              <span className="font-bold text-gray-900 text-lg">Adaptive</span>
-              <span className="font-medium text-gray-500 text-lg ml-1">Courses</span>
+              <span className="font-bold text-[var(--text-primary)] text-lg">Adaptive</span>
+              <span className="font-medium text-[var(--text-muted)] text-lg ml-1">Courses</span>
             </div>
           </a>
 
           {/* Auth Buttons */}
           <div className="flex items-center gap-3">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
             {isLoggedIn ? (
               <>
                 <a
-                  href="/dashboard"
-                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-3 py-2"
+                  href="/library"
+                  className="text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors px-3 py-2"
                 >
-                  My Courses
+                  Library
                 </a>
                 <div className="relative">
                   <button
@@ -111,8 +115,8 @@ export default function Navbar() {
                       e.stopPropagation();
                       setShowUserMenu(!showUserMenu);
                     }}
-                    className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:ring-2 hover:ring-gray-200"
-                    style={{ background: 'rgba(0, 63, 135, 0.1)' }}
+                    className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:ring-2 hover:ring-[var(--border-primary)]"
+                    style={{ background: 'var(--bg-glass-dark)' }}
                   >
                     <svg
                       className="w-5 h-5"
@@ -131,26 +135,26 @@ export default function Navbar() {
                   </button>
                   {showUserMenu && (
                     <div
-                      className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50"
+                      className="absolute right-0 mt-2 w-48 bg-[var(--bg-card)] rounded-xl shadow-lg border border-[var(--border-secondary)] py-2 z-50"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <a
-                        href="/dashboard"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        href="/library"
+                        className="block px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-glass-dark)]"
                       >
-                        My Courses
+                        My Library
                       </a>
                       <a
                         href="/account"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="block px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-glass-dark)]"
                       >
                         Account Settings
                       </a>
-                      <hr className="my-2 border-gray-100" />
+                      <hr className="my-2 border-[var(--border-secondary)]" />
                       <button
                         onClick={handleLogout}
                         disabled={isLoggingOut}
-                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+                        className="w-full text-left px-4 py-2 text-sm text-[var(--error-text)] hover:bg-[var(--error-bg)] disabled:opacity-50"
                       >
                         {isLoggingOut ? 'Signing out...' : 'Sign out'}
                       </button>
@@ -162,13 +166,13 @@ export default function Navbar() {
               <>
                 <button
                   onClick={() => setShowAuthModal(true)}
-                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-3 py-2"
+                  className="text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors px-3 py-2"
                 >
                   Sign in
                 </button>
                 <button
                   onClick={() => setShowAuthModal(true)}
-                  className="text-sm font-medium text-white px-4 py-2 rounded-lg transition-all hover:shadow-lg"
+                  className="text-sm font-medium text-[var(--text-inverted)] px-4 py-2 rounded-lg transition-all hover:shadow-lg"
                   style={{ background: 'var(--royal-blue)' }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--royal-blue-light)')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--royal-blue)')}

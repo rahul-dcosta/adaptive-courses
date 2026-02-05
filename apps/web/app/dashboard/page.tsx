@@ -55,11 +55,11 @@ function CourseCard({ course }: { course: Course }) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-6">
+    <div className="bg-[var(--bg-card)] rounded-xl shadow-sm hover:shadow-md transition-shadow p-6">
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
-          <h3 className="font-semibold text-gray-900 mb-1">{course.title}</h3>
-          <p className="text-sm text-gray-500">{course.subtitle}</p>
+          <h3 className="font-semibold text-[var(--text-primary)] mb-1">{course.title}</h3>
+          <p className="text-sm text-[var(--text-muted)]">{course.subtitle}</p>
         </div>
         {course.status === 'generating' ? (
           <span className="flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full bg-yellow-100 text-yellow-700">
@@ -84,11 +84,11 @@ function CourseCard({ course }: { course: Course }) {
         <>
           {/* Progress bar */}
           <div className="mb-4">
-            <div className="flex justify-between text-xs text-gray-500 mb-1">
+            <div className="flex justify-between text-xs text-[var(--text-muted)] mb-1">
               <span>{course.modules} modules</span>
               <span>{course.progress}% complete</span>
             </div>
-            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="w-full h-2 bg-[var(--bg-glass-dark)] rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all"
                 style={{
@@ -108,12 +108,12 @@ function CourseCard({ course }: { course: Course }) {
             >
               {course.progress === 100 ? 'Review' : 'Continue'}
             </a>
-            <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors" title="Download PDF">
+            <button className="p-2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors" title="Download PDF">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
             </button>
-            <button className="p-2 text-gray-400 hover:text-red-500 transition-colors" title="Delete">
+            <button className="p-2 text-[var(--text-muted)] hover:text-[var(--error-text)] transition-colors" title="Delete">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
@@ -124,13 +124,13 @@ function CourseCard({ course }: { course: Course }) {
 
       {course.status === 'generating' && (
         <div className="text-center py-4">
-          <p className="text-sm text-gray-500">Your course is being generated...</p>
-          <p className="text-xs text-gray-400 mt-1">This usually takes 30-60 seconds</p>
+          <p className="text-sm text-[var(--text-muted)]">Your course is being generated...</p>
+          <p className="text-xs text-[var(--text-muted)] mt-1">This usually takes 30-60 seconds</p>
         </div>
       )}
 
-      <div className="mt-4 pt-4 border-t border-gray-100">
-        <p className="text-xs text-gray-400">Created {formatDate(course.createdAt)}</p>
+      <div className="mt-4 pt-4 border-t border-[var(--border-secondary)]">
+        <p className="text-xs text-[var(--text-muted)]">Created {formatDate(course.createdAt)}</p>
       </div>
     </div>
   );
@@ -159,7 +159,7 @@ export default function DashboardPage() {
             <h1 className="text-3xl font-bold" style={{ color: 'var(--royal-blue)' }}>
               My Courses
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-[var(--text-secondary)] mt-1">
               {courses.length} course{courses.length !== 1 ? 's' : ''} in your library
             </p>
           </div>
@@ -177,18 +177,18 @@ export default function DashboardPage() {
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-xl p-4 shadow-sm">
-            <p className="text-sm text-gray-500">Total Courses</p>
+          <div className="bg-[var(--bg-card)] rounded-xl p-4 shadow-sm">
+            <p className="text-sm text-[var(--text-muted)]">Total Courses</p>
             <p className="text-2xl font-bold" style={{ color: 'var(--royal-blue)' }}>
               {courses.length}
             </p>
           </div>
-          <div className="bg-white rounded-xl p-4 shadow-sm">
-            <p className="text-sm text-gray-500">Completed</p>
+          <div className="bg-[var(--bg-card)] rounded-xl p-4 shadow-sm">
+            <p className="text-sm text-[var(--text-muted)]">Completed</p>
             <p className="text-2xl font-bold text-green-600">{completedCount}</p>
           </div>
-          <div className="bg-white rounded-xl p-4 shadow-sm">
-            <p className="text-sm text-gray-500">In Progress</p>
+          <div className="bg-[var(--bg-card)] rounded-xl p-4 shadow-sm">
+            <p className="text-sm text-[var(--text-muted)]">In Progress</p>
             <p className="text-2xl font-bold text-blue-600">{inProgressCount}</p>
           </div>
         </div>
@@ -206,7 +206,7 @@ export default function DashboardPage() {
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
                 filter === f.key
                   ? 'text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
+                  : 'bg-[var(--bg-card)] text-[var(--text-secondary)] hover:bg-[var(--bg-glass-dark)]'
               }`}
               style={filter === f.key ? { background: 'var(--royal-blue)' } : {}}
             >
@@ -226,7 +226,7 @@ export default function DashboardPage() {
           <div className="text-center py-16">
             <div
               className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
-              style={{ background: 'rgba(0, 63, 135, 0.1)' }}
+              style={{ background: 'var(--bg-glass-dark)' }}
             >
               <svg
                 className="w-8 h-8"
@@ -238,8 +238,8 @@ export default function DashboardPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No courses yet</h3>
-            <p className="text-gray-500 mb-6">Create your first course to get started</p>
+            <h3 className="text-lg font-medium text-[var(--text-primary)] mb-2">No courses yet</h3>
+            <p className="text-[var(--text-muted)] mb-6">Create your first course to get started</p>
             <a
               href="/"
               className="inline-block px-6 py-3 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all"
@@ -252,11 +252,11 @@ export default function DashboardPage() {
 
         {/* Upgrade prompt for free users */}
         {courses.length === 1 && (
-          <div className="mt-12 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 text-center">
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
+          <div className="mt-12 bg-[var(--bg-glass-dark)] rounded-2xl p-8 text-center">
+            <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">
               Ready for more?
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-[var(--text-secondary)] mb-6">
               You've used your free course. Unlock unlimited learning for just $9.99/month.
             </p>
             <a

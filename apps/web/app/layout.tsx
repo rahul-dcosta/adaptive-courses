@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Suspense } from 'react';
 import './globals.css';
 import Navbar from '@/components/Navbar';
+import { ThemeProvider, themeScript } from '@/lib/theme-context';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -59,8 +60,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Theme initialization script - prevents flash of wrong theme */}
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         {/* Additional SEO tags */}
         <meta name="application-name" content="Adaptive Courses" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -100,14 +103,16 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <AccessGate>
-          <Suspense fallback={null}>
-            <Navbar />
-          </Suspense>
-          <MobileOptimized>
-            {children}
-          </MobileOptimized>
-        </AccessGate>
+        <ThemeProvider defaultTheme="system">
+          <AccessGate>
+            <Suspense fallback={null}>
+              <Navbar />
+            </Suspense>
+            <MobileOptimized>
+              {children}
+            </MobileOptimized>
+          </AccessGate>
+        </ThemeProvider>
       </body>
     </html>
   );

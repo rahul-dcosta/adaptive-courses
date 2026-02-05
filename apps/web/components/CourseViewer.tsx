@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, Component, ReactNode } from 'react';
+import { useState, useEffect, useCallback, useRef, Component, ReactNode } from 'react';
 import { analytics } from '@/lib/analytics';
 import { generateCoursePDF } from '@/lib/generateCoursePDF';
 import MermaidDiagram from './MermaidDiagram';
@@ -9,6 +9,9 @@ import { ProgressTable } from './ProgressTable';
 import { KnowledgeGraph } from './KnowledgeGraph';
 import { useProgressTracking, loadProgressFromStorage, saveProgressToStorage } from '@/hooks/useProgressTracking';
 import { EmptyState } from './EmptyState';
+import { StreakBadge } from './LearningStreak';
+import { ProgressRing } from './ProgressRing';
+import { getStreakFromStorage, updateStreak, saveStreakToStorage, formatTimeSpent, type StreakData } from '@/lib/progress';
 import type { ViewerCourse, ContextMenuState, ContextMenuType } from '@/lib/types';
 
 interface CourseViewerProps {
@@ -53,16 +56,16 @@ class CourseViewerErrorBoundary extends Component<ErrorBoundaryProps, ErrorBound
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #ffffff 100%)' }}>
-          <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+        <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%)' }}>
+          <div className="max-w-md w-full bg-[var(--bg-card)] rounded-2xl shadow-xl p-8 text-center">
             <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)' }}>
               <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-3 font-serif">Course Display Error</h2>
-            <p className="text-gray-600 mb-6">
+            <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-3 font-serif">Course Display Error</h2>
+            <p className="text-[var(--text-secondary)] mb-6">
               We had trouble displaying this course. Don't worry, your progress is saved.
             </p>
 
@@ -84,8 +87,8 @@ class CourseViewerErrorBoundary extends Component<ErrorBoundaryProps, ErrorBound
               </button>
               <button
                 onClick={() => window.location.reload()}
-                className="w-full py-3 rounded-xl font-medium text-gray-600 hover:text-gray-900 transition-all"
-                style={{ backgroundColor: 'rgba(0, 63, 135, 0.05)' }}
+                className="w-full py-3 rounded-xl font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all"
+                style={{ backgroundColor: 'var(--bg-glass-dark)' }}
               >
                 Reload Page
               </button>
@@ -156,11 +159,11 @@ function formatTextContent(text: string): string {
     // Handle headers (### Header -> h4, ## Header -> h3)
     if (formatted.startsWith('### ')) {
       const headerText = formatted.slice(4);
-      return `<h4 class="text-lg font-bold text-gray-900 mt-8 mb-3 font-serif">${escapeHtml(headerText)}</h4>`;
+      return `<h4 class="text-lg font-bold text-[var(--text-primary)] mt-8 mb-3 font-serif">${escapeHtml(headerText)}</h4>`;
     }
     if (formatted.startsWith('## ')) {
       const headerText = formatted.slice(3);
-      return `<h3 class="text-xl font-bold text-gray-900 mt-10 mb-4 font-serif">${escapeHtml(headerText)}</h3>`;
+      return `<h3 class="text-xl font-bold text-[var(--text-primary)] mt-10 mb-4 font-serif">${escapeHtml(headerText)}</h3>`;
     }
 
     // Handle bullet lists (lines starting with - or *)
@@ -171,7 +174,7 @@ function formatTextContent(text: string): string {
         .filter(line => /^[\-\*]\s/.test(line.trim()))
         .map(line => `<li class="mb-2">${formatInlineText(line.replace(/^[\-\*]\s/, '').trim())}</li>`)
         .join('');
-      return `<ul class="list-disc pl-6 my-4 space-y-1 text-gray-700">${listItems}</ul>`;
+      return `<ul class="list-disc pl-6 my-4 space-y-1 text-[var(--text-secondary)]">${listItems}</ul>`;
     }
 
     // Handle numbered lists (lines starting with 1. 2. etc)
@@ -181,7 +184,7 @@ function formatTextContent(text: string): string {
         .filter(line => /^\d+\.\s/.test(line.trim()))
         .map(line => `<li class="mb-2">${formatInlineText(line.replace(/^\d+\.\s/, '').trim())}</li>`)
         .join('');
-      return `<ol class="list-decimal pl-6 my-4 space-y-1 text-gray-700">${listItems}</ol>`;
+      return `<ol class="list-decimal pl-6 my-4 space-y-1 text-[var(--text-secondary)]">${listItems}</ol>`;
     }
 
     // Handle definition-style content (Term: Definition)
@@ -191,12 +194,12 @@ function formatTextContent(text: string): string {
       const definition = formatted.slice(colonIndex + 1).trim();
       // Handle multi-line definitions
       const formattedDef = definition.split('\n').map(line => formatInlineText(line.trim())).join('<br/>');
-      return `<p class="my-4"><strong class="font-semibold text-gray-900">${escapeHtml(term)}:</strong> <span class="text-gray-700">${formattedDef}</span></p>`;
+      return `<p class="my-4"><strong class="font-semibold text-gray-900">${escapeHtml(term)}:</strong> <span class="text-[var(--text-secondary)]">${formattedDef}</span></p>`;
     }
 
     // Regular paragraph - handle inline newlines as soft breaks
     const formattedPara = formatted.split('\n').map(line => formatInlineText(line.trim())).join('<br/>');
-    return `<p class="my-4 text-gray-700 leading-relaxed">${formattedPara}</p>`;
+    return `<p class="my-4 text-[var(--text-secondary)] leading-relaxed">${formattedPara}</p>`;
   }).join('');
 }
 
@@ -323,7 +326,7 @@ function QuizSection({ quiz, lessonKey, previousAttempt, onAttempt, onContextMen
         </svg>
         <div className="w-full">
           <div className="flex items-center gap-2 mb-2">
-            <h3 className="text-lg font-bold text-gray-900">Quick Check</h3>
+            <h3 className="text-lg font-bold text-[var(--text-primary)]">Quick Check</h3>
             {previousAttempt !== undefined && (
               <span
                 className={`text-xs font-medium px-2 py-0.5 rounded-full transition-all duration-300 ${
@@ -338,14 +341,14 @@ function QuizSection({ quiz, lessonKey, previousAttempt, onAttempt, onContextMen
               </span>
             )}
           </div>
-          <p className="text-base text-gray-700 font-medium mb-4">{quiz.question}</p>
+          <p className="text-base text-[var(--text-secondary)] font-medium mb-4">{quiz.question}</p>
 
           {!showAnswer && !hasAnswered && (
             <button
               onClick={handleRevealAnswer}
               className="text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 hover:shadow-sm hover-lift btn-press"
               style={{
-                backgroundColor: 'rgba(0, 63, 135, 0.08)',
+                backgroundColor: 'var(--bg-glass-dark)',
                 color: 'var(--royal-blue)'
               }}
             >
@@ -355,13 +358,13 @@ function QuizSection({ quiz, lessonKey, previousAttempt, onAttempt, onContextMen
 
           {showAnswer && quiz.answer && (
             <div className="mt-4 animate-fade-in">
-              <p className="text-sm text-gray-700 pl-4 border-l-2 mb-4 transition-all duration-300" style={{ borderColor: 'var(--royal-blue)' }}>
+              <p className="text-sm text-[var(--text-secondary)] pl-4 border-l-2 mb-4 transition-all duration-300" style={{ borderColor: 'var(--royal-blue)' }}>
                 {quiz.answer}
               </p>
 
               {!hasAnswered && (
                 <div className="flex flex-wrap gap-3 mt-4 animate-fade-in-up">
-                  <p className="text-sm text-gray-600 mr-2">Did you get it right?</p>
+                  <p className="text-sm text-[var(--text-secondary)] mr-2">Did you get it right?</p>
                   <button
                     onClick={() => handleSelfAssess(true)}
                     className="text-sm font-medium px-4 py-1.5 rounded-lg transition-all duration-200 hover-lift btn-press"
@@ -411,6 +414,11 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   // PDF download state
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  // Streak data
+  const [streak, setStreak] = useState<StreakData>(() => getStreakFromStorage());
+  // Time tracking
+  const [timeSpentOnLesson, setTimeSpentOnLesson] = useState(0);
+  const timeTrackingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Check if course has valid content
   const hasValidCourse = course && course.modules && course.modules.length > 0;
@@ -428,6 +436,12 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
       const savedProgress = loadProgressFromStorage(course.id);
       setCompletedLessons(savedProgress.completed);
       setQuizAttempts(savedProgress.quizAttempts);
+
+      // Update streak on course load
+      const currentStreak = getStreakFromStorage();
+      const updatedStreak = updateStreak(currentStreak);
+      setStreak(updatedStreak);
+      saveStreakToStorage(updatedStreak);
     }
 
     // Read URL params for deep linking
@@ -457,7 +471,7 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
   // Handle empty course - show empty state (after all hooks)
   if (!hasValidCourse) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #ffffff 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%)' }}>
         <EmptyState
           type="no-modules"
           title="Course Not Available"
@@ -499,6 +513,23 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [currentModule, currentLesson, showNav]);
+
+  // Time tracking effect - track time spent on each lesson
+  useEffect(() => {
+    // Reset time when lesson changes
+    setTimeSpentOnLesson(0);
+
+    // Start time tracking interval
+    timeTrackingRef.current = setInterval(() => {
+      setTimeSpentOnLesson((prev) => prev + 10);
+    }, 10000); // Update every 10 seconds
+
+    return () => {
+      if (timeTrackingRef.current) {
+        clearInterval(timeTrackingRef.current);
+      }
+    };
+  }, [currentModule, currentLesson]);
 
   const handleLessonComplete = () => {
     const lessonKey = `${currentModule}-${currentLesson}`;
@@ -715,7 +746,7 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
   return (
     <div
       className="min-h-screen course-viewer-cursor"
-      style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #ffffff 100%)' }}
+      style={{ background: 'linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%)' }}
       onContextMenu={(e) => {
         // Show custom menu everywhere unless clicking on specific nested areas
         const target = e.target as HTMLElement;
@@ -725,14 +756,14 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
       }}
     >
       {/* Premium Header */}
-      <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b shadow-sm" style={{ borderColor: 'rgba(0, 63, 135, 0.1)' }}>
+      <header className="sticky top-0 z-20 bg-[var(--bg-card)]/95 backdrop-blur-sm border-b shadow-sm" style={{ borderColor: 'var(--border-secondary)' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-5">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 sm:gap-4 min-w-0">
               {onExit && (
                 <button
                   onClick={onExit}
-                  className="text-gray-500 hover:text-gray-900 transition-colors p-1 flex-shrink-0"
+                  className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors p-1 flex-shrink-0"
                   title="Exit course"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -742,15 +773,15 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
               )}
 
               <div className="min-w-0">
-                <h1 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 font-serif truncate">{course.title}</h1>
+                <h1 className="text-base sm:text-lg md:text-xl font-bold text-[var(--text-primary)] font-serif truncate">{course.title}</h1>
                 <div className="flex items-center gap-2 sm:gap-3 mt-0.5 sm:mt-1">
-                  <p className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
+                  <p className="text-xs sm:text-sm text-[var(--text-secondary)] whitespace-nowrap">
                     Module {currentModule + 1}/{course.modules.length}
                   </p>
                   {course.estimated_time && (
                     <>
-                      <span className="text-gray-300 hidden sm:inline">•</span>
-                      <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">{course.estimated_time}</p>
+                      <span className="text-[var(--text-muted)] hidden sm:inline">•</span>
+                      <p className="text-xs sm:text-sm text-[var(--text-secondary)] hidden sm:block">{course.estimated_time}</p>
                     </>
                   )}
                 </div>
@@ -760,7 +791,7 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
             <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
               {/* Progress bar - responsive width */}
               <div className="hidden sm:flex items-center gap-2 sm:gap-3">
-                <div className="w-16 sm:w-24 md:w-40 h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div className="w-16 sm:w-24 md:w-40 h-2 bg-[var(--bg-glass-dark)] rounded-full overflow-hidden">
                   <div
                     className="h-2 transition-all duration-500 rounded-full"
                     style={{
@@ -779,7 +810,7 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
                 onClick={() => setShowMobileGraph(true)}
                 className="lg:hidden flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 text-xs font-medium rounded-lg transition-all"
                 style={{
-                  backgroundColor: 'rgba(0, 63, 135, 0.08)',
+                  backgroundColor: 'var(--bg-glass-dark)',
                   color: 'var(--royal-blue)'
                 }}
                 title="View Knowledge Graph"
@@ -794,7 +825,7 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
               <button
                 onClick={handleDownloadPDF}
                 disabled={isGeneratingPDF}
-                className="flex items-center gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-sm font-medium rounded-lg transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-wait"
+                className="flex items-center gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-sm font-medium rounded-lg transition-all hover:bg-[var(--bg-glass-dark)] disabled:opacity-50 disabled:cursor-wait"
                 style={{ color: 'var(--royal-blue)' }}
                 title={isGeneratingPDF ? 'Generating PDF...' : 'Download PDF'}
               >
@@ -818,10 +849,10 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
       <div className="flex max-w-7xl mx-auto">
         {/* Elegant Sidebar */}
         {showNav && (
-          <aside className="w-80 min-h-screen sticky top-[89px] hidden lg:block border-r" style={{ borderColor: 'rgba(0, 63, 135, 0.08)' }}>
+          <aside className="w-80 min-h-screen sticky top-[89px] hidden lg:block border-r" style={{ borderColor: 'var(--border-secondary)' }}>
             <div className="p-8">
               {/* Progress Summary */}
-              <div className="mb-8 p-6 rounded-xl bg-white/50" style={{ border: '1px solid rgba(0, 63, 135, 0.1)' }}>
+              <div className="mb-8 p-6 rounded-xl bg-[var(--bg-card)]/50" style={{ border: '1px solid rgba(0, 63, 135, 0.1)' }}>
                 <h3 className="text-xs font-bold uppercase tracking-wider mb-4" style={{ color: 'var(--royal-blue)' }}>
                   Course Progress
                 </h3>
@@ -859,10 +890,10 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
                   </div>
                   
                   <div>
-                    <p className="text-2xl font-bold text-gray-900">
+                    <p className="text-2xl font-bold text-[var(--text-primary)]">
                       {completedCount}/{totalLessons}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-[var(--text-secondary)]">
                       lessons complete
                     </p>
                   </div>
@@ -870,7 +901,7 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
 
                 {/* Estimated time remaining */}
                 {course.estimated_time && (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-[var(--text-muted)]">
                     ⏱️ {course.estimated_time} total
                   </p>
                 )}
@@ -887,14 +918,14 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
               )}
 
               {/* Divider */}
-              <div className="mb-6 border-t" style={{ borderColor: 'rgba(0, 63, 135, 0.08)' }}></div>
+              <div className="mb-6 border-t" style={{ borderColor: 'var(--border-secondary)' }}></div>
 
               {/* View Toggle */}
               <div className="flex gap-2 mb-6">
                 <button
                   onClick={() => setViewMode('outline')}
                   className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg transition-all ${
-                    viewMode === 'outline' ? 'text-white' : 'text-gray-600 hover:text-gray-900'
+                    viewMode === 'outline' ? 'text-white' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                   style={{
                     backgroundColor: viewMode === 'outline' ? 'var(--royal-blue)' : 'rgba(0, 63, 135, 0.05)',
@@ -908,7 +939,7 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
                 <button
                   onClick={() => setViewMode('graph')}
                   className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg transition-all ${
-                    viewMode === 'graph' ? 'text-white' : 'text-gray-600 hover:text-gray-900'
+                    viewMode === 'graph' ? 'text-white' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                   style={{
                     backgroundColor: viewMode === 'graph' ? 'var(--royal-blue)' : 'rgba(0, 63, 135, 0.05)',
@@ -928,10 +959,10 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
                     const lessons = mod.lessons || [];
                     return (
                       <div key={modIdx}>
-                        <h4 className="text-sm font-bold text-gray-900 mb-3 font-serif">
+                        <h4 className="text-sm font-bold text-[var(--text-primary)] mb-3 font-serif">
                           {modIdx + 1}. {mod.title}
                         </h4>
-                        <div className="space-y-1 ml-3 border-l" style={{ borderColor: 'rgba(0, 63, 135, 0.12)' }}>
+                        <div className="space-y-1 ml-3 border-l" style={{ borderColor: 'var(--border-card)' }}>
                           {lessons.map((les, lesIdx) => {
                             const key = `${modIdx}-${lesIdx}`;
                             const isActive = modIdx === currentModule && lesIdx === currentLesson;
@@ -948,7 +979,7 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
                                   w-full text-left px-4 py-2 text-sm transition-all rounded-r-lg -ml-px
                                   ${isActive
                                     ? 'font-medium'
-                                    : 'text-gray-600 hover:text-gray-900'
+                                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                                   }
                                 `}
                                 style={{
@@ -1006,8 +1037,8 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
               <span
                 className="inline-block px-3 py-1 text-xs font-semibold rounded-full border transition-all duration-200 hover:shadow-sm"
                 style={{
-                  backgroundColor: 'rgba(0, 63, 135, 0.05)',
-                  borderColor: 'rgba(0, 63, 135, 0.15)',
+                  backgroundColor: 'var(--bg-glass-dark)',
+                  borderColor: 'var(--border-primary)',
                   color: 'var(--royal-blue)'
                 }}
               >
@@ -1017,7 +1048,7 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
 
             {/* Lesson Title */}
             {lesson && (
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 sm:mb-8 leading-tight font-serif animate-fade-in-up">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[var(--text-primary)] mb-6 sm:mb-8 leading-tight font-serif animate-fade-in-up">
                 {lesson.title}
               </h2>
             )}
@@ -1053,7 +1084,7 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
                           <div
                             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium"
                             style={{
-                              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                              backgroundColor: 'var(--bg-card)',
                               color: 'var(--royal-blue)',
                               border: '1px solid rgba(0, 63, 135, 0.15)',
                               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
@@ -1117,7 +1148,7 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
             )}
 
             {/* Navigation Actions */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-12 border-t" style={{ borderColor: 'rgba(0, 63, 135, 0.1)' }}>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-12 border-t" style={{ borderColor: 'var(--border-secondary)' }}>
               <div>
                 {!isCompleted && (
                   <button
@@ -1190,7 +1221,7 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
             {/* Next Steps Section */}
             {isLastLesson && course.next_steps && course.next_steps.length > 0 && (
               <div className="mt-16 p-8 rounded-xl" style={{ backgroundColor: 'rgba(0, 63, 135, 0.04)', border: '1px solid rgba(0, 63, 135, 0.12)' }}>
-                <h3 className="text-2xl font-bold text-gray-900 mb-6 font-serif">Next Steps</h3>
+                <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-6 font-serif">Next Steps</h3>
                 <ul className="space-y-4">
                   {course.next_steps.map((step, idx) => (
                     <li key={idx} className="flex gap-4">
@@ -1200,7 +1231,7 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
                       >
                         {idx + 1}
                       </span>
-                      <span className="text-gray-700 text-lg">{step}</span>
+                      <span className="text-[var(--text-secondary)] text-lg">{step}</span>
                     </li>
                   ))}
                 </ul>
@@ -1208,21 +1239,21 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
             )}
 
             {/* Keyboard shortcuts - hidden on mobile */}
-            <div className="hidden sm:block mt-12 p-6 rounded-xl border" style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(0, 63, 135, 0.08)' }}>
-              <p className="text-xs text-gray-500 text-center flex items-center justify-center gap-4 flex-wrap">
+            <div className="hidden sm:block mt-12 p-6 rounded-xl border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'rgba(0, 63, 135, 0.08)' }}>
+              <p className="text-xs text-[var(--text-muted)] text-center flex items-center justify-center gap-4 flex-wrap">
                 <span className="flex items-center gap-2">
-                  <kbd className="px-3 py-1 bg-white border rounded text-xs font-mono" style={{ borderColor: 'var(--royal-blue)' }}>←</kbd>
+                  <kbd className="px-3 py-1 bg-[var(--bg-input)] border rounded text-xs font-mono" style={{ borderColor: 'var(--royal-blue)' }}>←</kbd>
                   Previous
                 </span>
                 <span className="flex items-center gap-2">
-                  <kbd className="px-3 py-1 bg-white border rounded text-xs font-mono" style={{ borderColor: 'var(--royal-blue)' }}>→</kbd>
+                  <kbd className="px-3 py-1 bg-[var(--bg-input)] border rounded text-xs font-mono" style={{ borderColor: 'var(--royal-blue)' }}>→</kbd>
                   Next
                 </span>
                 <span className="flex items-center gap-2">
-                  <kbd className="px-3 py-1 bg-white border rounded text-xs font-mono" style={{ borderColor: 'var(--royal-blue)' }}>M</kbd>
+                  <kbd className="px-3 py-1 bg-[var(--bg-input)] border rounded text-xs font-mono" style={{ borderColor: 'var(--royal-blue)' }}>M</kbd>
                   Menu
                 </span>
-                <span className="flex items-center gap-2 border-l pl-4 ml-2" style={{ borderColor: 'rgba(0, 63, 135, 0.15)' }}>
+                <span className="flex items-center gap-2 border-l pl-4 ml-2" style={{ borderColor: 'var(--border-primary)' }}>
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                   </svg>
@@ -1260,24 +1291,24 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
           />
 
           {/* Modal Content */}
-          <div className="absolute inset-4 sm:inset-6 md:inset-8 bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+          <div className="absolute inset-4 sm:inset-6 md:inset-8 bg-[var(--bg-card)] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
             {/* Modal Header */}
             <div
               className="flex items-center justify-between px-4 sm:px-6 py-4 border-b"
-              style={{ borderColor: 'rgba(0, 63, 135, 0.1)' }}
+              style={{ borderColor: 'var(--border-secondary)' }}
             >
               <div>
-                <h3 className="text-lg font-bold text-gray-900 font-serif">Knowledge Graph</h3>
-                <p className="text-sm text-gray-500 mt-0.5">
+                <h3 className="text-lg font-bold text-[var(--text-primary)] font-serif">Knowledge Graph</h3>
+                <p className="text-sm text-[var(--text-muted)] mt-0.5">
                   Tap a lesson to navigate
                 </p>
               </div>
               <button
                 onClick={() => setShowMobileGraph(false)}
-                className="p-2 rounded-lg transition-colors hover:bg-gray-100"
+                className="p-2 rounded-lg transition-colors hover:bg-[var(--bg-glass-dark)]"
                 aria-label="Close"
               >
-                <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -1320,10 +1351,10 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
                     </div>
                   </div>
                   <div>
-                    <p className="text-lg font-bold text-gray-900">
+                    <p className="text-lg font-bold text-[var(--text-primary)]">
                       {completedCount}/{totalLessons}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-[var(--text-secondary)]">
                       lessons complete
                     </p>
                   </div>

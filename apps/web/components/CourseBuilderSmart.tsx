@@ -50,16 +50,16 @@ class CourseBuilderErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoun
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #ffffff 100%)' }}>
-          <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+        <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%)' }}>
+          <div className="max-w-md w-full bg-[var(--bg-card)] rounded-2xl shadow-xl p-8 text-center">
             <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)' }}>
               <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-3 font-serif">Something Went Wrong</h2>
-            <p className="text-gray-600 mb-6">
+            <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-3 font-serif">Something Went Wrong</h2>
+            <p className="text-[var(--text-secondary)] mb-6">
               We encountered an unexpected error. Please try again.
             </p>
 
@@ -284,13 +284,13 @@ function CourseBuilderContent({ initialTopic }: { initialTopic?: string }) {
   // Outline generation loading
   if (step === 'generating-outline') {
     return (
-      <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
+      <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%)' }}>
         <div className="max-w-md w-full text-center">
-          <div className="inline-block animate-spin rounded-full h-20 w-20 border-4 border-gray-200 border-t-4 mb-8" style={{ borderTopColor: 'var(--royal-blue)' }}></div>
+          <div className="inline-block animate-spin rounded-full h-20 w-20 border-4 border-[var(--border-secondary)] border-t-4 mb-8" style={{ borderTopColor: 'var(--royal-blue)' }}></div>
           <h2 className="text-4xl font-bold mb-4 font-serif" style={{ color: 'var(--royal-blue)' }}>
             {isRegenerating ? 'Updating Outline' : 'Structuring Your Course'}
           </h2>
-          <p className="text-gray-600 text-lg leading-relaxed">
+          <p className="text-[var(--text-secondary)] text-lg leading-relaxed">
             {isRegenerating ? 'Incorporating your feedback...' : 'Analyzing your profile and constructing optimal curriculum structure...'}
           </p>
         </div>
@@ -313,7 +313,7 @@ function CourseBuilderContent({ initialTopic }: { initialTopic?: string }) {
   // Full course generation loading
   if (step === 'generating-full') {
     return (
-      <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
+      <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%)' }}>
         <LoadingSpinner topic={fingerprint?.topic} />
       </div>
     );
@@ -322,7 +322,7 @@ function CourseBuilderContent({ initialTopic }: { initialTopic?: string }) {
   // Celebration
   if (step === 'celebration') {
     return (
-      <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
+      <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%)' }}>
         <SuccessCelebration onContinue={() => setStep('preview')} courseTitle={fingerprint?.topic || ''} />
       </div>
     );
