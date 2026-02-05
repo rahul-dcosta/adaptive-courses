@@ -341,11 +341,10 @@ export function ProgressBarWithMarkers({
             >
               <div
                 className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  isCurrent ? 'ring-2 ring-offset-1' : ''
+                  isCurrent ? 'ring-2 ring-offset-1 ring-[var(--royal-blue)]' : ''
                 }`}
                 style={{
                   backgroundColor: isPast ? fillColor : 'rgba(0, 63, 135, 0.2)',
-                  ringColor: isCurrent ? fillColor : undefined,
                 }}
               />
             </div>

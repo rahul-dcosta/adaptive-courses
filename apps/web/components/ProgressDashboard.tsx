@@ -296,13 +296,12 @@ function WeeklyActivityChart({ activity }: WeeklyActivityChartProps) {
             <div key={day.date} className="flex-1 text-center">
               <div
                 className={`h-16 rounded-lg mb-2 flex items-end justify-center transition-all ${
-                  isToday ? 'ring-2 ring-offset-2' : ''
+                  isToday ? 'ring-2 ring-offset-2 ring-[var(--royal-blue)]' : ''
                 }`}
                 style={{
                   backgroundColor: day.hasActivity
                     ? 'var(--royal-blue)'
                     : 'rgba(0, 63, 135, 0.08)',
-                  ringColor: isToday ? 'var(--royal-blue)' : undefined,
                 }}
               >
                 {day.hasActivity && (
