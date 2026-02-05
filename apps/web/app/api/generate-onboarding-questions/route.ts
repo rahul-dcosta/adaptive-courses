@@ -3,9 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getErrorMessage } from '@/lib/types';
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
-// Maintenance mode - blocks API usage on production
-const MAINTENANCE_MODE = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true';
-
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
@@ -60,14 +57,6 @@ function setCachedQuestion(topic: string, step: string, data: QuestionData): voi
 }
 
 export async function POST(request: NextRequest) {
-  // Block requests in maintenance mode
-  if (MAINTENANCE_MODE) {
-    return NextResponse.json(
-      { error: 'Service temporarily unavailable. Launching soon!' },
-      { status: 503 }
-    );
-  }
-
   // Check rate limit
   const rateLimitResult = await checkRateLimit(request, 'generate-onboarding-questions');
   if (!rateLimitResult.success) {

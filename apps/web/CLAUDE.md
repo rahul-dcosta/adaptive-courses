@@ -99,7 +99,7 @@ adaptive-courses/
 
 **Access Gate:** Site requires access code "sixseven" to enter (see [AccessGate.tsx](components/AccessGate.tsx)). Access stored in localStorage.
 
-**Maintenance Mode:** When `NEXT_PUBLIC_MAINTENANCE_MODE=true`, generation APIs return 503 and landing shows waitlist modal.
+**Branch Strategy:** `main` shows teaser landing, `dev` shows full app. Different `page.tsx` on each branch.
 
 ---
 
@@ -113,7 +113,6 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ...
 UPSTASH_REDIS_REST_URL=https://...upstash.io
 UPSTASH_REDIS_REST_TOKEN=AX...
 RESEND_API_KEY=re_...
-NEXT_PUBLIC_MAINTENANCE_MODE=true  # Production only
 # Future: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
 ```
 

@@ -6,17 +6,10 @@ import CourseBuilderSmart from './CourseBuilderSmart';
 import ExampleCourses from './ExampleCourses';
 import { analytics } from '@/lib/analytics';
 
-// Maintenance mode - set via environment variable
-const MAINTENANCE_MODE = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true';
-
 export default function LandingPagePremium() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [topic, setTopic] = useState('');
-  const [showWaitlistModal, setShowWaitlistModal] = useState(false);
-  const [waitlistEmail, setWaitlistEmail] = useState('');
-  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
-  const [pendingTopic, setPendingTopic] = useState('');
 
   // Check if we're in builder mode from URL
   const showBuilder = searchParams.get('mode') === 'build';
@@ -28,54 +21,20 @@ export default function LandingPagePremium() {
     }
   }, [showBuilder]);
 
-  // In maintenance mode, redirect away from builder
-  useEffect(() => {
-    if (MAINTENANCE_MODE && showBuilder) {
-      router.replace('/');
-    }
-  }, [showBuilder, router]);
-
   const handleTopicSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (topic.trim()) {
       analytics.track('topic_entered_landing', { topic });
-
-      // In maintenance mode, show waitlist modal instead
-      if (MAINTENANCE_MODE) {
-        setPendingTopic(topic.trim());
-        setShowWaitlistModal(true);
-        return;
-      }
-
-      // Navigate with search params to signal builder mode
       router.push(`/?mode=build&topic=${encodeURIComponent(topic.trim())}`);
     }
   };
 
   const handleSelectExample = (exampleTopic: string) => {
     analytics.track('example_course_selected', { topic: exampleTopic });
-
-    // In maintenance mode, show waitlist modal instead
-    if (MAINTENANCE_MODE) {
-      setPendingTopic(exampleTopic);
-      setShowWaitlistModal(true);
-      return;
-    }
-
     router.push(`/?mode=build&topic=${encodeURIComponent(exampleTopic)}`);
   };
 
-  const handleWaitlistSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (waitlistEmail.trim()) {
-      analytics.track('waitlist_signup', { email: waitlistEmail, topic: pendingTopic });
-      // TODO: Send to backend when ready
-      setWaitlistSubmitted(true);
-    }
-  };
-
-  // In maintenance mode, don't show builder even if URL says so
-  if (showBuilder && !MAINTENANCE_MODE) {
+  if (showBuilder) {
     return <CourseBuilderSmart initialTopic={initialTopic || topic} />;
   }
 
@@ -170,7 +129,7 @@ export default function LandingPagePremium() {
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
             </div>
-            <span>Powered by <strong className="text-gray-900">Claude AI</strong></span>
+            <span><strong className="text-gray-900">AI-powered</strong> personalization</span>
           </div>
         </div>
       </div>
@@ -222,7 +181,7 @@ export default function LandingPagePremium() {
               AI builds your course
             </h3>
             <p className="text-gray-600 leading-relaxed">
-              Claude generates a custom curriculum in under 60 seconds. No fluff—just what matters to you.
+              Our AI generates a custom curriculum in under 60 seconds. No fluff—just what matters to you.
             </p>
           </div>
 
@@ -363,89 +322,6 @@ export default function LandingPagePremium() {
         </div>
       </div>
 
-      {/* Waitlist Modal (Maintenance Mode) */}
-      {showWaitlistModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="waitlist-modal-title"
-            className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl"
-          >
-            {!waitlistSubmitted ? (
-              <>
-                <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <h3 id="waitlist-modal-title" className="text-2xl font-bold text-gray-900 mb-2">Launching Soon!</h3>
-                  <p className="text-gray-600">
-                    We're putting the finishing touches on Adaptive Courses. Join the waitlist to be first in line.
-                  </p>
-                </div>
-
-                {pendingTopic && (
-                  <div className="bg-gray-50 rounded-lg p-3 mb-4">
-                    <p className="text-sm text-gray-500">Your course topic:</p>
-                    <p className="font-medium text-gray-900">{pendingTopic}</p>
-                  </div>
-                )}
-
-                <form onSubmit={handleWaitlistSubmit}>
-                  <label htmlFor="waitlist-email" className="sr-only">Email address</label>
-                  <input
-                    id="waitlist-email"
-                    type="email"
-                    value={waitlistEmail}
-                    onChange={(e) => setWaitlistEmail(e.target.value)}
-                    placeholder="Enter your email"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                    aria-label="Email address for waitlist"
-                  />
-                  <button
-                    type="submit"
-                    className="w-full py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
-                  >
-                    Join Waitlist
-                  </button>
-                </form>
-
-                <button
-                  onClick={() => setShowWaitlistModal(false)}
-                  className="w-full mt-3 py-2 text-gray-500 hover:text-gray-700 transition-colors text-sm"
-                >
-                  Maybe later
-                </button>
-              </>
-            ) : (
-              <div className="text-center py-4" role="status" aria-live="polite">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">You're on the list!</h3>
-                <p className="text-gray-600 mb-6">
-                  We'll email you as soon as we launch. Get ready to learn about "{pendingTopic}".
-                </p>
-                <button
-                  onClick={() => {
-                    setShowWaitlistModal(false);
-                    setWaitlistSubmitted(false);
-                    setWaitlistEmail('');
-                  }}
-                  className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
