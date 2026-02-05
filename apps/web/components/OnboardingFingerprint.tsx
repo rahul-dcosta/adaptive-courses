@@ -61,14 +61,14 @@ const ONBOARDING_QUESTIONS: Record<Exclude<OnboardingStep, 'topic' | 'freeform' 
     ]
   },
   timeCommitment: {
-    question: "How much time do you have?",
-    subtitle: "We'll pace the course accordingly",
+    question: "How deep should we go?",
+    subtitle: "Choose your course depth and reading time",
     options: [
-      { value: '30_min', label: '30 Minutes', emoji: '⚡', description: 'Quick crash course right now' },
-      { value: '1_hour', label: '1 Hour', emoji: '⏱️', description: 'Focused session today' },
-      { value: '2_hours', label: '2 Hours', emoji: '📅', description: 'Deep dive this afternoon' },
-      { value: '1_week', label: 'This Week', emoji: '🗓️', description: 'I can spread it over several days' },
-      { value: 'no_rush', label: 'No Rush', emoji: '🌊', description: 'Learning at my own pace' },
+      { value: '30_min', label: 'Quick Overview', emoji: '⚡', description: '~5 min read · 2 modules · Key points only' },
+      { value: '1_hour', label: 'Solid Foundation', emoji: '📘', description: '~10 min read · 3 modules · Core concepts covered' },
+      { value: '2_hours', label: 'Thorough Coverage', emoji: '📚', description: '~20 min read · 4 modules · Real depth and nuance' },
+      { value: '1_week', label: 'Comprehensive Guide', emoji: '🎓', description: '~30 min read · 5 modules · Full curriculum' },
+      { value: 'no_rush', label: 'Deep Mastery', emoji: '🏆', description: '~45 min read · 6 modules · Expert-level detail' },
     ]
   },
   contentFormat: {
@@ -359,7 +359,7 @@ export default function OnboardingFingerprint({
                 <p className="text-sm font-semibold text-gray-900">{learningGoalLabel}</p>
               </div>
               <div className="bg-white rounded-lg p-4" style={{ border: '1px solid rgba(0, 63, 135, 0.08)' }}>
-                <p className="text-xs text-gray-500 mb-1">Time Available</p>
+                <p className="text-xs text-gray-500 mb-1">Course Depth</p>
                 <p className="text-sm font-semibold text-gray-900">{timeCommitmentLabel}</p>
               </div>
               <div className="bg-white rounded-lg p-4" style={{ border: '1px solid rgba(0, 63, 135, 0.08)' }}>

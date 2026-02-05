@@ -114,7 +114,15 @@ adaptive-courses/
 - **Academic/professional topics**: Concrete exercises and practice drills
 - **Goal-specific**: hobby/sound_smart gets casual tone, career/interview gets professional tone
 
-**Time Mapping:** Time options map to course structure (modules, lessons, word counts) in `generate-course/route.ts`.
+**Course Depth Options:** Users select course depth (not just time), which maps to structure:
+
+- `30_min` → Quick Overview: 2 modules, ~5 min read, key points only
+- `1_hour` → Solid Foundation: 3 modules, ~10 min read, core concepts
+- `2_hours` → Thorough Coverage: 4 modules, ~20 min read, real depth
+- `1_week` → Comprehensive Guide: 5 modules, ~30 min read, full curriculum
+- `no_rush` → Deep Mastery: 6 modules, ~45 min read, expert-level
+
+See `generate-course/route.ts` for word count mappings per lesson.
 
 ---
 
