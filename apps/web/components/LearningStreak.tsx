@@ -181,13 +181,12 @@ function WeeklyActivityCalendar({
             <span className="text-xs text-gray-400">{day.dayName}</span>
             <div
               className={`${daySize} rounded-md flex items-center justify-center transition-all ${
-                isToday ? 'ring-2 ring-offset-1' : ''
+                isToday ? 'ring-2 ring-offset-1 ring-[var(--royal-blue)]' : ''
               }`}
               style={{
                 backgroundColor: day.hasActivity
                   ? 'rgba(251, 146, 60, 0.2)'
                   : 'rgba(0, 63, 135, 0.06)',
-                ringColor: isToday ? 'var(--royal-blue)' : undefined,
               }}
             >
               {day.hasActivity && (
