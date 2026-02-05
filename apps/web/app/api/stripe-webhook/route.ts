@@ -36,13 +36,14 @@ export async function POST(request: NextRequest) {
 
     try {
       if (!webhookSecret) {
-        // In development without webhook secret, parse the body directly
-        // WARNING: This is insecure and should only be used in development
-        console.warn('STRIPE_WEBHOOK_SECRET not set - skipping signature verification');
-        event = JSON.parse(body) as Stripe.Event;
-      } else {
-        event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+        // SECURITY: Never skip webhook verification - reject if not configured
+        console.error('STRIPE_WEBHOOK_SECRET not configured - rejecting webhook');
+        return NextResponse.json(
+          { error: 'Webhook not configured' },
+          { status: 500 }
+        );
       }
+      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
     } catch (err) {
       console.error('Webhook signature verification failed:', err);
       return NextResponse.json(

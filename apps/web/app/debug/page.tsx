@@ -1,8 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { notFound } from 'next/navigation';
 
 export default function DebugPage() {
+  // SECURITY: Block this page in production
+  if (process.env.NODE_ENV === 'production') {
+    notFound();
+  }
+
   const [health, setHealth] = useState<any>(null);
   const [apiTest, setApiTest] = useState<any>(null);
   const [loading, setLoading] = useState(false);

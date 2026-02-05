@@ -23,8 +23,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Build redirect URL
-    const finalRedirect = redirectUrl || '/';
+    // Build redirect URL - validate to prevent open redirect attacks
+    const ALLOWED_REDIRECT_PATHS = ['/', '/dashboard', '/welcome', '/courses', '/account'];
+    const isValidRedirect = redirectUrl && (
+      ALLOWED_REDIRECT_PATHS.some(path => redirectUrl.startsWith(path)) &&
+      !redirectUrl.includes('//') && // Prevent protocol-relative URLs
+      !redirectUrl.includes(':') // Prevent absolute URLs with protocols
+    );
+    const finalRedirect = isValidRedirect ? redirectUrl : '/';
     const redirectResponse = NextResponse.redirect(
       new URL(finalRedirect, request.url)
     );

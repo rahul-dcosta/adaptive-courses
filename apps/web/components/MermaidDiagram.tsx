@@ -25,10 +25,11 @@ export default function MermaidDiagram({ chart, className = '' }: MermaidDiagram
 
   useEffect(() => {
     // Initialize mermaid with suppressed errors
+    // SECURITY: Use 'strict' to prevent XSS via diagram content
     mermaid.initialize({
       startOnLoad: false,
       theme: 'default',
-      securityLevel: 'loose',
+      securityLevel: 'strict',
       fontFamily: 'inherit',
       suppressErrorRendering: true,
     });

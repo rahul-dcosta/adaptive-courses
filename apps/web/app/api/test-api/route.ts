@@ -3,6 +3,14 @@ import Anthropic from '@anthropic-ai/sdk';
 import { getErrorMessage } from '@/lib/types';
 
 export async function GET() {
+  // SECURITY: Block this endpoint in production
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      { error: 'Not available in production' },
+      { status: 404 }
+    );
+  }
+
   try {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     

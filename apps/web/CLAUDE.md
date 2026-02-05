@@ -19,6 +19,24 @@ git checkout dev && npm run dev
 
 ---
 
+## Working with Existing Files
+
+When user references an existing file by name, ALWAYS check if that file exists and read it before providing guidance or starting new work.
+
+---
+
+## General Guidelines
+
+Before suggesting commands or features, verify they actually exist. If unsure, say so rather than attempting to use non-existent functionality.
+
+---
+
+## Task Planning
+
+For document creation and data analysis tasks, confirm the full scope and expected output format before beginning work to ensure completion within the session.
+
+---
+
 ## What This Is
 
 **AI-powered courses built around *why* you're learning, not just what.**

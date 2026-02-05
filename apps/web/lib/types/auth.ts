@@ -142,9 +142,13 @@ export function isValidEmail(email: string): boolean {
   return emailRegex.test(email) && !isDisposableEmail(email);
 }
 
-// OTP generation helper
+// OTP generation helper - uses cryptographically secure randomness
 export function generateOTP(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  // Use crypto.getRandomValues for secure OTP generation
+  const array = new Uint32Array(1);
+  crypto.getRandomValues(array);
+  // Generate 6-digit code (100000-999999)
+  return String(100000 + (array[0] % 900000));
 }
 
 // Rate limiting constants
