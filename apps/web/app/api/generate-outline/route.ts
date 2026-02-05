@@ -43,6 +43,11 @@ LEARNER PROFILE:
 - Challenge: ${challengePreference || 'adaptive'}
 ${context ? `- Specific Context: ${context}` : ''}
 
+NEXT STEPS TONE (IMPORTANT):
+- For CASUAL/FUN topics (dance moves, memes, pop culture, hobbies): Keep next steps light and fun. NO serious practice drills.
+- For ACADEMIC/PROFESSIONAL topics: Can include concrete exercises and practice.
+- Match the vibe to the topic. "Dabbing" shouldn't have "practice for 15 minutes" as a next step.
+
 ${previousOutline && feedback ? `
 PREVIOUS OUTLINE:
 ${JSON.stringify(previousOutline, null, 2)}

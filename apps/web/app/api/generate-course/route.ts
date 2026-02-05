@@ -168,6 +168,25 @@ ${timeGuidance}
 🎚️ DIFFICULTY PROGRESSION:
 ${challengeGuidance}
 
+🎯 NEXT STEPS TONE (CRITICAL):
+Match the "next steps" to the topic nature AND learner goal:
+
+For CASUAL/FUN topics (dance moves, memes, pop culture, hobbies, entertainment):
+- Keep it light and fun: "Try it out at your next party", "Share with friends", "Watch some videos"
+- NO serious practice drills or academic exercises
+- NO "practice for X minutes in front of a mirror" type instructions
+
+For ACADEMIC/PROFESSIONAL topics (business, science, technical skills, career):
+- Concrete actions: "Apply this in your next meeting", "Build a small project", "Read X for deeper understanding"
+- Can include practice exercises if appropriate
+
+For goal "${finalGoal}":
+${finalGoal === 'hobby' || finalGoal === 'sound_smart' ?
+  '- Keep next steps casual and enjoyable - this is for fun/social value, not mastery' :
+  finalGoal === 'job_interview' ?
+  '- Focus on talking points and conversation starters, not deep practice' :
+  '- Match the seriousness to the topic - professional topics get professional next steps'}
+
 📊 MERMAID DIAGRAMS - CRITICAL REQUIREMENT:
 
 FORBIDDEN - Never output these patterns:
