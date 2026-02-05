@@ -1,5 +1,10 @@
-import LandingPageTeaser from '@/components/LandingPageTeaser';
+import { Suspense } from 'react';
+import LandingPagePremium from '@/components/LandingPagePremium';
 
 export default function Home() {
-  return <LandingPageTeaser />;
+  return (
+    <Suspense fallback={null}>
+      <LandingPagePremium />
+    </Suspense>
+  );
 }
