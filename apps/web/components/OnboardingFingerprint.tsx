@@ -167,32 +167,32 @@ export default function OnboardingFingerprint({
   // Topic Input (only shown if no initialTopic provided)
   if (step === 'topic') {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--bg-primary)' }}>
         <div className="max-w-2xl w-full">
           <div className="text-center mb-12">
             <h1 className="text-6xl md:text-7xl font-black mb-6 leading-tight tracking-tight font-serif" style={{ color: 'var(--royal-blue)' }}>
               What would you<br/>like to study?
             </h1>
-            <p className="text-xl md:text-2xl text-gray-700 leading-relaxed">
+            <p className="text-xl md:text-2xl text-[var(--text-secondary)] leading-relaxed">
               Enter your subject of interest and we will construct a personalized curriculum
             </p>
           </div>
 
-          <div className="glass rounded-3xl p-12 shadow-2xl">
+          <div className="bg-[var(--bg-card)] rounded-3xl p-12 shadow-2xl border border-[var(--border-secondary)]">
             <h2 className="text-3xl font-bold mb-4 font-serif" style={{ color: 'var(--royal-blue)' }}>
               Subject of Study
             </h2>
-            <p className="text-base text-gray-600 mb-6 leading-relaxed">
+            <p className="text-base text-[var(--text-muted)] mb-6 leading-relaxed">
               Enter your topic of interest — from supply chain management to quantum mechanics
             </p>
-            
+
             <form onSubmit={handleTopicSubmit}>
               <input
                 type="text"
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder="Example: Game Theory for Strategic Business Decisions"
-                className="w-full px-6 py-5 text-xl text-gray-900 placeholder-gray-400 glass rounded-2xl focus:ring-2 focus:outline-none mb-4 transition-all shadow-sm"
+                className="w-full px-6 py-5 text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)] bg-[var(--bg-card)] rounded-2xl focus:ring-2 focus:outline-none mb-4 transition-all shadow-sm border border-[var(--border-secondary)]"
                 style={{ borderColor: 'var(--royal-blue)' }}
                 autoFocus
                 required
@@ -217,12 +217,12 @@ export default function OnboardingFingerprint({
   // Free-form Context Step
   if (step === 'freeform') {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--bg-primary)' }}>
         <div className="max-w-2xl w-full">
           {/* Show topic at top */}
           {initialTopic && (
             <div className="mb-6 text-center">
-              <p className="text-gray-600 text-sm mb-2">Building your course on</p>
+              <p className="text-[var(--text-muted)] text-sm mb-2">Building your course on</p>
               <h2 className="text-3xl font-bold" style={{ color: 'var(--royal-blue)' }}>{initialTopic}</h2>
             </div>
           )}
@@ -230,17 +230,17 @@ export default function OnboardingFingerprint({
           {/* Progress Bar */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-[var(--text-secondary)]">
                 Step {currentStepIndex} of {steps.length - 1}
               </span>
               <span className="text-sm font-medium" style={{ color: 'var(--royal-blue)' }}>
                 {progressPercent}% Complete
               </span>
             </div>
-            <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div 
+            <div className="w-full h-2 bg-[var(--bg-glass-dark)] rounded-full overflow-hidden">
+              <div
                 className="h-full transition-all duration-500 rounded-full"
-                style={{ 
+                style={{
                   width: `${progressPercent}%`,
                   backgroundColor: 'var(--royal-blue)'
                 }}
@@ -248,11 +248,11 @@ export default function OnboardingFingerprint({
             </div>
           </div>
 
-          <div className="glass rounded-3xl p-12 shadow-2xl">
+          <div className="bg-[var(--bg-card)] rounded-3xl p-12 shadow-2xl border border-[var(--border-secondary)]">
             <h2 className="text-4xl font-bold mb-4 font-serif" style={{ color: 'var(--royal-blue)' }}>
               Additional Context
             </h2>
-            <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+            <p className="text-[var(--text-secondary)] text-lg mb-8 leading-relaxed">
               Provide any specific context, deadlines, or objectives that will help us tailor your course more precisely. This step is optional but recommended for optimal personalization.
             </p>
 
@@ -260,17 +260,17 @@ export default function OnboardingFingerprint({
               value={freeformText}
               onChange={(e) => setFreeformText(e.target.value)}
               placeholder="Example: 'Strategy consulting interview scheduled for next week focusing on competitive scenarios and Nash equilibrium applications' or 'Manufacturing site visit requiring familiarity with assembly line optimization metrics'"
-              className="w-full px-6 py-4 text-lg text-gray-900 placeholder-gray-400 glass rounded-2xl focus:ring-2 focus:outline-none mb-6 transition-all shadow-sm resize-none"
-              style={{ 
+              className="w-full px-6 py-4 text-lg text-[var(--text-primary)] placeholder-[var(--text-muted)] bg-[var(--bg-card)] rounded-2xl focus:ring-2 focus:outline-none mb-6 transition-all shadow-sm resize-none border border-[var(--border-secondary)]"
+              style={{
                 borderColor: 'var(--royal-blue)',
                 minHeight: '180px'
               }}
               maxLength={500}
               autoFocus
             />
-            
+
             <div className="flex items-center justify-between mb-6">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-[var(--text-muted)]">
                 {freeformText.length}/500 characters
               </p>
             </div>
@@ -282,7 +282,7 @@ export default function OnboardingFingerprint({
                   setStep('review');
                 }}
                 className="flex-1 px-6 py-4 border-2 rounded-xl font-semibold transition-all"
-                style={{ 
+                style={{
                   borderColor: 'var(--royal-blue)',
                   color: 'var(--royal-blue)'
                 }}
@@ -295,7 +295,7 @@ export default function OnboardingFingerprint({
               >
                 Skip
               </button>
-              
+
               <button
                 onClick={() => {
                   if (freeformText.trim()) {
@@ -334,12 +334,12 @@ export default function OnboardingFingerprint({
     const challengePreferenceLabel = getDisplayLabel(fingerprint.challengePreference, ONBOARDING_QUESTIONS.challengePreference.options);
 
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--bg-primary)' }}>
         <div className="max-w-2xl w-full">
-          <div className="glass rounded-3xl p-10 shadow-2xl">
+          <div className="bg-[var(--bg-card)] rounded-3xl p-10 shadow-2xl border border-[var(--border-secondary)]">
             {/* Header with topic */}
             <div className="text-center mb-8">
-              <p className="text-sm text-gray-500 mb-2">Your personalized course on</p>
+              <p className="text-sm text-[var(--text-muted)] mb-2">Your personalized course on</p>
               <h2 className="text-2xl font-bold font-serif" style={{ color: 'var(--royal-blue)' }}>
                 "{fingerprint.topic}"
               </h2>
@@ -347,29 +347,29 @@ export default function OnboardingFingerprint({
 
             {/* Profile grid */}
             <div className="grid grid-cols-2 gap-3 mb-8">
-              <div className="bg-white rounded-lg p-4" style={{ border: '1px solid rgba(0, 63, 135, 0.08)' }}>
-                <p className="text-xs text-gray-500 mb-1">Learning Style</p>
-                <p className="text-sm font-semibold text-gray-900">{learningStyleLabel}</p>
+              <div className="bg-[var(--bg-glass-dark)] rounded-lg p-4 border border-[var(--border-secondary)]">
+                <p className="text-xs text-[var(--text-muted)] mb-1">Learning Style</p>
+                <p className="text-sm font-semibold text-[var(--text-primary)]">{learningStyleLabel}</p>
               </div>
-              <div className="bg-white rounded-lg p-4" style={{ border: '1px solid rgba(0, 63, 135, 0.08)' }}>
-                <p className="text-xs text-gray-500 mb-1">Prior Knowledge</p>
-                <p className="text-sm font-semibold text-gray-900">{priorKnowledgeLabel}</p>
+              <div className="bg-[var(--bg-glass-dark)] rounded-lg p-4 border border-[var(--border-secondary)]">
+                <p className="text-xs text-[var(--text-muted)] mb-1">Prior Knowledge</p>
+                <p className="text-sm font-semibold text-[var(--text-primary)]">{priorKnowledgeLabel}</p>
               </div>
-              <div className="bg-white rounded-lg p-4" style={{ border: '1px solid rgba(0, 63, 135, 0.08)' }}>
-                <p className="text-xs text-gray-500 mb-1">Learning Goal</p>
-                <p className="text-sm font-semibold text-gray-900">{learningGoalLabel}</p>
+              <div className="bg-[var(--bg-glass-dark)] rounded-lg p-4 border border-[var(--border-secondary)]">
+                <p className="text-xs text-[var(--text-muted)] mb-1">Learning Goal</p>
+                <p className="text-sm font-semibold text-[var(--text-primary)]">{learningGoalLabel}</p>
               </div>
-              <div className="bg-white rounded-lg p-4" style={{ border: '1px solid rgba(0, 63, 135, 0.08)' }}>
-                <p className="text-xs text-gray-500 mb-1">Course Depth</p>
-                <p className="text-sm font-semibold text-gray-900">{timeCommitmentLabel}</p>
+              <div className="bg-[var(--bg-glass-dark)] rounded-lg p-4 border border-[var(--border-secondary)]">
+                <p className="text-xs text-[var(--text-muted)] mb-1">Course Depth</p>
+                <p className="text-sm font-semibold text-[var(--text-primary)]">{timeCommitmentLabel}</p>
               </div>
-              <div className="bg-white rounded-lg p-4" style={{ border: '1px solid rgba(0, 63, 135, 0.08)' }}>
-                <p className="text-xs text-gray-500 mb-1">Content Format</p>
-                <p className="text-sm font-semibold text-gray-900">{contentFormatLabel}</p>
+              <div className="bg-[var(--bg-glass-dark)] rounded-lg p-4 border border-[var(--border-secondary)]">
+                <p className="text-xs text-[var(--text-muted)] mb-1">Content Format</p>
+                <p className="text-sm font-semibold text-[var(--text-primary)]">{contentFormatLabel}</p>
               </div>
-              <div className="bg-white rounded-lg p-4" style={{ border: '1px solid rgba(0, 63, 135, 0.08)' }}>
-                <p className="text-xs text-gray-500 mb-1">Challenge Level</p>
-                <p className="text-sm font-semibold text-gray-900">{challengePreferenceLabel}</p>
+              <div className="bg-[var(--bg-glass-dark)] rounded-lg p-4 border border-[var(--border-secondary)]">
+                <p className="text-xs text-[var(--text-muted)] mb-1">Challenge Level</p>
+                <p className="text-sm font-semibold text-[var(--text-primary)]">{challengePreferenceLabel}</p>
               </div>
             </div>
 
@@ -402,16 +402,16 @@ export default function OnboardingFingerprint({
 
   // Question Steps
   const currentQuestion = ONBOARDING_QUESTIONS[step as keyof typeof ONBOARDING_QUESTIONS];
-  
+
   if (!currentQuestion) return null;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #d0e2f4 100%)' }}>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--bg-primary)' }}>
       <div className="max-w-2xl w-full">
         {/* Show topic at top */}
         {(fingerprint.topic || initialTopic) && (
           <div className="mb-6 text-center">
-            <p className="text-gray-500 text-sm">
+            <p className="text-[var(--text-muted)] text-sm">
               Building your course on{' '}
               <span className="font-semibold" style={{ color: 'var(--royal-blue)' }}>
                 "{fingerprint.topic || initialTopic}"
@@ -427,7 +427,7 @@ export default function OnboardingFingerprint({
               {currentStepIndex > 1 && (
                 <button
                   onClick={handleBack}
-                  className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors"
+                  className="flex items-center gap-1 text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -435,7 +435,7 @@ export default function OnboardingFingerprint({
                   Back
                 </button>
               )}
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-[var(--text-secondary)]">
                 Step {currentStepIndex} of {steps.length - 1}
               </span>
             </div>
@@ -443,7 +443,7 @@ export default function OnboardingFingerprint({
               {progressPercent}% Complete
             </span>
           </div>
-          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div className="w-full h-2 bg-[var(--bg-glass-dark)] rounded-full overflow-hidden">
             <div
               className="h-full transition-all duration-500 rounded-full"
               style={{
@@ -454,11 +454,11 @@ export default function OnboardingFingerprint({
           </div>
         </div>
 
-        <div className="glass rounded-3xl p-12 shadow-2xl">
+        <div className="bg-[var(--bg-card)] rounded-3xl p-12 shadow-2xl border border-[var(--border-secondary)]">
           <h2 className="text-4xl font-bold mb-4 font-serif" style={{ color: 'var(--royal-blue)' }}>
             {currentQuestion.question}
           </h2>
-          <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+          <p className="text-[var(--text-secondary)] text-lg mb-8 leading-relaxed">
             {currentQuestion.subtitle}
           </p>
 
@@ -469,7 +469,7 @@ export default function OnboardingFingerprint({
                 onClick={() => handleOptionSelect(step as keyof LearnerFingerprint, option.value)}
                 disabled={selectedOption !== null}
                 className={`
-                  group relative bg-white rounded-lg py-3 px-4
+                  group relative bg-[var(--bg-card)] rounded-lg py-3 px-4
                   transition-all duration-150 w-full text-left
                   ${selectedOption === option.value
                     ? 'shadow-sm'
@@ -480,10 +480,10 @@ export default function OnboardingFingerprint({
                 style={{
                   border: selectedOption === option.value
                     ? '1.5px solid var(--royal-blue)'
-                    : '1px solid rgba(0, 63, 135, 0.1)',
+                    : '1px solid var(--border-secondary)',
                   backgroundColor: selectedOption === option.value
-                    ? 'rgba(0, 63, 135, 0.02)'
-                    : 'white'
+                    ? 'var(--bg-glass-dark)'
+                    : 'var(--bg-card)'
                 }}
               >
                 <div className="flex items-center gap-3">
@@ -491,7 +491,7 @@ export default function OnboardingFingerprint({
                   <div
                     className="w-4 h-4 rounded-full border-[1.5px] flex-shrink-0 flex items-center justify-center transition-all duration-150"
                     style={{
-                      borderColor: selectedOption === option.value ? 'var(--royal-blue)' : 'rgba(0, 63, 135, 0.25)'
+                      borderColor: selectedOption === option.value ? 'var(--royal-blue)' : 'var(--border-secondary)'
                     }}
                   >
                     {selectedOption === option.value && (
@@ -505,11 +505,11 @@ export default function OnboardingFingerprint({
                   <div className="flex-1 min-w-0">
                     <span
                       className="text-[15px] font-medium transition-colors duration-150"
-                      style={{ color: selectedOption === option.value ? 'var(--royal-blue)' : '#374151' }}
+                      style={{ color: selectedOption === option.value ? 'var(--royal-blue)' : 'var(--text-primary)' }}
                     >
                       {option.label}
                     </span>
-                    <span className="text-[13px] text-gray-400 ml-2">
+                    <span className="text-[13px] text-[var(--text-muted)] ml-2">
                       {option.description}
                     </span>
                   </div>

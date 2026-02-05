@@ -30,20 +30,20 @@ export default function CourseOutlinePreview({
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #e8f0f9 0%, #ffffff 100%)' }}>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--bg-primary)' }}>
       <div className="max-w-4xl w-full">
-        <div className="glass rounded-3xl p-12 shadow-2xl">
+        <div className="bg-[var(--bg-card)] rounded-3xl p-12 shadow-2xl border border-[var(--border-secondary)]">
           {/* Header */}
           <div className="text-center mb-12">
-            <p className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">
+            <p className="text-sm font-medium text-[var(--text-muted)] uppercase tracking-wider mb-4">
               Course Outline
             </p>
 
             <h1 className="text-3xl md:text-4xl font-bold mb-4 font-serif" style={{ color: 'var(--royal-blue)' }}>
               {outline.title}
             </h1>
-            
-            <div className="flex items-center justify-center gap-6 text-gray-600">
+
+            <div className="flex items-center justify-center gap-6 text-[var(--text-secondary)]">
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -78,10 +78,10 @@ export default function CourseOutlinePreview({
                     {modIdx + 1}
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 font-serif">
+                    <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2 font-serif">
                       {module.title}
                     </h3>
-                    <p className="text-gray-600">
+                    <p className="text-[var(--text-secondary)]">
                       {module.description}
                     </p>
                   </div>
@@ -89,7 +89,7 @@ export default function CourseOutlinePreview({
 
                 <div className="ml-14 space-y-2">
                   {module.lessons.map((lesson, lesIdx) => (
-                    <div key={lesIdx} className="flex items-center gap-3 text-gray-700">
+                    <div key={lesIdx} className="flex items-center gap-3 text-[var(--text-secondary)]">
                       <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--royal-blue)' }}></div>
                       <span className="text-base">{lesson.title}</span>
                     </div>
@@ -107,7 +107,7 @@ export default function CourseOutlinePreview({
               </h4>
               <ul className="space-y-2">
                 {outline.next_steps.map((step, idx) => (
-                  <li key={idx} className="flex gap-3 text-gray-700">
+                  <li key={idx} className="flex gap-3 text-[var(--text-secondary)]">
                     <span className="font-bold" style={{ color: 'var(--royal-blue)' }}>{idx + 1}.</span>
                     <span>{step}</span>
                   </li>
@@ -118,7 +118,7 @@ export default function CourseOutlinePreview({
 
           {/* Feedback Section */}
           {showFeedback ? (
-            <div className="mb-8 p-6 rounded-2xl" style={{ backgroundColor: 'rgba(0, 63, 135, 0.03)', border: '2px solid rgba(0, 63, 135, 0.15)' }}>
+            <div className="mb-8 p-6 rounded-2xl bg-[var(--bg-glass-dark)] border-2 border-[var(--border-secondary)]">
               <h4 className="text-lg font-bold mb-4" style={{ color: 'var(--royal-blue)' }}>
                 What would you like to change?
               </h4>
@@ -126,14 +126,14 @@ export default function CourseOutlinePreview({
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
                 placeholder="e.g., 'Add a module on practical applications' or 'Make it more technical' or 'I need it shorter'"
-                className="w-full px-4 py-3 text-base text-gray-900 placeholder-gray-400 rounded-xl border-2 focus:outline-none resize-none mb-4"
+                className="w-full px-4 py-3 text-base text-[var(--text-primary)] placeholder-[var(--text-muted)] bg-[var(--bg-card)] rounded-xl border-2 focus:outline-none resize-none mb-4"
                 style={{ borderColor: 'var(--royal-blue)' }}
                 rows={4}
                 maxLength={500}
                 autoFocus
               />
               <div className="flex items-center justify-between mb-4">
-                <span className="text-sm text-gray-500">{feedback.length}/500 characters</span>
+                <span className="text-sm text-[var(--text-muted)]">{feedback.length}/500 characters</span>
               </div>
               <div className="flex gap-3">
                 <button
@@ -141,8 +141,8 @@ export default function CourseOutlinePreview({
                     setShowFeedback(false);
                     setFeedback('');
                   }}
-                  className="flex-1 px-6 py-3 rounded-xl font-medium transition-all text-gray-600 hover:text-gray-900"
-                  style={{ backgroundColor: 'rgba(0, 63, 135, 0.05)' }}
+                  className="flex-1 px-6 py-3 rounded-xl font-medium transition-all text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  style={{ backgroundColor: 'var(--bg-glass-dark)' }}
                 >
                   Cancel
                 </button>
@@ -164,8 +164,8 @@ export default function CourseOutlinePreview({
               <button
                 onClick={() => setShowFeedback(true)}
                 disabled={isRegenerating}
-                className="flex-1 py-4 rounded-xl font-medium transition-all disabled:opacity-40 text-gray-700 hover:text-gray-900"
-                style={{ backgroundColor: 'rgba(0, 63, 135, 0.06)' }}
+                className="flex-1 py-4 rounded-xl font-medium transition-all disabled:opacity-40 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                style={{ backgroundColor: 'var(--bg-glass-dark)' }}
               >
                 Request Changes
               </button>
@@ -184,7 +184,7 @@ export default function CourseOutlinePreview({
           )}
 
           {/* Info */}
-          <p className="mt-6 text-sm text-gray-500 text-center">
+          <p className="mt-6 text-sm text-[var(--text-muted)] text-center">
             This is a preview. The full course includes detailed explanations, examples, and quizzes.
           </p>
         </div>

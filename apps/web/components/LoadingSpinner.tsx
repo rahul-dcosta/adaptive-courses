@@ -70,34 +70,34 @@ export default function LoadingSpinner({ topic }: LoadingSpinnerProps) {
             Generating Course Content
           </h2>
           {topic && (
-            <p className="text-gray-600 text-lg mb-2 leading-relaxed">
+            <p className="text-[var(--text-secondary)] text-lg mb-2 leading-relaxed">
               Subject: <span className="font-semibold" style={{ textTransform: 'capitalize' }}>{topic}</span>
             </p>
           )}
-          <p className="text-gray-500 text-sm">Processing time: approximately 30–60 seconds</p>
+          <p className="text-[var(--text-muted)] text-sm">Processing time: approximately 30–60 seconds</p>
         </div>
-        
+
         {/* Progress bar */}
         <div className="mb-6">
-          <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-            <div 
+          <div className="w-full bg-[var(--bg-glass-dark)] rounded-full h-3 overflow-hidden">
+            <div
               className="h-3 rounded-full transition-all duration-500 ease-out"
-              style={{ 
+              style={{
                 width: `${progress}%`,
                 backgroundColor: 'var(--royal-blue)'
               }}
             />
           </div>
-          <p className="text-gray-600 text-sm text-center mt-2">
+          <p className="text-[var(--text-secondary)] text-sm text-center mt-2">
             {Math.round(progress)}%
           </p>
         </div>
         
         {/* Rotating status messages */}
-        <div className="space-y-3 glass rounded-2xl p-6 min-h-[200px] shadow-xl">
+        <div className="space-y-3 bg-[var(--bg-card)] border border-[var(--border-secondary)] rounded-2xl p-6 min-h-[200px] shadow-xl">
           {LOADING_MESSAGES.map((msg, idx) => (
-            <div 
-              key={idx} 
+            <div
+              key={idx}
               className={`
                 flex items-center gap-3 transition-all duration-500
                 ${idx === messageIndex ? 'opacity-100 translate-x-0' :
@@ -105,16 +105,16 @@ export default function LoadingSpinner({ topic }: LoadingSpinnerProps) {
                   'opacity-70 translate-x-2'}
               `}
             >
-              <div 
+              <div
                 className={`
                   w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0
-                  ${idx < messageIndex ? 'text-white' : 
-                    idx === messageIndex ? 'text-white' : 
-                    'bg-gray-200 text-gray-500'}
+                  ${idx < messageIndex ? 'text-white' :
+                    idx === messageIndex ? 'text-white' :
+                    'bg-[var(--bg-glass-dark)] text-[var(--text-muted)]'}
                   transition-all duration-500
                 `}
                 style={{
-                  backgroundColor: idx < messageIndex ? '#10b981' : 
+                  backgroundColor: idx < messageIndex ? '#10b981' :
                     idx === messageIndex ? 'var(--royal-blue)' : undefined
                 }}
               >
@@ -123,8 +123,8 @@ export default function LoadingSpinner({ topic }: LoadingSpinnerProps) {
                 </span>
               </div>
               <span className={`
-                ${idx === messageIndex ? 'text-gray-900 font-medium' :
-                  idx < messageIndex ? 'text-gray-600' : 'text-gray-500'}
+                ${idx === messageIndex ? 'text-[var(--text-primary)] font-medium' :
+                  idx < messageIndex ? 'text-[var(--text-secondary)]' : 'text-[var(--text-muted)]'}
                 transition-colors duration-500
               `}>
                 {msg.text}
@@ -134,9 +134,9 @@ export default function LoadingSpinner({ topic }: LoadingSpinnerProps) {
         </div>
 
         {/* Academic note */}
-        <div className="mt-6 glass-dark rounded-xl p-4 shadow-md">
-          <p className="text-gray-700 text-sm text-center leading-relaxed">
-            <strong>Note:</strong> Course content is dynamically generated based on your learner profile, 
+        <div className="mt-6 bg-[var(--bg-glass-dark)] rounded-xl p-4 shadow-md border border-[var(--border-secondary)]">
+          <p className="text-[var(--text-secondary)] text-sm text-center leading-relaxed">
+            <strong>Note:</strong> Course content is dynamically generated based on your learner profile,
             incorporating context-specific examples and adaptive difficulty progression.
           </p>
         </div>
