@@ -65,10 +65,11 @@ const ONBOARDING_QUESTIONS: Record<Exclude<OnboardingStep, 'topic' | 'freeform' 
     subtitle: "Choose your course depth and reading time",
     options: [
       { value: '30_min', label: 'Quick Overview', emoji: '⚡', description: '~5 min read · 2 modules · Key points only' },
-      { value: '1_hour', label: 'Solid Foundation', emoji: '📘', description: '~10 min read · 3 modules · Core concepts covered' },
-      { value: '2_hours', label: 'Thorough Coverage', emoji: '📚', description: '~20 min read · 4 modules · Real depth and nuance' },
-      { value: '1_week', label: 'Comprehensive Guide', emoji: '🎓', description: '~30 min read · 5 modules · Full curriculum' },
-      { value: 'no_rush', label: 'Deep Mastery', emoji: '🏆', description: '~45 min read · 6 modules · Expert-level detail' },
+      { value: '1_hour', label: 'Solid Foundation', emoji: '📘', description: '~15 min read · 3 modules · Core concepts' },
+      { value: '2_hours', label: 'Thorough Coverage', emoji: '📚', description: '~25 min read · 5 modules · Real depth' },
+      { value: '1_week', label: 'Full Course', emoji: '🎓', description: '~45 min read · 8 modules · Complete curriculum' },
+      { value: 'no_rush', label: 'Deep Mastery', emoji: '🏆', description: '~1 hr read · 10 modules · Expert-level' },
+      { value: 'masterclass', label: 'Masterclass', emoji: '👑', description: '~2 hr read · 15 modules · Comprehensive mastery' },
     ]
   },
   contentFormat: {

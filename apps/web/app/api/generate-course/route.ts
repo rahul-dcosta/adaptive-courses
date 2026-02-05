@@ -118,12 +118,13 @@ This feedback loop ensures quality..."
 
     const timeMap: Record<string, string> = {
       '30_min': 'VERY concise. 2 modules, 2 lessons each. 100-150 words per lesson max. Hit only the critical essentials.',
-      '1_hour': 'Concise. 2-3 modules with 2-3 lessons each. 150-200 words per lesson. Core concepts only.',
-      '2_hours': '3-4 modules with 2-3 lessons each. 200-300 words per lesson. Include some depth.',
-      '1_week': '4-5 modules with 3-4 lessons each. 250-350 words per lesson. Comprehensive coverage.',
-      'no_rush': '5-6 modules with 3-4 lessons each. 300-400 words per lesson. Deep, thorough exploration.'
+      '1_hour': 'Concise. 3 modules with 2-3 lessons each. 150-200 words per lesson. Core concepts covered.',
+      '2_hours': '5 modules with 2-3 lessons each. 200-250 words per lesson. Real depth and nuance.',
+      '1_week': '8 modules with 3-4 lessons each. 250-300 words per lesson. Complete curriculum like a real course.',
+      'no_rush': '10 modules with 3-4 lessons each. 300-350 words per lesson. Expert-level depth and detail.',
+      'masterclass': '15 modules with 4-5 lessons each. 350-400 words per lesson. Comprehensive mastery - cover everything important about this topic like a premium online course.'
     };
-    const timeGuidance = timeMap[finalTimeAvailable] || '4 modules with 2-3 lessons each. 200-300 words per lesson.';
+    const timeGuidance = timeMap[finalTimeAvailable] || '5 modules with 2-3 lessons each. 200-250 words per lesson.';
 
     const systemPrompt = `You are a course creation AI that outputs valid JSON with embedded mermaid diagrams.
 
