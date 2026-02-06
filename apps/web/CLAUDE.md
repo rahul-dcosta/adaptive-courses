@@ -1,6 +1,6 @@
 # CLAUDE.md - Adaptive Courses
 
-**Updated:** 2026-02-05 | **Domain:** [adaptivecourses.ai](https://adaptivecourses.ai) | **Status:** Beta
+**Updated:** 2026-02-05 (v2) | **Domain:** [adaptivecourses.ai](https://adaptivecourses.ai) | **Status:** Beta
 
 ---
 
@@ -125,6 +125,13 @@ adaptive-courses/
 
 See `generate-course/route.ts` for word count mappings per lesson.
 
+**JSON Parsing:** Claude responses occasionally have malformed JSON. The API includes fallback repair:
+
+1. Normalize curly quotes (`'` `"`) → straight quotes
+2. Remove trailing commas
+3. If parse fails, attempt to escape unescaped quotes inside content strings
+4. Escape actual newlines that should be `\n`
+
 ---
 
 ## Environment Variables
@@ -169,6 +176,84 @@ Full details in [DESIGN.md](./DESIGN.md)
 
 ---
 
+## Dark Mode
+
+**Implementation:** CSS variables + React Context (`lib/theme-context.tsx`)
+
+**Theme Toggle:** In navbar, uses `ThemeProvider` wrapping the app in `layout.tsx`
+
+**CSS Variables (globals.css):**
+
+```css
+:root {
+  --bg-primary: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-glass-dark: rgba(0, 63, 135, 0.04);
+  --text-primary: #1a1a2e;
+  --text-secondary: #4a5568;
+  --text-muted: #718096;
+  --border-secondary: rgba(0, 63, 135, 0.1);
+  --royal-blue: #003F87;
+}
+
+.dark {
+  --bg-primary: #0f172a;
+  --bg-card: #1e293b;
+  --bg-glass-dark: rgba(255, 255, 255, 0.05);
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --border-secondary: rgba(255, 255, 255, 0.1);
+}
+```
+
+**CRITICAL:** Always use CSS variables for colors, never hardcoded `text-gray-*` or `bg-white`:
+
+```tsx
+// ✅ CORRECT
+className="text-[var(--text-primary)] bg-[var(--bg-card)]"
+
+// ❌ WRONG - breaks dark mode
+className="text-gray-900 bg-white"
+```
+
+**Ring Colors:** Use Tailwind classes, not inline styles:
+
+```tsx
+// ✅ CORRECT
+className="ring-2 ring-[var(--royal-blue)]"
+
+// ❌ WRONG - ringColor is not a valid CSS property
+style={{ ringColor: 'var(--royal-blue)' }}
+```
+
+---
+
+## Course Library (Dashboard)
+
+**Route:** `/dashboard` → [app/dashboard/page.tsx](app/dashboard/page.tsx)
+
+**Features:**
+
+- Course cards with progress, status (complete/generating/error)
+- Filter tabs: All, In Progress, Completed
+- Stats: Total courses, completed, in progress
+- Delete with GitHub-style type-to-confirm modal
+
+---
+
+## Progress Tracking
+
+**Components:**
+
+- `ProgressDashboard.tsx` - Main progress overview
+- `ProgressBarEnhanced.tsx` - Animated progress bars
+- `LearningStreak.tsx` - Activity streak calendar
+
+**Storage:** localStorage for client-side persistence (will migrate to Supabase)
+
+---
+
 ## Database (Supabase)
 
 **Tables:** `users`, `courses`, `sessions`, `otp_codes`, `email_signups`
@@ -209,13 +294,13 @@ npm run lint      # Lint
 **Requires Node 22+** (use `nvm use` - .nvmrc configured)
 
 ```bash
-# Unit/Integration (Vitest) - 141 tests
+# Unit/Integration (Vitest) - 307 tests
 npm test              # Watch mode
-npm run test:run      # Single run (~700ms)
+npm run test:run      # Single run
 npm run test:coverage # With coverage report
 
 # E2E (Playwright) - 42 tests
-npm run test:e2e         # Headless (~26s)
+npm run test:e2e         # Headless
 npm run test:e2e:ui      # Interactive UI
 npm run test:e2e:headed  # Visible browser
 ```
