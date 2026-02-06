@@ -19,6 +19,19 @@ git checkout dev && npm run dev
 
 ---
 
+## Session Continuity
+
+When user says **"update claude.md"**, treat it as a session checkpoint (like a manual save in gaming). Update this file with:
+
+- New features/components added
+- Architectural decisions made
+- Bugs fixed and their solutions
+- Any patterns or gotchas discovered
+
+This ensures the next chat session starts with full context of where we left off.
+
+---
+
 ## Working with Existing Files
 
 When user references an existing file by name, ALWAYS check if that file exists and read it before providing guidance or starting new work.
