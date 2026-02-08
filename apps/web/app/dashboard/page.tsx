@@ -1,154 +1,102 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getAllProgressFromStorage, getStreakFromStorage, formatTimeSpent, getRelativeTime, type CourseProgressData } from '@/lib/progress';
+import { ProgressRing } from '@/components/ProgressRing';
+import { DailyGoalCard } from '@/components/DailyGoal';
+import { ReviewBadge, ReviewQueue } from '@/components/ReviewQueue';
+import { getTotalDueCount } from '@/lib/spaced-repetition';
+import { BuddyInvite } from '@/components/BuddyInvite';
 
-type CourseStatus = 'complete' | 'generating' | 'error';
+type FilterType = 'all' | 'in-progress' | 'completed';
 
-interface Course {
-  id: string;
-  title: string;
-  subtitle: string;
-  createdAt: string;
-  status: CourseStatus;
-  modules: number;
-  progress: number;
-}
-
-// Mock data - will be replaced with real data from Supabase
-const mockCourses: Course[] = [
-  {
-    id: '1',
-    title: 'Supply Chain Fundamentals',
-    subtitle: 'Understanding logistics and inventory management',
-    createdAt: '2026-01-28T10:00:00Z',
-    status: 'complete' as CourseStatus,
-    modules: 5,
-    progress: 60,
-  },
-  {
-    id: '2',
-    title: 'Introduction to Game Theory',
-    subtitle: 'Strategic decision-making basics',
-    createdAt: '2026-01-25T14:30:00Z',
-    status: 'complete' as CourseStatus,
-    modules: 4,
-    progress: 100,
-  },
-  {
-    id: '3',
-    title: 'Nuclear Energy Basics',
-    subtitle: 'How nuclear power plants work',
-    createdAt: '2026-01-30T09:15:00Z',
-    status: 'generating' as CourseStatus,
-    modules: 0,
-    progress: 0,
-  },
-];
-
-function CourseCard({ course }: { course: Course }) {
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
+function CourseCard({ course }: { course: CourseProgressData }) {
+  const progress = course.overallCompletionPercent;
+  const isComplete = progress >= 100;
 
   return (
-    <div className="bg-[var(--bg-card)] rounded-xl shadow-sm hover:shadow-md transition-shadow p-6">
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex-1">
-          <h3 className="font-semibold text-[var(--text-primary)] mb-1">{course.title}</h3>
-          <p className="text-sm text-[var(--text-muted)]">{course.subtitle}</p>
+    <div className="bg-[var(--bg-card)] rounded-xl shadow-sm hover:shadow-md transition-shadow p-6" style={{ border: '1px solid var(--border-secondary)' }}>
+      <div className="flex justify-between items-start gap-4 mb-4">
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-[var(--text-primary)] mb-1 truncate">
+            {course.courseTitle || 'Untitled Course'}
+          </h3>
+          <p className="text-sm text-[var(--text-muted)]">
+            {course.lessonsCompleted}/{course.totalLessons} lessons
+          </p>
         </div>
-        {course.status === 'generating' ? (
-          <span className="flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full bg-yellow-100 text-yellow-700">
-            <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-            </svg>
-            Generating
-          </span>
-        ) : course.progress === 100 ? (
-          <span className="text-xs font-medium px-3 py-1 rounded-full bg-green-100 text-green-700">
-            Completed
-          </span>
-        ) : (
-          <span className="text-xs font-medium px-3 py-1 rounded-full bg-blue-100 text-blue-700">
-            In Progress
-          </span>
-        )}
+        <ProgressRing
+          progress={progress}
+          size={52}
+          strokeWidth={5}
+          color={isComplete ? 'rgb(34, 197, 94)' : 'var(--royal-blue)'}
+          showPercentage
+          animate
+        />
       </div>
 
-      {course.status === 'complete' && (
-        <>
-          {/* Progress bar */}
-          <div className="mb-4">
-            <div className="flex justify-between text-xs text-[var(--text-muted)] mb-1">
-              <span>{course.modules} modules</span>
-              <span>{course.progress}% complete</span>
-            </div>
-            <div className="w-full h-2 bg-[var(--bg-glass-dark)] rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all"
-                style={{
-                  width: `${course.progress}%`,
-                  background: 'var(--royal-blue)',
-                }}
-              />
-            </div>
-          </div>
+      {/* Time & activity info */}
+      <div className="flex items-center gap-4 text-xs text-[var(--text-muted)] mb-4">
+        {course.totalTimeSpent > 0 && (
+          <span className="flex items-center gap-1">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {formatTimeSpent(course.totalTimeSpent)}
+          </span>
+        )}
+        <span>{getRelativeTime(course.lastActivityAt)}</span>
+      </div>
 
-          {/* Actions */}
-          <div className="flex gap-2">
-            <a
-              href={`/course/${course.id}`}
-              className="flex-1 py-2 px-4 text-center text-sm font-medium text-white rounded-lg transition-all"
-              style={{ background: 'var(--royal-blue)' }}
-            >
-              {course.progress === 100 ? 'Review' : 'Continue'}
-            </a>
-            <button className="p-2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors" title="Download PDF">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-            </button>
-            <button className="p-2 text-[var(--text-muted)] hover:text-[var(--error-text)] transition-colors" title="Delete">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </button>
-          </div>
-        </>
-      )}
+      {/* Actions */}
+      <div className="flex gap-2">
+        <a
+          href={`/?mode=build&resume=${course.courseId}`}
+          className="flex-1 py-2.5 px-4 text-center text-sm font-medium text-white rounded-lg transition-all hover:shadow-md"
+          style={{ background: 'var(--royal-blue)' }}
+        >
+          {isComplete ? 'Review' : 'Continue'}
+        </a>
+      </div>
 
-      {course.status === 'generating' && (
-        <div className="text-center py-4">
-          <p className="text-sm text-[var(--text-muted)]">Your course is being generated...</p>
-          <p className="text-xs text-[var(--text-muted)] mt-1">This usually takes 30-60 seconds</p>
-        </div>
-      )}
-
-      <div className="mt-4 pt-4 border-t border-[var(--border-secondary)]">
-        <p className="text-xs text-[var(--text-muted)]">Created {formatDate(course.createdAt)}</p>
+      <div className="mt-4 pt-3 border-t border-[var(--border-secondary)]">
+        <p className="text-xs text-[var(--text-muted)]">
+          Started {getRelativeTime(course.startedAt)}
+        </p>
       </div>
     </div>
   );
 }
 
 export default function DashboardPage() {
-  const [courses] = useState<Course[]>(mockCourses);
-  const [filter, setFilter] = useState<'all' | 'in-progress' | 'completed'>('all');
+  const [courses, setCourses] = useState<CourseProgressData[]>([]);
+  const [filter, setFilter] = useState<FilterType>('all');
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [reviewDueCount, setReviewDueCount] = useState(0);
+  const [showReviewQueue, setShowReviewQueue] = useState(false);
+
+  useEffect(() => {
+    const allProgress = getAllProgressFromStorage();
+    // Sort by most recently accessed
+    allProgress.sort((a, b) => new Date(b.lastActivityAt).getTime() - new Date(a.lastActivityAt).getTime());
+    setCourses(allProgress);
+    setReviewDueCount(getTotalDueCount());
+    setIsLoaded(true);
+  }, []);
+
+  const streak = typeof window !== 'undefined' ? getStreakFromStorage() : { currentStreak: 0, longestStreak: 0, lastActivityDate: null, streakHistory: [] };
 
   const filteredCourses = courses.filter((course) => {
     if (filter === 'all') return true;
-    if (filter === 'in-progress') return course.progress < 100 && course.status === 'complete';
-    if (filter === 'completed') return course.progress === 100;
+    if (filter === 'in-progress') return course.overallCompletionPercent < 100;
+    if (filter === 'completed') return course.overallCompletionPercent >= 100;
     return true;
   });
 
-  const completedCount = courses.filter((c) => c.progress === 100).length;
-  const inProgressCount = courses.filter((c) => c.progress < 100 && c.status === 'complete').length;
+  const completedCount = courses.filter((c) => c.overallCompletionPercent >= 100).length;
+  const inProgressCount = courses.filter((c) => c.overallCompletionPercent < 100).length;
+  const totalLessons = courses.reduce((sum, c) => sum + c.lessonsCompleted, 0);
+  const totalTime = courses.reduce((sum, c) => sum + c.totalTimeSpent, 0);
 
   return (
     <div className="min-h-screen pt-20">
@@ -176,39 +124,113 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="bg-[var(--bg-card)] rounded-xl p-4 shadow-sm">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-[var(--bg-card)] rounded-xl p-4 shadow-sm" style={{ border: '1px solid var(--border-secondary)' }}>
             <p className="text-sm text-[var(--text-muted)]">Total Courses</p>
             <p className="text-2xl font-bold" style={{ color: 'var(--royal-blue)' }}>
               {courses.length}
             </p>
           </div>
-          <div className="bg-[var(--bg-card)] rounded-xl p-4 shadow-sm">
+          <div className="bg-[var(--bg-card)] rounded-xl p-4 shadow-sm" style={{ border: '1px solid var(--border-secondary)' }}>
             <p className="text-sm text-[var(--text-muted)]">Completed</p>
             <p className="text-2xl font-bold text-green-600">{completedCount}</p>
           </div>
-          <div className="bg-[var(--bg-card)] rounded-xl p-4 shadow-sm">
-            <p className="text-sm text-[var(--text-muted)]">In Progress</p>
-            <p className="text-2xl font-bold text-blue-600">{inProgressCount}</p>
+          <div className="bg-[var(--bg-card)] rounded-xl p-4 shadow-sm" style={{ border: '1px solid var(--border-secondary)' }}>
+            <p className="text-sm text-[var(--text-muted)]">Lessons Done</p>
+            <p className="text-2xl font-bold" style={{ color: 'var(--royal-blue)' }}>{totalLessons}</p>
+          </div>
+          <div className="bg-[var(--bg-card)] rounded-xl p-4 shadow-sm" style={{ border: '1px solid var(--border-secondary)' }}>
+            <p className="text-sm text-[var(--text-muted)]">Time Spent</p>
+            <p className="text-2xl font-bold" style={{ color: 'var(--royal-blue)' }}>
+              {totalTime > 0 ? formatTimeSpent(totalTime) : '0m'}
+            </p>
           </div>
         </div>
 
+        {/* Streak banner */}
+        {streak.currentStreak > 0 && (
+          <div
+            className="flex items-center gap-3 p-4 rounded-xl mb-8"
+            style={{
+              backgroundColor: 'rgba(251, 146, 60, 0.08)',
+              border: '1px solid rgba(251, 146, 60, 0.2)',
+            }}
+          >
+            <span className="text-2xl">🔥</span>
+            <div>
+              <p className="font-semibold text-[var(--text-primary)]">
+                {streak.currentStreak} day streak!
+              </p>
+              <p className="text-sm text-[var(--text-muted)]">
+                Keep learning daily to maintain your streak
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Daily Goal + Reviews */}
+        <div className="grid md:grid-cols-3 gap-4 mb-8">
+          <DailyGoalCard className="md:col-span-1" />
+          {reviewDueCount > 0 && !showReviewQueue && (
+            <div
+              className="md:col-span-2 rounded-xl p-5 flex items-center justify-between"
+              style={{
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border-secondary)',
+              }}
+            >
+              <div>
+                <h3 className="font-semibold text-[var(--text-primary)]">Spaced Repetition</h3>
+                <p className="text-sm text-[var(--text-muted)]">Review cards to boost long-term retention</p>
+              </div>
+              <ReviewBadge count={reviewDueCount} onClick={() => setShowReviewQueue(true)} />
+            </div>
+          )}
+        </div>
+
+        {/* Review Queue (expandable) */}
+        {showReviewQueue && (
+          <div
+            className="rounded-xl p-6 mb-8 animate-fade-in"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-secondary)',
+            }}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-[var(--text-primary)]">Review Queue</h3>
+              <button
+                onClick={() => setShowReviewQueue(false)}
+                className="text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+              >
+                Close
+              </button>
+            </div>
+            <ReviewQueue
+              onComplete={() => {
+                setReviewDueCount(getTotalDueCount());
+                setShowReviewQueue(false);
+              }}
+            />
+          </div>
+        )}
+
         {/* Filters */}
         <div className="flex gap-2 mb-6">
-          {[
-            { key: 'all', label: 'All' },
-            { key: 'in-progress', label: 'In Progress' },
-            { key: 'completed', label: 'Completed' },
-          ].map((f) => (
+          {([
+            { key: 'all' as FilterType, label: 'All' },
+            { key: 'in-progress' as FilterType, label: `In Progress${inProgressCount > 0 ? ` (${inProgressCount})` : ''}` },
+            { key: 'completed' as FilterType, label: `Completed${completedCount > 0 ? ` (${completedCount})` : ''}` },
+          ]).map((f) => (
             <button
               key={f.key}
-              onClick={() => setFilter(f.key as typeof filter)}
+              onClick={() => setFilter(f.key)}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
                 filter === f.key
                   ? 'text-white'
                   : 'bg-[var(--bg-card)] text-[var(--text-secondary)] hover:bg-[var(--bg-glass-dark)]'
               }`}
-              style={filter === f.key ? { background: 'var(--royal-blue)' } : {}}
+              style={filter === f.key ? { background: 'var(--royal-blue)' } : { border: '1px solid var(--border-secondary)' }}
             >
               {f.label}
             </button>
@@ -216,13 +238,13 @@ export default function DashboardPage() {
         </div>
 
         {/* Course Grid */}
-        {filteredCourses.length > 0 ? (
+        {isLoaded && filteredCourses.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredCourses.map((course) => (
-              <CourseCard key={course.id} course={course} />
+              <CourseCard key={course.courseId} course={course} />
             ))}
           </div>
-        ) : (
+        ) : isLoaded ? (
           <div className="text-center py-16">
             <div
               className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
@@ -238,8 +260,12 @@ export default function DashboardPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-[var(--text-primary)] mb-2">No courses yet</h3>
-            <p className="text-[var(--text-muted)] mb-6">Create your first course to get started</p>
+            <h3 className="text-lg font-medium text-[var(--text-primary)] mb-2">
+              {filter !== 'all' ? 'No matching courses' : 'No courses yet'}
+            </h3>
+            <p className="text-[var(--text-muted)] mb-6">
+              {filter !== 'all' ? 'Try a different filter' : 'Create your first course to get started'}
+            </p>
             <a
               href="/"
               className="inline-block px-6 py-3 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all"
@@ -247,6 +273,13 @@ export default function DashboardPage() {
             >
               Create Your First Course
             </a>
+          </div>
+        ) : null}
+
+        {/* Learning Buddies */}
+        {courses.length > 0 && (
+          <div className="mt-8">
+            <BuddyInvite />
           </div>
         )}
 
@@ -257,7 +290,7 @@ export default function DashboardPage() {
               Ready for more?
             </h3>
             <p className="text-[var(--text-secondary)] mb-6">
-              You've used your free course. Unlock unlimited learning for just $9.99/month.
+              You&apos;ve used your free course. Unlock unlimited learning for just $9.99/month.
             </p>
             <a
               href="/pricing"

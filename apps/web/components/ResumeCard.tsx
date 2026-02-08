@@ -43,8 +43,8 @@ export function ResumeCard({ course, onResume, className = '' }: ResumeCardProps
     <div
       className={`rounded-xl overflow-hidden transition-all hover:shadow-lg ${className}`}
       style={{
-        backgroundColor: 'white',
-        border: '1px solid rgba(0, 63, 135, 0.1)',
+        backgroundColor: 'var(--bg-card)',
+        border: '1px solid var(--border-secondary)',
       }}
     >
       {/* Progress indicator strip at top */}
@@ -66,25 +66,25 @@ export function ResumeCard({ course, onResume, className = '' }: ResumeCardProps
               backgroundColor: isComplete ? 'rgb(34, 197, 94)' : 'var(--royal-blue)',
             }}
           />
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-[var(--text-muted)]">
             {isComplete ? 'Completed' : 'In progress'} - {relativeTime}
           </span>
         </div>
 
         {/* Course title */}
-        <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-1 font-serif">
+        <h3 className="font-bold text-[var(--text-primary)] text-lg mb-2 line-clamp-1 font-serif">
           {course.title}
         </h3>
 
         {/* Current position */}
         {!isComplete && (
           <div className="mb-4">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-[var(--text-secondary)]">
               <span className="font-medium">Next up:</span>{' '}
               {course.currentLessonTitle || `Lesson ${course.currentLessonIndex + 1}`}
             </p>
             {course.currentModuleTitle && (
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">
                 Module {course.currentModuleIndex + 1}: {course.currentModuleTitle}
               </p>
             )}
@@ -100,7 +100,7 @@ export function ResumeCard({ course, onResume, className = '' }: ResumeCardProps
         />
 
         {/* Stats row */}
-        <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+        <div className="flex items-center justify-between text-xs text-[var(--text-muted)] mb-4">
           <span>
             {course.lessonsCompleted}/{course.totalLessons} lessons
           </span>
@@ -178,11 +178,11 @@ export function ResumeBanner({
 
         {/* Course info */}
         <div className="flex-1 min-w-0">
-          <p className="text-xs text-gray-500 mb-0.5">Continue where you left off</p>
-          <h4 className="font-semibold text-gray-900 truncate">{course.title}</h4>
-          <p className="text-sm text-gray-600">
+          <p className="text-xs text-[var(--text-muted)] mb-0.5">Continue where you left off</p>
+          <h4 className="font-semibold text-[var(--text-primary)] truncate">{course.title}</h4>
+          <p className="text-sm text-[var(--text-secondary)]">
             {course.currentLessonTitle || `Lesson ${course.currentLessonIndex + 1}`}{' '}
-            <span className="text-gray-400">- {relativeTime}</span>
+            <span className="text-[var(--text-muted)]">- {relativeTime}</span>
           </p>
         </div>
 
@@ -198,7 +198,7 @@ export function ResumeBanner({
           {onDismiss && (
             <button
               onClick={onDismiss}
-              className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              className="p-2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
               title="Dismiss"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,7 +240,7 @@ export function ResumeListItem({
   return (
     <button
       onClick={onResume}
-      className={`w-full text-left p-3 rounded-lg transition-all hover:bg-gray-50 ${className}`}
+      className={`w-full text-left p-3 rounded-lg transition-all hover:bg-[var(--bg-glass-dark)] ${className}`}
     >
       <div className="flex items-start gap-3">
         {/* Progress ring */}
@@ -280,16 +280,16 @@ export function ResumeListItem({
 
         {/* Course info */}
         <div className="flex-1 min-w-0">
-          <h4 className="font-medium text-gray-900 text-sm truncate">{course.title}</h4>
-          <p className="text-xs text-gray-500 truncate">
+          <h4 className="font-medium text-[var(--text-primary)] text-sm truncate">{course.title}</h4>
+          <p className="text-xs text-[var(--text-muted)] truncate">
             {course.currentLessonTitle || `Lesson ${course.currentLessonIndex + 1}`}
           </p>
-          <p className="text-xs text-gray-400 mt-0.5">{relativeTime}</p>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">{relativeTime}</p>
         </div>
 
         {/* Arrow */}
         <svg
-          className="w-4 h-4 text-gray-400 flex-shrink-0 mt-1"
+          className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0 mt-1"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -339,8 +339,8 @@ export function NoResumeState({ onCreateCourse, className = '' }: NoResumeStateP
         </svg>
       </div>
 
-      <h3 className="font-semibold text-gray-900 mb-2">No courses in progress</h3>
-      <p className="text-sm text-gray-500 mb-4">
+      <h3 className="font-semibold text-[var(--text-primary)] mb-2">No courses in progress</h3>
+      <p className="text-sm text-[var(--text-muted)] mb-4">
         Start learning something new today!
       </p>
 

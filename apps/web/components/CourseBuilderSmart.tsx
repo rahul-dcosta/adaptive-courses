@@ -8,9 +8,10 @@ import CourseViewer from './CourseViewer';
 import OnboardingFingerprint from './OnboardingFingerprint';
 import CourseOutlinePreview from './CourseOutlinePreview';
 import { ApiError } from './ApiError';
+import { DiagnosticQuiz, type DiagnosticResult } from './DiagnosticQuiz';
 import { LearnerFingerprint, CourseContent, CourseOutline, getErrorMessage } from '@/lib/types';
 
-type Step = 'onboarding' | 'generating-outline' | 'outline-preview' | 'generating-full' | 'celebration' | 'preview' | 'error';
+type Step = 'onboarding' | 'diagnostic' | 'generating-outline' | 'outline-preview' | 'generating-full' | 'celebration' | 'preview' | 'error';
 
 // Error state interface
 interface ErrorState {
@@ -97,11 +98,36 @@ function CourseBuilderContent({ initialTopic }: { initialTopic?: string }) {
   const [fingerprint, setFingerprint] = useState<LearnerFingerprint | null>(null);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [error, setError] = useState<ErrorState | null>(null);
+  const [diagnosticResult, setDiagnosticResult] = useState<DiagnosticResult | null>(null);
 
   const handleFingerprintComplete = async (completedFingerprint: LearnerFingerprint) => {
     setFingerprint(completedFingerprint);
-    setError(null); // Clear any previous errors
-    generateOutline(completedFingerprint);
+    setError(null);
+    // Go to diagnostic if user selected intermediate+ knowledge
+    if (completedFingerprint.priorKnowledge && completedFingerprint.priorKnowledge !== 'beginner') {
+      setStep('diagnostic');
+    } else {
+      generateOutline(completedFingerprint);
+    }
+  };
+
+  const handleDiagnosticComplete = (result: DiagnosticResult) => {
+    setDiagnosticResult(result);
+    if (fingerprint) {
+      // Override the prior knowledge with diagnostic result
+      const adjustedFingerprint = {
+        ...fingerprint,
+        priorKnowledge: result.suggestedLevel,
+      };
+      setFingerprint(adjustedFingerprint);
+      generateOutline(adjustedFingerprint);
+    }
+  };
+
+  const handleDiagnosticSkip = () => {
+    if (fingerprint) {
+      generateOutline(fingerprint);
+    }
   };
 
   const generateOutline = async (fp: LearnerFingerprint, previousOutline?: CourseOutline | null, userFeedback?: string) => {
@@ -121,6 +147,7 @@ function CourseBuilderContent({ initialTopic }: { initialTopic?: string }) {
           priorKnowledge: fp.priorKnowledge,
           learningGoal: fp.learningGoal,
           timeCommitment: fp.timeCommitment,
+          diagnosticResult: diagnosticResult || undefined,
           contentFormat: fp.contentFormat,
           challengePreference: fp.challengePreference,
           context: fp.context || '',
@@ -278,6 +305,22 @@ function CourseBuilderContent({ initialTopic }: { initialTopic?: string }) {
         onRetry={handleErrorRetry}
         onDismiss={handleErrorDismiss}
       />
+    );
+  }
+
+  // Diagnostic quiz
+  if (step === 'diagnostic' && fingerprint) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ background: 'linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%)' }}>
+        <div className="max-w-2xl w-full py-12">
+          <DiagnosticQuiz
+            topic={fingerprint.topic}
+            priorKnowledge={fingerprint.priorKnowledge}
+            onComplete={handleDiagnosticComplete}
+            onSkip={handleDiagnosticSkip}
+          />
+        </div>
+      </div>
     );
   }
 

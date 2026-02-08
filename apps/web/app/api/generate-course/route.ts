@@ -227,6 +227,17 @@ The art: Find the MINIMUM WIP to keep flow stable without excessive holding cost
 
 DON'T just say "WIP = work in progress" and move on. Teach the nuances.
 
+🎯 PERSONALIZATION CALLOUTS (1-2 per lesson):
+Weave in 1-2 personalized notes per lesson that reference the learner's specific context, goal, or background.
+Format: [PERSONALIZED: Your note here referencing the learner's goal/context/skill level]
+Example: [PERSONALIZED: Since you're preparing for a job interview, focus on being able to explain this concept clearly in 30 seconds.]
+These should feel natural and helpful, not forced.
+
+📖 GLOSSARY TERMS (2-4 per lesson):
+For key technical terms or jargon, use this inline format: {{term:short definition}}
+Example: "The {{API:Application Programming Interface - a way for programs to talk to each other}} handles all requests."
+Only use for terms the learner might not know based on their skill level. Don't over-use.
+
 ${approvedOutline ? `
 📋 APPROVED COURSE STRUCTURE (FOLLOW THIS EXACTLY):
 ${JSON.stringify(approvedOutline, null, 2)}

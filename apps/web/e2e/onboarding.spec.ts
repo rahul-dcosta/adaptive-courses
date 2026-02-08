@@ -92,11 +92,11 @@ test.describe('Onboarding Flow', () => {
       await expect(page.getByText(/Why are you learning this/i)).toBeVisible({ timeout: 5000 })
       await page.getByText('Personal Interest').click()
 
-      // Check time commitment question
-      await expect(page.getByText(/How much time do you have/i)).toBeVisible({ timeout: 5000 })
-      await expect(page.getByText('30 Minutes')).toBeVisible()
-      await expect(page.getByText('1 Hour')).toBeVisible()
-      await expect(page.getByText('No Rush')).toBeVisible()
+      // Check course depth question
+      await expect(page.getByText(/How deep should we go/i)).toBeVisible({ timeout: 5000 })
+      await expect(page.getByText('Quick Overview')).toBeVisible()
+      await expect(page.getByText('Solid Foundation')).toBeVisible()
+      await expect(page.getByText('Deep Mastery')).toBeVisible()
     })
 
     test('displays progress indicator', async ({ page }) => {

@@ -4,12 +4,16 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import CourseBuilderSmart from './CourseBuilderSmart';
 import ExampleCourses from './ExampleCourses';
+import { ResumeBanner } from './ResumeCard';
+import { getMostRecentProgress, type CourseProgressData } from '@/lib/progress';
 import { analytics } from '@/lib/analytics';
 
 export default function LandingPagePremium() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [topic, setTopic] = useState('');
+  const [recentProgress, setRecentProgress] = useState<CourseProgressData | null>(null);
+  const [resumeDismissed, setResumeDismissed] = useState(false);
 
   // Check if we're in builder mode from URL
   const showBuilder = searchParams.get('mode') === 'build';
@@ -18,6 +22,11 @@ export default function LandingPagePremium() {
   useEffect(() => {
     if (!showBuilder) {
       analytics.pageView('landing');
+      // Load most recent course progress for returning users
+      const progress = getMostRecentProgress();
+      if (progress) {
+        setRecentProgress(progress);
+      }
     }
   }, [showBuilder]);
 
@@ -40,8 +49,33 @@ export default function LandingPagePremium() {
 
   return (
     <div className="min-h-screen">
+      {/* Resume Banner for returning users */}
+      {recentProgress && !resumeDismissed && (
+        <div className="max-w-6xl mx-auto px-6 pt-20 md:pt-24">
+          <ResumeBanner
+            course={{
+              courseId: recentProgress.courseId,
+              title: recentProgress.courseTitle || 'Your Course',
+              currentModuleIndex: recentProgress.currentModuleIndex,
+              currentLessonIndex: recentProgress.currentLessonIndex,
+              currentLessonTitle: recentProgress.currentLessonTitle,
+              currentModuleTitle: recentProgress.currentModuleTitle,
+              completionPercent: recentProgress.overallCompletionPercent,
+              lastActivityAt: recentProgress.lastActivityAt,
+              totalLessons: recentProgress.totalLessons,
+              lessonsCompleted: recentProgress.lessonsCompleted,
+            }}
+            onResume={() => {
+              analytics.track('resume_course_landing', { courseId: recentProgress.courseId });
+              router.push(`/?mode=build&resume=${recentProgress.courseId}`);
+            }}
+            onDismiss={() => setResumeDismissed(true)}
+          />
+        </div>
+      )}
+
       {/* Hero */}
-      <div className="max-w-6xl mx-auto px-6 pt-24 md:pt-32 pb-16 md:pb-20">
+      <div className={`max-w-6xl mx-auto px-6 ${recentProgress && !resumeDismissed ? 'pt-8 md:pt-12' : 'pt-24 md:pt-32'} pb-16 md:pb-20`}>
         <div className="max-w-4xl">
           {/* Free badge - prominent value signal */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6" style={{ backgroundColor: 'var(--bg-glass-dark)', border: '1px solid var(--border-primary)' }}>

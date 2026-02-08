@@ -31,8 +31,8 @@ test.describe('Navigation', () => {
     await expect(page.getByText(/course topics available/i)).toBeVisible()
     // Use first match for elements that appear multiple times
     await expect(page.getByText(/60 seconds/i).first()).toBeVisible()
-    await expect(page.getByText(/Powered by/i).first()).toBeVisible()
-    await expect(page.getByText(/Claude/i).first()).toBeVisible()
+    await expect(page.getByText(/AI-powered/i).first()).toBeVisible()
+    await expect(page.getByText(/personalization/i).first()).toBeVisible()
   })
 
   test('displays how it works section', async ({ page }) => {

@@ -12,6 +12,14 @@ import { EmptyState } from './EmptyState';
 import { StreakBadge } from './LearningStreak';
 import { ProgressRing } from './ProgressRing';
 import { getStreakFromStorage, updateStreak, saveStreakToStorage, formatTimeSpent, type StreakData } from '@/lib/progress';
+import { useMilestoneDetection } from '@/hooks/useMilestoneDetection';
+import { MilestoneCelebration } from './MilestoneCelebration';
+import { useGlossaryTooltips } from './GlossaryTooltip';
+import { CompactDailyGoal } from './DailyGoal';
+import { getDailyGoalData, recordLessonComplete as recordDailyLessonComplete, type DailyGoalData } from '@/lib/daily-goals';
+import { feedbackLessonComplete, feedbackQuizCorrect, feedbackQuizIncorrect } from '@/lib/feedback';
+import { LearningPath } from './LearningPath';
+import { addReviewItem } from '@/lib/spaced-repetition';
 import type { ViewerCourse, ContextMenuState, ContextMenuType } from '@/lib/types';
 
 interface CourseViewerProps {
@@ -156,6 +164,13 @@ function formatTextContent(text: string): string {
   return paragraphs.map(para => {
     let formatted = para.trim();
 
+    // Handle personalization callouts: [PERSONALIZED: ...]
+    const personalizedMatch = formatted.match(/^\[PERSONALIZED:\s*([\s\S]*)\]$/);
+    if (personalizedMatch) {
+      const calloutText = formatInlineText(personalizedMatch[1].trim());
+      return `<div class="my-6 pl-4 py-3 pr-4 rounded-r-lg" style="border-left: 3px solid var(--royal-blue); background-color: rgba(0, 63, 135, 0.05);"><p class="text-sm text-[var(--text-secondary)] leading-relaxed"><span class="font-semibold" style="color: var(--royal-blue);">Tailored for you:</span> ${calloutText}</p></div>`;
+    }
+
     // Handle headers (### Header -> h4, ## Header -> h3)
     if (formatted.startsWith('### ')) {
       const headerText = formatted.slice(4);
@@ -194,7 +209,7 @@ function formatTextContent(text: string): string {
       const definition = formatted.slice(colonIndex + 1).trim();
       // Handle multi-line definitions
       const formattedDef = definition.split('\n').map(line => formatInlineText(line.trim())).join('<br/>');
-      return `<p class="my-4"><strong class="font-semibold text-gray-900">${escapeHtml(term)}:</strong> <span class="text-[var(--text-secondary)]">${formattedDef}</span></p>`;
+      return `<p class="my-4"><strong class="font-semibold text-[var(--text-primary)]">${escapeHtml(term)}:</strong> <span class="text-[var(--text-secondary)]">${formattedDef}</span></p>`;
     }
 
     // Regular paragraph - handle inline newlines as soft breaks
@@ -207,13 +222,18 @@ function formatTextContent(text: string): string {
 function formatInlineText(text: string): string {
   let result = escapeHtml(text);
   // Bold: **text** or __text__
-  result = result.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>');
-  result = result.replace(/__([^_]+)__/g, '<strong class="font-semibold text-gray-900">$1</strong>');
+  result = result.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-[var(--text-primary)]">$1</strong>');
+  result = result.replace(/__([^_]+)__/g, '<strong class="font-semibold text-[var(--text-primary)]">$1</strong>');
   // Italic: *text* or _text_
   result = result.replace(/\*([^*]+)\*/g, '<em class="italic">$1</em>');
   result = result.replace(/_([^_]+)_/g, '<em class="italic">$1</em>');
   // Inline code: `code`
   result = result.replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded text-sm font-mono" style="background-color: rgba(0, 63, 135, 0.08); color: var(--royal-blue-dark);">$1</code>');
+  // Glossary terms: {{term:definition}}
+  result = result.replace(
+    /\{\{([^:}]+):([^}]+)\}\}/g,
+    '<span data-glossary data-glossary-term="$1" data-glossary-def="$2" class="border-b border-dashed cursor-help" style="border-color: var(--royal-blue); color: var(--royal-blue);">$1</span>'
+  );
   return result;
 }
 
@@ -256,8 +276,11 @@ function QuizSection({ quiz, lessonKey, previousAttempt, onAttempt, onContextMen
     setHasAnswered(true);
     if (gotItRight) {
       setJustMastered(true);
+      feedbackQuizCorrect();
       // Reset celebration after animation completes
       setTimeout(() => setJustMastered(false), 2000);
+    } else {
+      feedbackQuizIncorrect();
     }
     onAttempt(gotItRight);
   };
@@ -405,7 +428,7 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
   const [quizAttempts, setQuizAttempts] = useState<Map<string, boolean>>(new Map());
   const [showNav, setShowNav] = useState(true);
-  const [viewMode, setViewMode] = useState<'outline' | 'graph'>('outline');
+  const [viewMode, setViewMode] = useState<'outline' | 'graph' | 'journey'>('outline');
   const [showMobileGraph, setShowMobileGraph] = useState(false);
   // Animation states
   const [lessonTransition, setLessonTransition] = useState<'idle' | 'slide-left' | 'slide-right'>('idle');
@@ -429,6 +452,16 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
     completedLessons,
     quizAttempts
   );
+
+  // Milestone detection
+  const { activeMilestone, dismissMilestone, checkMilestones } = useMilestoneDetection();
+
+  // Glossary tooltips
+  const lessonContentRef = useRef<HTMLDivElement>(null);
+  const { GlossaryTooltipPortal } = useGlossaryTooltips(lessonContentRef);
+
+  // Daily goal tracking
+  const [dailyGoal, setDailyGoal] = useState<DailyGoalData>(() => getDailyGoalData());
 
   useEffect(() => {
     // Load progress from localStorage (including quiz attempts)
@@ -543,6 +576,23 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
       lessonIndex: currentLesson
     });
 
+    // Haptic/audio feedback
+    feedbackLessonComplete();
+
+    // Update daily goal
+    const updatedGoal = recordDailyLessonComplete();
+    setDailyGoal(updatedGoal);
+
+    // Check for milestones
+    const newCompletedCount = newCompleted.size;
+    const progressPercent = totalLessons > 0 ? Math.round((newCompletedCount / totalLessons) * 100) : 0;
+    checkMilestones({
+      progressPercent,
+      streakDays: streak.currentStreak,
+      lessonsCompleted: newCompletedCount,
+      courseId: course.id || 'unknown',
+    });
+
     // Auto-advance
     setTimeout(() => handleNext(), 500);
   };
@@ -611,6 +661,21 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
     const newAttempts = new Map(quizAttempts);
     newAttempts.set(lessonKey, isCorrect);
     setQuizAttempts(newAttempts);
+
+    // Add to spaced repetition queue
+    const [modIdx, lesIdx] = lessonKey.split('-').map(Number);
+    const mod = course.modules[modIdx];
+    const les = mod?.lessons?.[lesIdx];
+    if (les?.quiz && course.id) {
+      addReviewItem(
+        course.id,
+        lessonKey,
+        les.quiz.question,
+        les.quiz.answer || '',
+        les.title,
+        mod.title
+      );
+    }
 
     analytics.track('quiz_attempted', {
       courseId: course.id,
@@ -755,6 +820,14 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
         }
       }}
     >
+      {/* Milestone Celebration Overlay */}
+      {activeMilestone && (
+        <MilestoneCelebration milestone={activeMilestone} onDismiss={dismissMilestone} />
+      )}
+
+      {/* Glossary Tooltip Portal */}
+      {GlossaryTooltipPortal}
+
       {/* Premium Header */}
       <header className="sticky top-0 z-20 bg-[var(--bg-card)]/95 backdrop-blur-sm border-b shadow-sm" style={{ borderColor: 'var(--border-secondary)' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-5">
@@ -804,6 +877,9 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
                   {Math.round(progress)}%
                 </span>
               </div>
+
+              {/* Daily Goal compact */}
+              <CompactDailyGoal goalData={dailyGoal} className="hidden md:flex" />
 
               {/* Mobile Knowledge Graph button */}
               <button
@@ -921,35 +997,28 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
               <div className="mb-6 border-t" style={{ borderColor: 'var(--border-secondary)' }}></div>
 
               {/* View Toggle */}
-              <div className="flex gap-2 mb-6">
-                <button
-                  onClick={() => setViewMode('outline')}
-                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg transition-all ${
-                    viewMode === 'outline' ? 'text-white' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                  }`}
-                  style={{
-                    backgroundColor: viewMode === 'outline' ? 'var(--royal-blue)' : 'rgba(0, 63, 135, 0.05)',
-                  }}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                  </svg>
-                  Outline
-                </button>
-                <button
-                  onClick={() => setViewMode('graph')}
-                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg transition-all ${
-                    viewMode === 'graph' ? 'text-white' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                  }`}
-                  style={{
-                    backgroundColor: viewMode === 'graph' ? 'var(--royal-blue)' : 'rgba(0, 63, 135, 0.05)',
-                  }}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                  </svg>
-                  Graph
-                </button>
+              <div className="flex gap-1 mb-6">
+                {([
+                  { key: 'outline' as const, label: 'Outline', icon: 'M4 6h16M4 10h16M4 14h16M4 18h16' },
+                  { key: 'journey' as const, label: 'Path', icon: 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7' },
+                  { key: 'graph' as const, label: 'Graph', icon: 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1' },
+                ]).map((v) => (
+                  <button
+                    key={v.key}
+                    onClick={() => setViewMode(v.key)}
+                    className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs font-semibold rounded-lg transition-all ${
+                      viewMode === v.key ? 'text-white' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                    style={{
+                      backgroundColor: viewMode === v.key ? 'var(--royal-blue)' : 'rgba(0, 63, 135, 0.05)',
+                    }}
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={v.icon} />
+                    </svg>
+                    {v.label}
+                  </button>
+                ))}
               </div>
 
               {/* Conditional View: Outline or Graph */}
@@ -1004,6 +1073,17 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
                     );
                   })}
                 </nav>
+              ) : viewMode === 'journey' ? (
+                <LearningPath
+                  modules={course.modules}
+                  completedLessons={completedLessons}
+                  currentModule={currentModule}
+                  currentLesson={currentLesson}
+                  onNavigate={(modIdx, lesIdx) => {
+                    setCurrentModule(modIdx);
+                    setCurrentLesson(lesIdx);
+                  }}
+                />
               ) : (
                 <KnowledgeGraph
                   course={course}
@@ -1056,6 +1136,7 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
             {/* Lesson Content */}
             {lesson && (
               <div
+                ref={lessonContentRef}
                 className="lesson-prose max-w-none mb-16 animate-fade-in"
                 style={{
                   fontSize: '1.125rem',
@@ -1131,9 +1212,9 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
 
             {/* Completion Status */}
             {isCompleted && (
-              <div 
+              <div
                 className="flex items-center gap-3 p-4 rounded-xl mb-8"
-                style={{ 
+                style={{
                   backgroundColor: 'rgba(34, 197, 94, 0.08)',
                   border: '1px solid rgba(34, 197, 94, 0.2)'
                 }}
@@ -1144,6 +1225,66 @@ function CourseViewerContent({ course, onExit }: CourseViewerProps) {
                 <span className="text-sm font-medium text-green-700">
                   Lesson completed
                 </span>
+              </div>
+            )}
+
+            {/* What's Next Guidance */}
+            {isCompleted && !isLastLesson && (
+              <div
+                className="p-6 rounded-xl mb-8 animate-fade-in"
+                style={{
+                  backgroundColor: 'rgba(0, 63, 135, 0.04)',
+                  border: '1px solid rgba(0, 63, 135, 0.12)',
+                }}
+              >
+                <h4 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-4">
+                  What&apos;s Next
+                </h4>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {lesson?.quiz && !quizAttempts.has(lessonKey) && (
+                    <button
+                      onClick={() => {
+                        const quizEl = document.querySelector('[data-quiz-section]');
+                        quizEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }}
+                      className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-white transition-all shadow-md hover:shadow-lg"
+                      style={{ backgroundColor: 'var(--royal-blue)' }}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Take the Quiz
+                    </button>
+                  )}
+                  <button
+                    onClick={handleNext}
+                    className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold transition-all ${
+                      lesson?.quiz && !quizAttempts.has(lessonKey)
+                        ? 'border-2 text-[var(--royal-blue)]'
+                        : 'text-white shadow-md hover:shadow-lg'
+                    }`}
+                    style={
+                      lesson?.quiz && !quizAttempts.has(lessonKey)
+                        ? { borderColor: 'var(--royal-blue)' }
+                        : { backgroundColor: 'var(--royal-blue)' }
+                    }
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                    Continue to Next Lesson
+                  </button>
+                  <button
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-medium text-[var(--text-secondary)] border transition-all hover:bg-[var(--bg-glass-dark)]"
+                    style={{ borderColor: 'var(--border-secondary)' }}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                    </svg>
+                    Review Key Points
+                  </button>
+                </div>
               </div>
             )}
 

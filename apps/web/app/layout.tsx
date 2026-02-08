@@ -53,6 +53,7 @@ export const metadata: Metadata = {
 
 import MobileOptimized from '@/components/MobileOptimized';
 import AccessGate from '@/components/AccessGate';
+import PWAProvider from '@/components/PWAProvider';
 
 export default function RootLayout({
   children,
@@ -104,14 +105,16 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <ThemeProvider defaultTheme="system">
-          <AccessGate>
-            <Suspense fallback={null}>
-              <Navbar />
-            </Suspense>
-            <MobileOptimized>
-              {children}
-            </MobileOptimized>
-          </AccessGate>
+          <PWAProvider>
+            <AccessGate>
+              <Suspense fallback={null}>
+                <Navbar />
+              </Suspense>
+              <MobileOptimized>
+                {children}
+              </MobileOptimized>
+            </AccessGate>
+          </PWAProvider>
         </ThemeProvider>
       </body>
     </html>

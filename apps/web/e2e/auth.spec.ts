@@ -161,14 +161,8 @@ test.describe('Authentication Modal', () => {
 
       // Enter email and wait for button to be enabled
       await emailInput.fill('test@example.com')
-
-      // Wait for the button to become enabled (debounce/validation delay)
       const continueButton = page.getByRole('button', { name: /Continue with email/i })
-      await expect(continueButton).toBeEnabled({ timeout: 3000 }).catch(() => {
-        // If button never enables, skip - this may be an email validation issue
-        test.skip()
-      })
-
+      await expect(continueButton).toBeEnabled({ timeout: 5000 })
       await continueButton.click()
 
       // Should show OTP step
@@ -214,9 +208,11 @@ test.describe('Authentication Modal', () => {
         return
       }
 
-      // Enter email and submit
+      // Enter email and wait for button to be enabled before submitting
       await emailInput.fill('test@example.com')
-      await page.getByRole('button', { name: /Continue with email/i }).click()
+      const continueButton = page.getByRole('button', { name: /Continue with email/i })
+      await expect(continueButton).toBeEnabled({ timeout: 5000 })
+      await continueButton.click()
 
       // Wait for OTP step
       await expect(page.getByText(/Check your email/i)).toBeVisible({ timeout: 5000 })
@@ -257,9 +253,11 @@ test.describe('Authentication Modal', () => {
         return
       }
 
-      // Enter email and submit
+      // Enter email and wait for button to be enabled before submitting
       await emailInput.fill('test@example.com')
-      await page.getByRole('button', { name: /Continue with email/i }).click()
+      const continueButton = page.getByRole('button', { name: /Continue with email/i })
+      await expect(continueButton).toBeEnabled({ timeout: 5000 })
+      await continueButton.click()
 
       // Wait for OTP step
       await expect(page.getByText(/Check your email/i)).toBeVisible({ timeout: 5000 })
@@ -310,22 +308,12 @@ test.describe('Authentication Modal', () => {
 
       // Enter email and wait for button to be enabled
       await emailInput.fill('test@example.com')
-
       const continueButton = page.getByRole('button', { name: /Continue with email/i })
-      const isEnabled = await continueButton.isEnabled({ timeout: 3000 }).catch(() => false)
-      if (!isEnabled) {
-        test.skip()
-        return
-      }
-
+      await expect(continueButton).toBeEnabled({ timeout: 5000 })
       await continueButton.click()
 
       // Wait for OTP step
-      const otpStepVisible = await page.getByText(/Check your email/i).isVisible({ timeout: 5000 }).catch(() => false)
-      if (!otpStepVisible) {
-        test.skip()
-        return
-      }
+      await expect(page.getByText(/Check your email/i)).toBeVisible({ timeout: 5000 })
 
       // Enter valid OTP code
       const otpInputs = page.locator('input[inputmode="numeric"]')

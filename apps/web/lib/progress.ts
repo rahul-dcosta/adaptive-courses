@@ -49,6 +49,11 @@ export interface CourseProgressData {
   courseId: string;
   userId?: string;
 
+  // Course metadata for resume display
+  courseTitle?: string;
+  currentLessonTitle?: string;
+  currentModuleTitle?: string;
+
   // Lesson progress by key (moduleIdx-lessonIdx)
   lessonProgress: Record<string, LessonProgress>;
 
@@ -584,4 +589,29 @@ export function getWeeklyActivity(streakHistory: string[]): Array<{
   }
 
   return result;
+}
+
+// =============================================================================
+// Resume Helpers
+// =============================================================================
+
+/**
+ * Get the most recent in-progress course, or most recent completed course if all are done.
+ * Returns null if no progress data exists.
+ */
+export function getMostRecentProgress(): CourseProgressData | null {
+  const allProgress = getAllProgressFromStorage();
+  if (allProgress.length === 0) return null;
+
+  // Prefer in-progress courses
+  const inProgress = allProgress
+    .filter((p) => p.overallCompletionPercent < 100)
+    .sort((a, b) => new Date(b.lastActivityAt).getTime() - new Date(a.lastActivityAt).getTime());
+
+  if (inProgress.length > 0) return inProgress[0];
+
+  // All completed — return most recently accessed
+  return allProgress.sort(
+    (a, b) => new Date(b.lastActivityAt).getTime() - new Date(a.lastActivityAt).getTime()
+  )[0];
 }
